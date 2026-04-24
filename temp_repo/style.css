@@ -1,0 +1,171 @@
+:root {
+    --navy: #0A1A3A;
+    --gold: #D4AF37;
+    --gold-light: #F1E5AC;
+    --white: #FFFFFF;
+    --gray-light: #F4F4F4;
+    --gray-dark: #333333;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--navy);
+    color: var(--white);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-serif);
+    color: var(--gold);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Luxury Card Style */
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Inputs & Buttons */
+input, textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-size: 16px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+button {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    background: var(--gold-light);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button.secondary {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+}
+
+/* Journal Entries */
+.entry {
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 16px 0;
+}
+
+.entry:last-child {
+    border-bottom: none;
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.entry-date {
+    font-size: 12px;
+    color: var(--gold);
+    opacity: 0.8;
+}
+
+.entry-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.tag {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Setup Page Specific */
+.setup-guide {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+}
+
+.setup-guide ol {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.setup-guide li {
+    margin-bottom: 8px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+    .card {
+        padding: 16px;
+    }
+}
+
+/* Animations */
+[x-cloak] { display: none !important; }
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
