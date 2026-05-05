@@ -525,7 +525,7 @@ export const SyncEngine = {
       if (screenshotUrl) {
         let urls = [];
         if (Array.isArray(screenshotUrl)) urls = screenshotUrl;
-        else if (typeof screenshotUrl === 'string') urls = screenshotUrl.split(',').map(s => s.trim()).filter(s => s);
+        else if (typeof screenshotUrl === 'string') urls = screenshotUrl.split(' | ').map(s => s.trim()).filter(s => s);
         
         for (const url of urls) {
            if (url.includes('firebasestorage')) {
