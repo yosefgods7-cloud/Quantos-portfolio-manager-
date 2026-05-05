@@ -6,6 +6,7 @@
     <title>QuantEdge | Portfolio Management System</title>
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#09090b" />
+    <link rel="stylesheet" href="themes.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -26,6 +27,7 @@
       }
     </script>
     <script type="module" src="./core/sync.js"></script>
+    <script type="module" src="theme-manager.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
@@ -788,6 +790,31 @@
         .user-profile {
           display: none;
         }
+      }
+    </style>
+    <style>
+      #modal-add-trade .modal {
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        border: 1px solid var(--border);
+      }
+      #modal-add-trade h3 {
+        color: var(--primary);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 0.9rem !important;
+      }
+      #modal-add-trade label {
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 0.85rem;
+      }
+      #modal-add-trade input, #modal-add-trade select {
+        transition: all 0.2s ease;
+      }
+      #modal-add-trade input:focus, #modal-add-trade select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
       }
     </style>
   </head>
@@ -4764,7 +4791,10 @@
     </div>
 
     <!-- 1. TRADE IDENTIFICATION -->
-    <h3 style="margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 8px;">1. Trade Identification</h3>
+    <h3 style="margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        1. Trade Identification
+        <span id="trade-market-system-badge" style="font-size: 0.8rem; background: var(--surface); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); font-weight: normal; display: none;">Auto-detecting...</span>
+    </h3>
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
       <div class="form-group">
         <label>Pair</label>
@@ -6008,15 +6038,37 @@
         "ETHUSD": { pipSize: 0.01,   pipValue: 1   },
       };
 
-      function getPipConfig(pair) {
+      function getPipConfig(pair, marketClass = 'auto') {
         if (!pair) return { pipSize: 0.0001, pipValue: 10, isDefault: true };
-        const config = PAIR_CONFIG[pair.toUpperCase()];
-        if (!config) {
-          // Fallback for unknown pairs — show warning
-          console.warn(`Pair "${pair}" not in PAIR_CONFIG. Using default $10/pip.`);
-          return { pipSize: 0.0001, pipValue: 10, isDefault: true };
+
+        const explicitConfig = PAIR_CONFIG[pair.toUpperCase()];
+        if (explicitConfig && marketClass === 'auto') {
+            return { ...explicitConfig, isDefault: false };
         }
-        return { ...config, isDefault: false };
+
+        let mClass = marketClass;
+        if (mClass === 'auto') {
+            const p = pair.toUpperCase();
+            if (p.includes('JPY')) mClass = 'forex_jpy';
+            else if (p.includes('XAU') || p.includes('GOLD') || p.includes('SILVER') || p.includes('XAG') || p.includes('OIL') || p.includes('WTI')) mClass = 'commodity';
+            else if (p.includes('US30') || p.includes('NAS') || p.includes('SPX') || p.includes('UK100') || p.includes('GER') || p.includes('DOW') || p.includes('NDX')) mClass = 'indices';
+            else if (p.includes('BTC') || p.includes('ETH') || p.includes('SOL') || p.includes('XRP')) mClass = 'crypto';
+            else mClass = 'forex_standard';
+        }
+
+        switch (mClass) {
+            case 'forex_jpy':
+                return { pipSize: 0.01, pipValue: null, isDefault: false, system: 'Forex (JPY)' };
+            case 'commodity':
+                return { pipSize: 0.01, pipValue: 1, isDefault: false, system: 'Commodities' };
+            case 'indices':
+                return { pipSize: 1, pipValue: 1, isDefault: false, system: 'Indices' };
+            case 'crypto':
+                return { pipSize: 1, pipValue: 1, isDefault: false, system: 'Crypto' };
+            case 'forex_standard':
+            default:
+                return { pipSize: 0.0001, pipValue: 10, isDefault: true, system: 'Forex' };
+        }
       }
 
       window.toggleCurrentPriceVisibility = function(pairElementId, targetElementId) {
@@ -7441,11 +7493,14 @@
         stocks: getLocal("qe_stocks", []),
         dividends: getLocal("qe_dividends", []),
         locks: getLocal("qe_locks", []),
-        journalConfig: getLocal("qe_journal_config", {
-          pairs: ['EURUSD', 'GBPUSD', 'XAUUSD', 'BTCUSD', 'NQ100', 'SPX500'],
-          setups: ['OB', 'FVG', 'MSS', 'Liquidity Sweep', 'AMD', 'Other'],
-          confluences: ['HTF zone', 'Liquidity taken', 'MSS confirmed', 'FVG present', 'Session timing', 'Volume confirmation']
-        }),
+        journalConfig: (() => {
+          const loaded = getLocal("qe_journal_config", {});
+          return {
+            pairs: loaded.pairs || ['EURUSD', 'GBPUSD', 'XAUUSD', 'BTCUSD', 'NQ100', 'SPX500'],
+            setups: loaded.setups || ['OB', 'FVG', 'MSS', 'Liquidity Sweep', 'AMD', 'Other'],
+            confluences: loaded.confluences || ['HTF zone', 'Liquidity taken', 'MSS confirmed', 'FVG present', 'Session timing', 'Volume confirmation']
+          };
+        })(),
         settings: getLocal("qe_settings", {
           riskThresholds: { safe: 2, med: 5 },
           openRisk: 0,
@@ -9528,6 +9583,17 @@
 
         // 3. Pips, R:R, Risk Amount
         const config = getPipConfig(asset);
+        
+        const badge = document.getElementById("trade-market-system-badge");
+        if (badge) {
+            if (asset) {
+                badge.style.display = "inline-block";
+                badge.innerText = `Calculation System: ${config.system || 'Forex Std'} (1pt = ${config.pipValue === null ? 'Dynamic' : '$' + config.pipValue})`;
+            } else {
+                badge.style.display = "none";
+            }
+        }
+
         let riskAmount = 0;
         let plannedRVal = null;
         let autoActualR = null;
@@ -9731,6 +9797,7 @@
         const value = input.value.trim();
         if (!value) return;
 
+        if (!Store.journalConfig[type]) Store.journalConfig[type] = [];
         if (!Store.journalConfig[type].includes(value)) {
           Store.journalConfig[type].push(value);
           Store.save();
@@ -9741,6 +9808,7 @@
       };
 
       window.removeJournalConfigItem = function(type, value) {
+        if (!Store.journalConfig[type]) Store.journalConfig[type] = [];
         Store.journalConfig[type] = Store.journalConfig[type].filter(item => item !== value);
         Store.save();
         renderJournalConfig();
@@ -9752,6 +9820,7 @@
         types.forEach(type => {
           const container = document.getElementById(`config-${type}-list`);
           if (!container) return;
+          if (!Store.journalConfig[type]) Store.journalConfig[type] = [];
           container.innerHTML = Store.journalConfig[type].map(item => `
             <div style="background: var(--surface); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
               ${item}
@@ -9763,6 +9832,10 @@
       };
 
       window.populateTradeDropdowns = function() {
+        if (!Store.journalConfig.pairs) Store.journalConfig.pairs = [];
+        if (!Store.journalConfig.setups) Store.journalConfig.setups = [];
+        if (!Store.journalConfig.confluences) Store.journalConfig.confluences = [];
+        
         // Pairs
         const pairOptions = '<option value="">Select Pair...</option>' + Store.journalConfig.pairs.map(p => `<option value="${p}">${p}</option>`).join('');
         

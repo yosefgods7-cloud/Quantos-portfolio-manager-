@@ -301,7 +301,13 @@ export const SyncEngine = {
           if (data.stocks) window.Store.stocks = data.stocks;
           if (data.dividends) window.Store.dividends = data.dividends;
           if (data.locks) window.Store.locks = data.locks;
-          if (data.journalConfig) window.Store.journalConfig = data.journalConfig;
+          if (data.journalConfig) {
+            window.Store.journalConfig = {
+              pairs: data.journalConfig.pairs || window.Store.journalConfig.pairs || ['EURUSD', 'GBPUSD'],
+              setups: data.journalConfig.setups || window.Store.journalConfig.setups || ['OB', 'FVG'],
+              confluences: data.journalConfig.confluences || window.Store.journalConfig.confluences || ['HTF zone']
+            };
+          }
           if (data.debriefs) window.Store.debriefs = data.debriefs;
           if (data.weeklyReviews) window.Store.weeklyReviews = data.weeklyReviews;
           
