@@ -1570,6 +1570,22 @@
                 <i data-lucide="brain-circuit"></i> Analyze Trading Patterns
               </button>
             </div>
+            
+            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+              <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;">Select Analysis Dimensions (Use 1-2 for free tier, select more for deep multi-analysis):</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem;">
+                <label><input type="checkbox" class="ai-dim-chk" value="setup" checked> Setup</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="pair" checked> Pair</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="session"> Session</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="psychology"> Psychology</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="month"> Month</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="dayOfWeek"> Day of Week</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="outcome"> Outcome</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="rr"> Risk/Reward</label>
+                <label><input type="checkbox" class="ai-dim-chk" value="grade"> Grade</label>
+              </div>
+            </div>
+
             <div
               id="trade-ai-output"
               style="
@@ -1581,13 +1597,13 @@
                 font-size: 0.9rem;
                 line-height: 1.6;
                 color: var(--muted);
-                max-height: 300px;
+                max-height: 400px;
                 overflow-y: auto;
               "
             >
               Click "Analyze Trading Patterns" to get deep insights on your
               psychological patterns, common mistakes, and strategy improvements
-              based on your logged trades.
+              based on your logged trades grouped by your selected dimensions.
             </div>
           </div>
 
@@ -6425,6 +6441,9 @@
           if (Notification.permission === "granted") {
             new Notification("QuantEdge Alert", { body: msg });
           }
+          if (window.sendNotification) {
+             window.sendNotification(`🚨 **DRAWDOWN ALERT** 🚨\n${msg}`, "rtAlerts");
+          }
         });
       };
 
@@ -6471,45 +6490,85 @@
         callGemini(prompt, "risk-insight-output", "btn-risk-insight");
       };
 
-      window.generateTradeInsights = function () {
-        const recentTrades = Store.trades
-          .slice(0, 30)
-          .map(
-            (t) =>
-              `Asset: ${t.asset}, R: ${t.r}, Duration: ${t.duration || "N/A"}, Plan RR: ${t.plannedR || "N/A"}, Exit RR: ${t.exitR || "N/A"}, Mistake: ${t.ruleDeviation || "None"}, Pre-Emotion: ${t.preEmotion || "None"}, Post-Emotion: ${t.postEmotion || "None"}, Session: ${t.session || "N/A"}, Setup: ${t.setupType || "N/A"}, Notes: ${t.notes || "None"}`,
-          )
-          .join("\n");
+      function getTradeAggregations(trades, dimensions) {
+          if (!trades || trades.length === 0) return "No trades available for analysis.";
+          if (!dimensions || dimensions.length === 0) return "No dimensions selected.";
+          
+          const groups = {};
+          
+          trades.forEach(t => {
+              // Extract values for each dimension
+              const keys = dimensions.map(dim => {
+                  if (dim === "setup") return t.setupType || "Unknown";
+                  if (dim === "pair") return t.asset || "Unknown";
+                  if (dim === "session") return t.session || "Unknown";
+                  if (dim === "psychology") return t.preEmotion || "Unknown";
+                  if (dim === "month") return t.date ? t.date.slice(0, 7) : "Unknown";
+                  if (dim === "dayOfWeek") {
+                      if (!t.date) return "Unknown";
+                      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                      return days[new Date(t.date).getDay()] || "Unknown";
+                  }
+                  if (dim === "outcome") return (t.r > 0) ? "Win" : (t.r < 0) ? "Loss" : "Break Even";
+                  if (dim === "rr") return t.r ? Math.round(t.r) + "R" : "Unknown";
+                  if (dim === "grade") return t.qualityScore ? "Grade " + t.qualityScore : "Unknown";
+                  return "Unknown";
+              });
+              
+              const keyStr = keys.join(" | ");
+              if (!groups[keyStr]) {
+                  groups[keyStr] = { count: 0, wins: 0, totalR: 0, sumPnl: 0 };
+              }
+              groups[keyStr].count++;
+              if (t.r > 0) groups[keyStr].wins++;
+              groups[keyStr].totalR += (parseFloat(t.r) || 0);
+              groups[keyStr].sumPnl += (parseFloat(t.pnlAmount) || 0);
+          });
+          
+          const summaryArr = Object.keys(groups).map(k => {
+              const g = groups[k];
+              const winRate = ((g.wins / g.count) * 100).toFixed(1);
+              return `[${k}]: ${g.count} trades, ${winRate}% WR, Net ${g.totalR.toFixed(2)}R, Net $${g.sumPnl.toFixed(2)}`;
+          });
+          
+          return summaryArr.join("\n");
+      }
 
-        const prompt = `You are an elite trading coach and quantitative analyst. Analyze the following recent trades (up to 30) from my trading journal.
+      window.generateTradeInsights = function () {
+        const checkboxes = document.querySelectorAll(".ai-dim-chk");
+        const dimensions = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+        
+        if (dimensions.length === 0) {
+            document.getElementById("trade-ai-output").innerHTML = '<span style="color:var(--warning)">Please select at least one dimension for analysis.</span>';
+            return;
+        }
+
+        const aggregatedData = getTradeAggregations(Store.trades, dimensions);
+
+        const prompt = `You are an elite trading coach and quantitative analyst. Analyze the following aggregated trade data from my journal.
+The data is grouped by the following dimensions: ${dimensions.join(", ")}.
+
+Aggregated Trades Data:
+${aggregatedData}
             
-            Recent Trades Data:
-            ${recentTrades || "No trades logged yet."}
-            
-            Please provide a concise, highly actionable analysis covering:
-            1. **Psychological Patterns**: Identify recurring emotional triggers or behavioral loops based on the 'Emotion' and 'Mistake' fields.
-            2. **Common Mistakes**: What are the most frequent errors (e.g., early exit, FOMO, over-leveraging) and how are they impacting the R-multiple?
-            3. **Strategy Improvements**: Based on the Asset, Session, Setup, and Planned vs. Exit RR, what specific adjustments should I make to improve my win rate and profitability?
-            
-            Keep the response structured with clear headings and bullet points.`;
+Please provide a concise, highly actionable, multi-dimensional analysis prioritizing the highest impact insights. Keep token usage minimal and efficient.
+1. **Key Strengths**: Which combinations of dimensions are highly profitable?
+2. **Critical Vulnerabilities**: Which combinations are draining capital?
+3. **Execution Adjustments**: What precise behavioral or systematic changes will yield the best R-multiple improvements?
+
+Keep the response cleanly formatted with lists or bold text.`;
 
         callGemini(prompt, "trade-ai-output", "btn-trade-ai");
       };
 
       window.generatePsychologyInsight = function () {
-        const recentTrades = Store.trades
-          .slice(0, 20)
-          .map(
-            (t) =>
-              `Result: ${t.r}R, Pre-Emotion: ${t.preEmotion || "None"}, Post-Emotion: ${t.postEmotion || "None"}, Mistake: ${t.ruleDeviation || "None"}`,
-          )
-          .join("\n");
-
-        const prompt = `Analyze the following recent trades (up to 20) focusing purely on trading psychology, emotions, and mistakes.
+        const aggregatedPsychData = getTradeAggregations(Store.trades, ["psychology"]);
+        const prompt = `Analyze the following aggregated psychological trade data (grouped by Pre-trade Emotion).
             
-            Recent Trades:
-            ${recentTrades || "No trades logged."}
+            Emotion Performance Data:
+            ${aggregatedPsychData || "No trades logged."}
             
-            Identify any behavioral patterns (e.g., losing when anxious, specific recurring mistakes) and provide 2 actionable psychological tips to improve discipline.`;
+            Identify behavioral patterns based on win rates and profitability tied to specific emotional states. Provide 2 actionable psychological systems to improve discipline and mitigate negative-ROI emotions.`;
 
         callGemini(prompt, "trade-insight-output", "btn-psych-insight");
       };
@@ -6519,22 +6578,25 @@
         const wins = Store.trades.filter((t) => t.r > 0).length;
         const winRate =
           Store.trades.length > 0 ? (wins / Store.trades.length) * 100 : 0;
-        const recentTrades = Store.trades
-          .slice(0, 30)
-          .map(
-            (t) =>
-              `Asset: ${t.asset}, Session: ${t.session}, Setup: ${t.setupType}, Quality: ${t.qualityScore}, Result: ${t.r}R`,
-          )
-          .join("\n");
+          
+        const aggregatedSessionData = getTradeAggregations(Store.trades, ["session"]);
+        const aggregatedPairData = getTradeAggregations(Store.trades, ["pair"]);
+        const aggregatedSetupData = getTradeAggregations(Store.trades, ["setup"]);
 
         const prompt = `Analyze the following trading performance data.
             
-            Overall Stats: Total R: ${totalR}, Win Rate: ${winRate.toFixed(1)}%
+            Overall Stats: Total R: ${totalR.toFixed(2)}, Win Rate: ${winRate.toFixed(1)}%
             
-            Recent Trades (up to 30):
-            ${recentTrades || "No trades logged."}
+            Performance by Session:
+            ${aggregatedSessionData}
             
-            Identify which assets, sessions, or setups are performing best/worst. Provide 2-3 actionable suggestions on what to focus on or avoid.`;
+            Performance by Pair:
+            ${aggregatedPairData}
+            
+            Performance by Setup:
+            ${aggregatedSetupData}
+            
+            Identify which assets, sessions, or setups are performing best/worst. Provide 2-3 precise systemic actionable suggestions on what to focus on or avoid to optimize edge.`;
 
         callGemini(prompt, "trade-insight-output", "btn-perf-insight");
       };
@@ -7085,15 +7147,74 @@
           document.getElementById("api-key-input").value = storedApiKey;
         }
 
-        if (Store.settings.webhooks) {
-          document.getElementById("webhook-discord").value =
-            Store.settings.webhooks.discord || "";
-          document.getElementById("webhook-telegram-token").value =
-            Store.settings.webhooks.telegramToken || "";
-          document.getElementById("webhook-telegram-chat").value =
-            Store.settings.webhooks.telegramChat || "";
+        if (Store.settings.notifications) {
+          document.getElementById("webhook-discord").value = Store.settings.notifications.discord || "";
+          document.getElementById("discord-rt-alerts").checked = Store.settings.notifications.discordRtAlerts !== false;
+          document.getElementById("discord-daily-rep").checked = Store.settings.notifications.discordDailyRep !== false;
+          document.getElementById("discord-weekly-rep").checked = Store.settings.notifications.discordWeeklyRep !== false;
+          document.getElementById("discord-monthly-rep").checked = Store.settings.notifications.discordMonthlyRep !== false;
+          
+          document.getElementById("webhook-telegram-token").value = Store.settings.notifications.telegramToken || "";
+          document.getElementById("webhook-telegram-chat").value = Store.settings.notifications.telegramChat || "";
+          document.getElementById("telegram-rt-alerts").checked = Store.settings.notifications.telegramRtAlerts !== false;
+          document.getElementById("telegram-daily-rep").checked = Store.settings.notifications.telegramDailyRep !== false;
+          document.getElementById("telegram-weekly-rep").checked = Store.settings.notifications.telegramWeeklyRep !== false;
+          document.getElementById("telegram-monthly-rep").checked = Store.settings.notifications.telegramMonthlyRep !== false;
+          
+          document.getElementById("notif-daily-time").value = Store.settings.notifications.dailyTime || "21:00";
+          document.getElementById("notif-monthly-time").value = Store.settings.notifications.monthlyTime || "08:00";
+          document.getElementById("notif-weekly-day").value = Store.settings.notifications.weeklyDay || "0";
+          document.getElementById("notif-weekly-time").value = Store.settings.notifications.weeklyTime || "20:00";
+          
+          document.getElementById("notif-loss-thresh").value = Store.settings.notifications.lossThresh || 50;
+          document.getElementById("notif-dd-thresh").value = Store.settings.notifications.ddThresh || 70;
+          document.getElementById("notif-streak-thresh").value = Store.settings.notifications.streakThresh || 3;
+          document.getElementById("notif-eq-high").checked = Store.settings.notifications.eqHigh !== false;
+          document.getElementById("notif-psych-escalation").checked = Store.settings.notifications.psychEscalation !== false;
+          document.getElementById("notif-trade-logged").checked = Store.settings.notifications.tradeLogged !== false;
+        } else if (Store.settings.webhooks) {
+          // Migration from old settings
+          document.getElementById("webhook-discord").value = Store.settings.webhooks.discord || "";
+          document.getElementById("webhook-telegram-token").value = Store.settings.webhooks.telegramToken || "";
+          document.getElementById("webhook-telegram-chat").value = Store.settings.webhooks.telegramChat || "";
+          window.saveNotificationSettings();
         }
       }
+
+      window.saveNotificationSettings = function () {
+        if (!Store.settings.notifications) Store.settings.notifications = {};
+        
+        Store.settings.notifications = {
+          discord: document.getElementById("webhook-discord").value,
+          discordRtAlerts: document.getElementById("discord-rt-alerts").checked,
+          discordDailyRep: document.getElementById("discord-daily-rep").checked,
+          discordWeeklyRep: document.getElementById("discord-weekly-rep").checked,
+          discordMonthlyRep: document.getElementById("discord-monthly-rep").checked,
+          
+          telegramToken: document.getElementById("webhook-telegram-token").value,
+          telegramChat: document.getElementById("webhook-telegram-chat").value,
+          telegramRtAlerts: document.getElementById("telegram-rt-alerts").checked,
+          telegramDailyRep: document.getElementById("telegram-daily-rep").checked,
+          telegramWeeklyRep: document.getElementById("telegram-weekly-rep").checked,
+          telegramMonthlyRep: document.getElementById("telegram-monthly-rep").checked,
+          
+          dailyTime: document.getElementById("notif-daily-time").value,
+          monthlyTime: document.getElementById("notif-monthly-time").value,
+          weeklyDay: document.getElementById("notif-weekly-day").value,
+          weeklyTime: document.getElementById("notif-weekly-time").value,
+          
+          lossThresh: parseInt(document.getElementById("notif-loss-thresh").value) || 50,
+          ddThresh: parseInt(document.getElementById("notif-dd-thresh").value) || 70,
+          streakThresh: parseInt(document.getElementById("notif-streak-thresh").value) || 3,
+          eqHigh: document.getElementById("notif-eq-high").checked,
+          psychEscalation: document.getElementById("notif-psych-escalation").checked,
+          tradeLogged: document.getElementById("notif-trade-logged").checked,
+        };
+        Store.save();
+      };
+      
+      // Kept for UI buttons that might still call it
+      window.saveWebhooks = window.saveNotificationSettings;
 
       window.saveApiKey = function () {
         const key = document.getElementById("api-key-input").value;
@@ -7163,7 +7284,9 @@
               profitTarget: a.profitTarget,
               maxDrawdown: a.maxDrawdown,
             })),
-            transactions: Store.transactions.slice(0, 50),
+            transactions: Store.transactions.slice(0, 20),
+            tradeAggregationsBySetup: getTradeAggregations(Store.trades, ["setup"]),
+            tradeAggregationsByPair: getTradeAggregations(Store.trades, ["pair"]),
             allocations: Store.allocations,
             riskThresholds: Store.settings.riskThresholds,
             overallStats: {
@@ -7322,19 +7445,9 @@
         }, 500); // Wait for charts to render
       };
 
-      window.saveWebhooks = function () {
-        Store.settings.webhooks = {
-          discord: document.getElementById("webhook-discord").value,
-          telegramToken: document.getElementById("webhook-telegram-token")
-            .value,
-          telegramChat: document.getElementById("webhook-telegram-chat").value,
-        };
-        Store.save();
-      };
-
       window.sendTestWebhook = async function () {
-        const webhooks = Store.settings.webhooks;
-        if (!webhooks) {
+        const notifs = Store.settings.notifications || Store.settings.webhooks;
+        if (!notifs) {
           alert("Please configure webhook URLs first.");
           return;
         }
@@ -7350,21 +7463,21 @@
         const message = `📊 **QuantEdge Daily Summary**\nDate: ${new Date().toLocaleDateString()}\nTotal Balance: $${totalBal.toLocaleString()}\nTotal Equity: $${totalEq.toLocaleString()}`;
 
         try {
-          if (webhooks.discord) {
-            await fetch(webhooks.discord, {
+          if (notifs.discord) {
+            await fetch(notifs.discord, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ content: message }),
             });
           }
 
-          if (webhooks.telegramToken && webhooks.telegramChat) {
-            const url = `https://api.telegram.org/bot${webhooks.telegramToken}/sendMessage`;
+          if (notifs.telegramToken && notifs.telegramChat) {
+            const url = `https://api.telegram.org/bot${notifs.telegramToken}/sendMessage`;
             await fetch(url, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                chat_id: webhooks.telegramChat,
+                chat_id: notifs.telegramChat,
                 text: message,
               }),
             });
@@ -7651,8 +7764,98 @@
         }
       };
 
-      setInterval(checkDailySnapshots, 60000); // Check every minute
+      // --- Notifications Engine ---
+      window.sendNotification = async function(message, type = "rtAlerts") {
+        const notifs = Store.settings.notifications;
+        if (!notifs) return;
+
+        try {
+          // Discord support
+          const dKey = "discord" + type.charAt(0).toUpperCase() + type.slice(1);
+          if (notifs.discord && notifs[dKey] !== false) {
+            fetch(notifs.discord, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: message })
+            }).catch(e => console.error("Discord webhook error", e));
+          }
+
+          // Telegram support
+          const tKey = "telegram" + type.charAt(0).toUpperCase() + type.slice(1);
+          if (notifs.telegramToken && notifs.telegramChat && notifs[tKey] !== false) {
+            const url = `https://api.telegram.org/bot${notifs.telegramToken}/sendMessage`;
+            fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: notifs.telegramChat,
+                text: message,
+                parse_mode: "Markdown"
+              })
+            }).catch(e => console.error("Telegram webhook error", e));
+          }
+        } catch(e) {
+          console.error("General notification error", e);
+        }
+      };
+
+      window.checkScheduledNotifications = function() {
+         const notifs = Store.settings.notifications;
+         if (!notifs) return;
+         if (!Store.notificationHistory) Store.notificationHistory = {};
+
+         const now = new Date();
+         const dateKey = now.toISOString().split("T")[0];
+         const hhmm = String(now.getUTCHours()).padStart(2,"0") + ":" + String(now.getUTCMinutes()).padStart(2,"0");
+         const dayOfWeek = now.getUTCDay().toString();
+         
+         const totalBal = Store.accounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+         const totalEq = Store.accounts.reduce((sum, a) => sum + (a.equity || 0), 0);
+
+         // Daily Check
+         if (hhmm === (notifs.dailyTime || "21:00")) {
+            const histKey = `daily_${dateKey}`;
+            if (!Store.notificationHistory[histKey]) {
+                const recentTrades = Store.trades.filter(t => t.date === dateKey);
+                const pnl = recentTrades.reduce((s, t) => s + (parseFloat(t.pnlAmount)||0), 0);
+                const msg = `📊 **Daily Report - ${dateKey}**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}\nTrades Today: ${recentTrades.length}\nToday's PNL: $${pnl.toFixed(2)}`;
+                window.sendNotification(msg, "dailyRep");
+                Store.notificationHistory[histKey] = true;
+                Store.save();
+            }
+         }
+
+         // Weekly Check
+         if (dayOfWeek === (notifs.weeklyDay || "0") && hhmm === (notifs.weeklyTime || "20:00")) {
+             const yearWeek = dateKey + "_W"; // Simplified uniqueness key
+             const histKey = `weekly_${yearWeek}`;
+             if (!Store.notificationHistory[histKey]) {
+                const msg = `📅 **Weekly Report**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}\nPlease perform your weekly active review to get deeper insights.`;
+                window.sendNotification(msg, "weeklyRep");
+                Store.notificationHistory[histKey] = true;
+                Store.save();
+             }
+         }
+
+         // Monthly Check
+         if (now.getUTCDate() === 1 && hhmm === (notifs.monthlyTime || "08:00")) {
+             const yyyymm = dateKey.slice(0, 7);
+             const histKey = `monthly_${yyyymm}`;
+             if (!Store.notificationHistory[histKey]) {
+                 const msg = `📈 **Monthly Summary - ${yyyymm}**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}`;
+                 window.sendNotification(msg, "monthlyRep");
+                 Store.notificationHistory[histKey] = true;
+                 Store.save();
+             }
+         }
+      };
+
+      setInterval(() => {
+         checkDailySnapshots();
+         checkScheduledNotifications();
+      }, 60000); // Check every minute
       checkDailySnapshots(); // Check on load
+      checkScheduledNotifications();
 
       // --- UI Logic ---
       window.switchView = function (viewId) {
@@ -10574,6 +10777,11 @@
             window.SyncEngine.syncTrade(newTrade);
         }
         
+        if (Store.settings.notifications && Store.settings.notifications.tradeLogged) {
+            const pnlStr = pnlAmount !== 0 ? ` ($${pnlAmount})` : "";
+            window.sendNotification(`📝 **Trade Logged**\nAsset: ${newTrade.asset}\nResult: ${newTrade.r}R${pnlStr}\nAccount: ${act ? act.name : 'Unknown'}`, "rtAlerts");
+        }
+        
         closeModal();
         renderAll();
         
@@ -11746,6 +11954,17 @@
                         </div>
                     </div>
                 `;
+                
+          if (Store.settings.notifications && Store.settings.notifications.psychEscalation) {
+             const now = new Date().toISOString().split("T")[0];
+             const histKey = `psych_${now}_${consecutiveLosses}`;
+             if (!Store.notificationHistory) Store.notificationHistory = {};
+             if (!Store.notificationHistory[histKey]) {
+                window.sendNotification(`🚨 **PSYCH ENGINE ESCALATION: STOP TRADING** 🚨\nYou have hit ${consecutiveLosses} consecutive losses. Your psychological state may be compromised. Step away from the charts immediately.`, "rtAlerts");
+                Store.notificationHistory[histKey] = true;
+                Store.save();
+             }
+          }
         } else if (consecutiveLosses === 2) {
           riskBadge.innerText = "WARNING";
           riskBadge.className = "risk-badge risk-med";
