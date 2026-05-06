@@ -9456,7 +9456,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("metric-hold-wins").innerText = wins.length>0 ? (sumHoldW/wins.length).toFixed(0) + "m" : "--";
         document.getElementById("metric-hold-losses").innerText = losses.length>0 ? (sumHoldL/losses.length).toFixed(0) + "m" : "--";
 
-        let calmar = parseFloat(document.getElementById("dd-max-r").innerText) !== 0 ? (cumulativeR / parseFloat(document.getElementById("dd-max-r").innerText.replace('-',''))) : 0;
+        let calmar = parseFloat(document.getElementById("dd-max-r").innerText) !== 0 ? (cum / parseFloat(document.getElementById("dd-max-r").innerText.replace('-',''))) : 0;
         document.getElementById("metric-calmar").innerText = (Math.abs(calmar)||0).toFixed(2);
         
         let sInsight = document.getElementById("sortino-insight");
