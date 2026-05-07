@@ -6018,7 +6018,7 @@
     </div>
 
     <script type="module">
-      window.ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+      window.ENV_GEMINI_API_KEY = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : "";
     </script>
     <script>
       const PAIR_CONFIG = {

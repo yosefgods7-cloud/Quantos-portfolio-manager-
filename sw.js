@@ -1,8 +1,10 @@
-const CACHE_NAME = 'quantos-v5';
+const CACHE_NAME = 'quantos-v6';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
+    './weeklyReview.js',
+    './NotificationEngine.js',
     'https://unpkg.com/lucide@latest',
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
