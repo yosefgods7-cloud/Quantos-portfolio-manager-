@@ -29,11 +29,6 @@ class NotificationEngine {
         document.getElementById('telegram-weekly-rep').checked = cfg.telegram.weekly;
         document.getElementById('telegram-monthly-rep').checked = cfg.telegram.monthly;
 
-        document.getElementById('notif-daily-time').value = cfg.schedule.dailyTime || '21:00';
-        document.getElementById('notif-monthly-time').value = cfg.schedule.monthlyTime || '08:00';
-        document.getElementById('notif-weekly-day').value = cfg.schedule.weeklyDay || 0;
-        document.getElementById('notif-weekly-time').value = cfg.schedule.weeklyTime || '20:00';
-
         document.getElementById('notif-loss-thresh').value = cfg.thresholds.lossWarn || 50;
         document.getElementById('notif-dd-thresh').value = cfg.thresholds.ddWarn || 70;
         document.getElementById('notif-streak-thresh').value = cfg.thresholds.streak || 3;
@@ -47,7 +42,7 @@ class NotificationEngine {
 
     startEngine() {
         if(this.intervalId) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => this.checkSchedules(), this.checkInterval);
+        // Automated report schedule check removed; alerts still evaluate on individual triggers.
     }
 
     saveSettings() {
@@ -67,12 +62,7 @@ class NotificationEngine {
                 weekly: document.getElementById('telegram-weekly-rep').checked,
                 monthly: document.getElementById('telegram-monthly-rep').checked
             },
-            schedule: {
-                dailyTime: document.getElementById('notif-daily-time').value,
-                monthlyTime: document.getElementById('notif-monthly-time').value,
-                weeklyDay: parseInt(document.getElementById('notif-weekly-day').value),
-                weeklyTime: document.getElementById('notif-weekly-time').value
-            },
+            // Schedule removed for manual report generation
             thresholds: {
                 lossWarn: parseInt(document.getElementById('notif-loss-thresh').value),
                 ddWarn: parseInt(document.getElementById('notif-dd-thresh').value),
@@ -85,46 +75,35 @@ class NotificationEngine {
         Store.save();
     }
 
-    // Checking scheduled reports (run every minute)
-    async checkSchedules() {
-        const cfg = Store.settings.notifications;
-        if(!cfg) return;
-
-        const now = new Date();
-        const utcHour = String(now.getUTCHours()).padStart(2,'0');
-        const utcMin = String(now.getUTCMinutes()).padStart(2,'0');
-        const currentTime = `${utcHour}:${utcMin}`;
-        const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-        const currentMonth = currentDate.substring(0, 7); // YYYY-MM
-        const currentWeekKey = window.getLocalWeekBoundaries ? window.getLocalWeekBoundaries(now).key : null; // Reusing from weeklyReview
-        const dayOfWeek = now.getUTCDay();
-
-        if(!Store.settings.notificationState) Store.settings.notificationState = {};
-        const state = Store.settings.notificationState;
-
-        // Check Daily
-        if (currentTime >= cfg.schedule.dailyTime && state.lastDaily !== currentDate) {
-            await this.sendDailyReport();
-            state.lastDaily = currentDate;
-            Store.save();
+    manualReport(type) {
+        const statusEl = document.getElementById('notif-test-status');
+        if (statusEl) {
+            statusEl.innerText = 'Generating...';
+            statusEl.style.color = 'var(--text)';
         }
-
-        // Check Weekly
-        if (currentWeekKey && dayOfWeek === cfg.schedule.weeklyDay && currentTime >= cfg.schedule.weeklyTime && state.lastWeekly !== currentWeekKey) {
-            await this.sendWeeklyReport();
-            state.lastWeekly = currentWeekKey;
-            Store.save();
-        }
-
-        // Check Monthly
-        if (now.getUTCDate() === 1 && currentTime >= cfg.schedule.monthlyTime && state.lastMonthly !== currentMonth) {
-            if (cfg.discord.monthly || cfg.telegram.monthly) {
-                await this.sendMonthlyReport();
+        
+        const finish = (msg, isError = false) => {
+            if (statusEl) {
+                statusEl.innerText = msg;
+                statusEl.style.color = isError ? 'var(--danger)' : 'var(--success)';
             }
-            state.lastMonthly = currentMonth;
-            Store.save();
+            if (isError) console.error(msg);
+        };
+
+        try {
+            if (type === 'daily') {
+                this.sendDailyReport().then(()=> finish("Daily report generated & sent")).catch(err => finish("Error: " + err.message, true));
+            } else if (type === 'weekly') {
+                this.sendWeeklyReport().then(()=> finish("Weekly report generated & sent")).catch(err => finish("Error: " + err.message, true));
+            } else if (type === 'monthly') {
+                this.sendMonthlyReport().then(()=> finish("Monthly report generated & sent")).catch(err => finish("Error: " + err.message, true));
+            }
+        } catch (e) {
+            finish("Error: " + e.message, true);
         }
     }
+
+    // Automated scheduling check logic removed
 
     async doSend(payloadFunc, flags) {
         const cfg = Store.settings.notifications;
