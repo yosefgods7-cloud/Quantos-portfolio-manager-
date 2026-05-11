@@ -5033,6 +5033,13 @@
           <input type="number" id="trade-pnl-percent" step="0.01" placeholder="0.00" readonly style="background: var(--bg); cursor: not-allowed;" />
         </div>
       </div>
+      <div class="form-group outcome-field">
+        <label>Commission ($)</label>
+        <div class="input-wrapper">
+          <i data-lucide="dollar-sign"></i>
+          <input type="number" id="trade-commission" step="0.01" placeholder="0.00" oninput="calculateTradeMetrics()" />
+        </div>
+      </div>
       <div class="form-group missed-field" style="display: none;">
         <label>Reason for Missed</label>
         <div class="input-wrapper">
@@ -9928,7 +9935,10 @@ Keep the response cleanly formatted with lists or bold text.`;
 
         // 5. P&L
         if (!isNaN(actualR) && riskAmount > 0) {
-          const pnlAmount = actualR * riskAmount;
+          let pnlAmount = actualR * riskAmount;
+          const commission = parseFloat(document.getElementById("trade-commission").value) || 0;
+          pnlAmount -= commission;
+          
           document.getElementById("trade-pnl-amount").value = pnlAmount.toFixed(2);
           if (accountBalance > 0) {
             document.getElementById("trade-pnl-percent").value = ((pnlAmount / accountBalance) * 100).toFixed(2);
@@ -9936,8 +9946,19 @@ Keep the response cleanly formatted with lists or bold text.`;
             document.getElementById("trade-pnl-percent").value = "";
           }
         } else {
-          document.getElementById("trade-pnl-amount").value = "";
-          document.getElementById("trade-pnl-percent").value = "";
+          const commission = parseFloat(document.getElementById("trade-commission").value) || 0;
+          if (commission > 0) {
+            const pnlAmount = -commission;
+            document.getElementById("trade-pnl-amount").value = pnlAmount.toFixed(2);
+            if (accountBalance > 0) {
+              document.getElementById("trade-pnl-percent").value = ((pnlAmount / accountBalance) * 100).toFixed(2);
+            } else {
+              document.getElementById("trade-pnl-percent").value = "";
+            }
+          } else {
+            document.getElementById("trade-pnl-amount").value = "";
+            document.getElementById("trade-pnl-percent").value = "";
+          }
         }
       };
 
@@ -10114,6 +10135,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("trade-r").value = "";
         document.getElementById("trade-pnl-amount").value = "";
         document.getElementById("trade-pnl-percent").value = "";
+        document.getElementById("trade-commission").value = "";
         document.getElementById("trade-missed-reason").value = "Distracted";
         document.getElementById("trade-canceled-reason").value = "Setup Invalidated";
         document.getElementById("trade-htf-bias").value = "Bullish";
@@ -10161,6 +10183,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("trade-r").value = trade.r || "";
         document.getElementById("trade-pnl-amount").value = trade.pnlAmount || "";
         document.getElementById("trade-pnl-percent").value = trade.pnlPercent || "";
+        document.getElementById("trade-commission").value = trade.commission || "";
         document.getElementById("trade-missed-reason").value = trade.missedReason || "Distracted";
         document.getElementById("trade-canceled-reason").value = trade.canceledReason || "Setup Invalidated";
         document.getElementById("trade-htf-bias").value = trade.htfBias || "Bullish";
@@ -10714,6 +10737,7 @@ Keep the response cleanly formatted with lists or bold text.`;
           r: parseFloat(document.getElementById("trade-r").value) || 0,
           pnlAmount: parseFloat(document.getElementById("trade-pnl-amount").value) || 0,
           pnlPercent: parseFloat(document.getElementById("trade-pnl-percent").value) || 0,
+          commission: parseFloat(document.getElementById("trade-commission").value) || 0,
           missedReason: document.getElementById("trade-missed-reason").value,
           canceledReason: document.getElementById("trade-canceled-reason").value,
           exitPrice: parseFloat(document.getElementById("trade-exit-price").value) || null,
@@ -11000,6 +11024,10 @@ Keep the response cleanly formatted with lists or bold text.`;
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">P&L</p>
               <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem; color: ${trade.pnlAmount >= 0 ? 'var(--success)' : 'var(--danger)'}">${trade.pnlAmount >= 0 ? '+' : ''}$${(trade.pnlAmount || 0).toFixed(2)}</p>
+            </div>
+            <div>
+              <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Commission</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">$${(trade.commission || 0).toFixed(2)}</p>
             </div>
           </div>
           
@@ -15051,9 +15079,9 @@ window.CSVExportEngine = {
             filtered = filtered.filter(t => new Date(t.date) <= new Date(dateTo));
         }
         if (resultFilt === "win") {
-            filtered = filtered.filter(t => (t.r > 0 || t.pnlAmount > 0));
+            filtered = filtered.filter(t => t.r > 0 || t.resultType === "Win" || t.resultType === "Partial Win");
         } else if (resultFilt === "loss") {
-            filtered = filtered.filter(t => (t.r < 0 || t.pnlAmount < 0));
+            filtered = filtered.filter(t => t.r < 0 || t.resultType === "Loss");
         }
         
         if (filtered.length === 0) {
@@ -15108,14 +15136,15 @@ window.CSVExportEngine = {
 
             // Summary Tab
             const summaryData = [];
-            const wins = filtered.filter(t => t.r > 0 || t.pnlAmount > 0);
+            const wins = filtered.filter(t => t.r > 0 || t.resultType === "Win" || t.resultType === "Partial Win");
+            const losses = filtered.filter(t => t.r < 0 || t.resultType === "Loss");
             const totalPnl = filtered.reduce((s,t) => s + (t.pnlAmount||0), 0);
             const winRate = ((wins.length / filtered.length) * 100).toFixed(2);
             
             summaryData.push(["Metric", "Value"]);
             summaryData.push(["Total Trades", filtered.length]);
             summaryData.push(["Total Wins", wins.length]);
-            summaryData.push(["Total Losses", filtered.length - wins.length]);
+            summaryData.push(["Total Losses", losses.length]);
             summaryData.push(["Win Rate", winRate + "%"]);
             summaryData.push(["Total Net P&L", "$" + totalPnl.toFixed(2)]);
             
