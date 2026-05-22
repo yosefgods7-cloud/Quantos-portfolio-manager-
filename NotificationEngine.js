@@ -49,15 +49,22 @@ class NotificationEngine {
         setCheck('discord-weekly-rep', cfg.discord.weekly);
         setCheck('discord-monthly-rep', cfg.discord.monthly);
         
-        setVal('webhook-telegram-token', cfg.telegram.token || '');
-        setVal('webhook-telegram-chat', cfg.telegram.chatId || '');
-        setCheck('telegram-enabled', cfg.telegram.enabled !== false);
-        setCheck('telegram-rt-alerts', cfg.telegram.alerts);
-        setCheck('telegram-daily-rep', cfg.telegram.daily);
-        setCheck('telegram-weekly-rep', cfg.telegram.weekly);
-        setCheck('telegram-monthly-rep', cfg.telegram.monthly);
+        setVal('webhook-telegram-token', cfg.telegram?.token || '');
+        setVal('webhook-telegram-chat', cfg.telegram?.chatId || '');
+        setCheck('telegram-enabled', cfg.telegram?.enabled !== false);
+        setCheck('telegram-rt-alerts', cfg.telegram?.alerts);
+        setCheck('telegram-daily-rep', cfg.telegram?.daily);
+        setCheck('telegram-weekly-rep', cfg.telegram?.weekly);
+        setCheck('telegram-monthly-rep', cfg.telegram?.monthly);
 
-        setVal('notif-loss-thresh', cfg.thresholds.lossWarn || 50);
+        setVal('webhook-google-chat-space', cfg.googleChat?.space || '');
+        setCheck('google-chat-enabled', cfg.googleChat?.enabled !== false);
+        setCheck('google-chat-rt-alerts', cfg.googleChat?.alerts);
+        setCheck('google-chat-daily-rep', cfg.googleChat?.daily);
+        setCheck('google-chat-weekly-rep', cfg.googleChat?.weekly);
+        setCheck('google-chat-monthly-rep', cfg.googleChat?.monthly);
+
+        setVal('notif-loss-thresh', cfg.thresholds?.lossWarn || 50);
         setVal('notif-dd-thresh', cfg.thresholds.ddWarn || 70);
         setVal('notif-streak-thresh', cfg.thresholds.streak || 3);
         setCheck('notif-eq-high', cfg.thresholds.eqHigh);
@@ -95,6 +102,14 @@ class NotificationEngine {
                 daily: getCheck('telegram-daily-rep'),
                 weekly: getCheck('telegram-weekly-rep'),
                 monthly: getCheck('telegram-monthly-rep')
+            },
+            googleChat: {
+                space: getVal('webhook-google-chat-space'),
+                enabled: getCheck('google-chat-enabled'),
+                alerts: getCheck('google-chat-rt-alerts'),
+                daily: getCheck('google-chat-daily-rep'),
+                weekly: getCheck('google-chat-weekly-rep'),
+                monthly: getCheck('google-chat-monthly-rep')
             },
             // Schedule removed for manual report generation
             thresholds: {
@@ -167,6 +182,14 @@ class NotificationEngine {
             p.push(Promise.reject(new Error("Telegram Bot Token or Chat ID is missing.")));
         }
 
+        const useGoogleChat = cfg.googleChat && cfg.googleChat.enabled && cfg.googleChat.space && (force || flags.googleChat);
+        if (useGoogleChat) {
+            const gp = payloadFunc('googleChat'); // Using text payload compatible with telegram for google chat
+            if (gp) p.push(this.postGoogleChat(cfg.googleChat.space, gp));
+        } else if (force && cfg.googleChat && cfg.googleChat.enabled && !cfg.googleChat.space) {
+            p.push(Promise.reject(new Error("Google Chat Space identifier is missing.")));
+        }
+
         if(p.length > 0) {
             try {
                 const results = await Promise.allSettled(p);
@@ -185,28 +208,35 @@ class NotificationEngine {
     }
 
     async postDiscord(url, payload) {
-        return fetch(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
-        }).then(res => {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
             if(!res.ok) throw new Error("Discord error " + res.status);
             return res;
-        });
+        } catch(err) {
+            if(err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+                throw new Error('Discord request failed (Network error or invalid Webhook URL)');
+            }
+            throw err;
+        }
     }
 
     async postTelegram(token, chatId, text) {
         const cleanToken = token.startsWith('bot') ? token.substring(3) : token;
         const url = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
-        return fetch(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: text,
-                parse_mode: 'HTML'
-            })
-        }).then(async res => {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: text,
+                    parse_mode: 'HTML'
+                })
+            });
             if(!res.ok) {
                 let errDetails = "";
                 try {
@@ -218,7 +248,50 @@ class NotificationEngine {
                 throw new Error(`Telegram error ${res.status}: ${errDetails}`);
             }
             return res;
-        });
+        } catch(err) {
+            if(err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+                throw new Error('Telegram request failed (Network error or CORS issue. Please try using a backend proxy).');
+            }
+            throw err;
+        }
+    }
+
+    async postGoogleChat(space, text) {
+        if (!space) throw new Error("Google Chat space identifier is missing.");
+        let spaceName = space.startsWith('spaces/') ? space : `spaces/${space}`;
+        
+        let token = null;
+        if (window.FirebaseService) {
+            token = window.FirebaseService.getWorkspaceAccessToken();
+        }
+        if (!token) throw new Error("Google Workspace Access Token missing. Please sign in with Google.");
+
+        const url = `https://chat.googleapis.com/v1/${spaceName}/messages`;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    text: text
+                })
+            });
+            if(!res.ok) {
+                let errDetails = "";
+                try {
+                    const data = await res.json();
+                    errDetails = data.error?.message || res.statusText;
+                } catch(e) {
+                    errDetails = res.statusText;
+                }
+                throw new Error(`Google Chat error ${res.status}: ${errDetails}`);
+            }
+            return res;
+        } catch(err) {
+            throw new Error('Google Chat request failed: ' + err.message);
+        }
     }
 
     isSpam(key, cooldownMins=5) {
@@ -234,8 +307,8 @@ class NotificationEngine {
     // Expected object containing account name, loss, limit, usedPct, remaining
     dispatchLossWarning(accnt, rLoss, limit, allow) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('loss_warn_'+accnt.name, 10)) return;
 
         const blocks = Math.round(allow * 10);
@@ -250,18 +323,18 @@ class NotificationEngine {
                         description: `**Account:** ${accnt.name}\n**Loss so far:** ${rLoss.toFixed(2)}R\n**Daily Limit:** ${limit.toFixed(2)}R\n**Used:** ${Math.round(allow*100)}% ${bar}\n\n**Remaining allowance:** ${(limit - Math.abs(rLoss)).toFixed(2)}R\n*Slow down. Protect your capital.*`
                     }]
                 };
-            } else {
+            } else { // Fallback for telegram and googleChat
                 return `⚠️ <b>DAILY LOSS WARNING</b>\n\n<b>Account:</b> ${accnt.name}\n<b>Loss so far:</b> ${rLoss.toFixed(2)}R\n<b>Daily Limit:</b> ${limit.toFixed(2)}R\n<b>Used:</b> ${Math.round(allow*100)}% ${bar}\n\n<b>Remaining:</b> ${(limit - Math.abs(rLoss)).toFixed(2)}R\n<i>Slow down. Protect your capital.</i>`;
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchLossHit(accnt, rLoss, limit) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('loss_hit_'+accnt.name, 60)) return;
 
         const buildMsg = (type) => {
@@ -277,14 +350,14 @@ class NotificationEngine {
                 return `🔴 <b>TRADING LOCKED</b> — Limit Reached\n\n<b>Account:</b> ${accnt.name}\n<b>Loss:</b> ${rLoss.toFixed(2)}R\n<b>Limit:</b> ${limit.toFixed(2)}R\n\nJournal is locked. Complete reflection to unlock.\n<b>Stop. Breathe. Review.</b>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchEquityHigh(accnt, newMax, prevMax) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.eqHigh) return;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         
         const gain = newMax - prevMax;
         const gainPct = (gain / prevMax * 100);
@@ -302,13 +375,13 @@ class NotificationEngine {
                 return `🏆 <b>NEW EQUITY HIGH</b>\n\n<b>Account:</b> ${accnt.name}\n<b>New High:</b> $${parseFloat(newMax).toLocaleString()}\n<b>Previous:</b> $${parseFloat(prevMax).toLocaleString()}\n<b>Gain:</b> +$${parseFloat(gain).toLocaleString()} (+${gainPct.toFixed(1)}%)\n\n<i>Keep building. Stay disciplined.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchConsecutiveLoss(streak, trades) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('streak_loss', 30)) return;
 
         let rTotal = trades.reduce((a, b) => a + parseFloat(b.r), 0);
@@ -328,14 +401,14 @@ class NotificationEngine {
                 return `🔁 <b>LOSS STREAK ALERT</b>\n\n<b>Consecutive Losses:</b> ${streak}\n<b>Last ${streak} trades:</b>\n${listStrTg}\n\n<b>Total loss:</b> ${rTotal.toFixed(2)}R\n<b>Psych Risk:</b> ELEVATED\n\n<i>Consider stepping away. Review before next trade.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchPsychEscalation(level, avgEmotion, losses) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.psychEscalate) return;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('psych_escalation', 60)) return;
 
         let clr = level === "ELEVATED" ? 15105570 : 15158332; // Orange or Red
@@ -353,14 +426,14 @@ class NotificationEngine {
                 return `🧠 <b>PSYCH RISK ESCALATION</b>\n\n<b>Risk Level:</b> ${level === "ELEVATED" ? "🟠 ELEVATED" : "🔴 CRITICAL"}\n<b>Avg Emotion:</b> ${avgEmotion}% Negative\n<b>Consec. Losses:</b> ${losses}\n<b>Recommendation:</b> Reduce risk\n\n<i>Your mental state is affecting performance. Step back.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchTradeLogged(trade) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.tradeLogged) return;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
 
         let prefix = parseFloat(trade.r) >= 0 ? '+' : '';
         let accnt = Store.accounts.find(a => a.id === trade.accountId);
@@ -378,13 +451,13 @@ class NotificationEngine {
             }
         };
         // no spam protection needed, explicitly requested to fire per trade if enabled
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchDrawdownWarning(accnt, currentDd, maxDd, usedPct) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('dd_warn_'+accnt.name, 60)) return;
 
         const blocks = Math.round(usedPct * 10);
@@ -405,13 +478,13 @@ class NotificationEngine {
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     dispatchPropTargetReached(accnt, achievedAmount, targetAmount) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
-        if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
+        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
+        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
         if (this.isSpam('prop_target_'+accnt.name, 1440)) return; // 1 day cooldown
 
         const targetPct = (targetAmount / parseFloat(accnt.balance)) * 100;
@@ -436,7 +509,7 @@ class NotificationEngine {
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord.alerts, telegram: cfg.telegram.alerts});
+        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
     }
 
     // --- REPORTS ---
@@ -448,7 +521,7 @@ class NotificationEngine {
         let t24 = Store.trades.filter(t => new Date(t.date) >= yest && new Date(t.date) <= now);
         
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord.daily, telegram: cfg.telegram.daily};
+        const dFlags = {discord: cfg.discord?.daily, telegram: cfg.telegram?.daily, googleChat: cfg.googleChat?.daily};
 
         if (t24.length === 0) {
             const emptyMsg = (type) => {
@@ -561,7 +634,7 @@ class NotificationEngine {
         }
 
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord.weekly, telegram: cfg.telegram.weekly};
+        const dFlags = {discord: cfg.discord?.weekly, telegram: cfg.telegram?.weekly, googleChat: cfg.googleChat?.weekly};
 
         if(tradesCount === 0) {
             const emptyMsg = (type) => {
@@ -601,7 +674,7 @@ class NotificationEngine {
         });
 
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord.monthly, telegram: cfg.telegram.monthly};
+        const dFlags = {discord: cfg.discord?.monthly, telegram: cfg.telegram?.monthly, googleChat: cfg.googleChat?.monthly};
 
         let wins=0, losses=0, totR=0, totPnl=0;
         mTrades.forEach(t=>{

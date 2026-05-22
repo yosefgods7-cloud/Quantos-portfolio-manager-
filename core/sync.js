@@ -703,5 +703,6 @@ window.forceSyncLocalToCloud = async function() {
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
+  window.FirebaseService = FirebaseService;
   SyncEngine.init();
 });

@@ -5068,22 +5068,16 @@
                     `;
           });
 
-          // Fetch real XAUUSD price from gold-api.com
+          // Fetch gold price proxy (PAXG) from Binance to avoid CORS issues
           try {
             const goldResponse = await fetch(
-              "https://api.gold-api.com/price/XAU",
+              "https://api.binance.com/api/v3/ticker/24hr?symbol=PAXGUSDT"
             );
             const goldData = await goldResponse.json();
-            const goldPrice = parseFloat(goldData.price);
+            const goldPrice = parseFloat(goldData.lastPrice);
 
             if (!isNaN(goldPrice)) {
-              let changePct = 0;
-              if (window.livePrices["XAUUSD"]) {
-                changePct =
-                  ((goldPrice - window.livePrices["XAUUSD"]) /
-                    window.livePrices["XAUUSD"]) *
-                  100;
-              }
+              const changePct = parseFloat(goldData.priceChangePercent) || 0;
               window.livePrices["XAUUSD"] = goldPrice;
 
               const priceStr = goldPrice.toLocaleString(undefined, {

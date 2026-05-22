@@ -502,7 +502,7 @@ window.generateWeeklyReviewAI = async function(reviewData) {
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash",
+            model: "gemini-1.5-flash",
             contents: prompt,
             config: {
                 systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."

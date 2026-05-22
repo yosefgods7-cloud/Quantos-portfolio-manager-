@@ -1,22 +1,23 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBW43DIMLEA4igVq8Un5-pQKsBlv6lGOnc",
-  authDomain: "quantos-edge.firebaseapp.com",
-  projectId: "quantos-edge",
-  storageBucket: "quantos-edge.firebasestorage.app",
-  messagingSenderId: "336499583255",
-  appId: "1:336499583255:web:394b2bbdd354916689af52",
-  measurementId: "G-WWMY0EESRB"
+  apiKey: "AIzaSyAn9rHtNupm6t8q7VfkaLL7ejie732S8lc",
+  authDomain: "gen-lang-client-0940321923.firebaseapp.com",
+  projectId: "gen-lang-client-0940321923",
+  storageBucket: "gen-lang-client-0940321923.firebasestorage.app",
+  messagingSenderId: "259751023246",
+  appId: "1:259751023246:web:1bde2eb99b7bf211b1efdf"
 };
 
 let app;
 let auth;
 let db;
 let storage;
+
+let cachedWorkspaceAccessToken = null;
 
 export const FirebaseService = {
   isInitialized: false,
@@ -87,8 +88,30 @@ export const FirebaseService = {
     return signInAnonymously(auth);
   },
 
+  async loginWithGoogle() {
+    if (!auth) throw new Error("Firebase not initialized");
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/chat.messages');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential && credential.accessToken) {
+         cachedWorkspaceAccessToken = credential.accessToken;
+      }
+      return { user: result.user, accessToken: cachedWorkspaceAccessToken };
+    } catch(err) {
+      console.error("Google Auth failed:", err);
+      throw err;
+    }
+  },
+
+  getWorkspaceAccessToken() {
+    return cachedWorkspaceAccessToken;
+  },
+
   async logout() {
     if (!auth) throw new Error("Firebase not initialized");
+    cachedWorkspaceAccessToken = null;
     return signOut(auth);
   },
 
