@@ -6039,7 +6039,10 @@
         // Indices (point-based, per contract)
         "US30":   { pipSize: 1,      pipValue: 1   },
         "NAS100": { pipSize: 1,      pipValue: 1   },
-        "SPX500": { pipSize: 0.1,    pipValue: 1   },
+        "SPX500": { pipSize: 1,      pipValue: 1   },
+        "US100":  { pipSize: 1,      pipValue: 1   },
+        "USTEC":  { pipSize: 1,      pipValue: 1   },
+        "US500":  { pipSize: 1,      pipValue: 1   },
         "GER40":  { pipSize: 1,      pipValue: 1   },
         "UK100":  { pipSize: 1,      pipValue: 1   },
 
@@ -7136,72 +7139,25 @@ Keep the response cleanly formatted with lists or bold text.`;
           document.getElementById("api-key-input").value = storedApiKey;
         }
 
-        if (Store.settings.notifications) {
-          document.getElementById("webhook-discord").value = Store.settings.notifications.discord || "";
-          document.getElementById("discord-rt-alerts").checked = Store.settings.notifications.discordRtAlerts !== false;
-          document.getElementById("discord-daily-rep").checked = Store.settings.notifications.discordDailyRep !== false;
-          document.getElementById("discord-weekly-rep").checked = Store.settings.notifications.discordWeeklyRep !== false;
-          document.getElementById("discord-monthly-rep").checked = Store.settings.notifications.discordMonthlyRep !== false;
-          
-          document.getElementById("webhook-telegram-token").value = Store.settings.notifications.telegramToken || "";
-          document.getElementById("webhook-telegram-chat").value = Store.settings.notifications.telegramChat || "";
-          document.getElementById("telegram-rt-alerts").checked = Store.settings.notifications.telegramRtAlerts !== false;
-          document.getElementById("telegram-daily-rep").checked = Store.settings.notifications.telegramDailyRep !== false;
-          document.getElementById("telegram-weekly-rep").checked = Store.settings.notifications.telegramWeeklyRep !== false;
-          document.getElementById("telegram-monthly-rep").checked = Store.settings.notifications.telegramMonthlyRep !== false;
-          
-          document.getElementById("notif-daily-time").value = Store.settings.notifications.dailyTime || "21:00";
-          document.getElementById("notif-monthly-time").value = Store.settings.notifications.monthlyTime || "08:00";
-          document.getElementById("notif-weekly-day").value = Store.settings.notifications.weeklyDay || "0";
-          document.getElementById("notif-weekly-time").value = Store.settings.notifications.weeklyTime || "20:00";
-          
-          document.getElementById("notif-loss-thresh").value = Store.settings.notifications.lossThresh || 50;
-          document.getElementById("notif-dd-thresh").value = Store.settings.notifications.ddThresh || 70;
-          document.getElementById("notif-streak-thresh").value = Store.settings.notifications.streakThresh || 3;
-          document.getElementById("notif-eq-high").checked = Store.settings.notifications.eqHigh !== false;
-          document.getElementById("notif-psych-escalation").checked = Store.settings.notifications.psychEscalation !== false;
-          document.getElementById("notif-trade-logged").checked = Store.settings.notifications.tradeLogged !== false;
-        } else if (Store.settings.webhooks) {
+        if (Store.settings.webhooks && !Store.settings.notifications) {
           // Migration from old settings
-          document.getElementById("webhook-discord").value = Store.settings.webhooks.discord || "";
-          document.getElementById("webhook-telegram-token").value = Store.settings.webhooks.telegramToken || "";
-          document.getElementById("webhook-telegram-chat").value = Store.settings.webhooks.telegramChat || "";
-          window.saveNotificationSettings();
+          if (window.NotificationEngine) {
+              Store.settings.notifications = {
+                  discord: { url: Store.settings.webhooks.discord || '' },
+                  telegram: { token: Store.settings.webhooks.telegramToken || '', chatId: Store.settings.webhooks.telegramChat || '' }
+              };
+              window.NotificationEngine.saveSettings();
+          }
         }
       }
 
+      // Notifications are managed by NotificationEngine.js
       window.saveNotificationSettings = function () {
-        if (!Store.settings.notifications) Store.settings.notifications = {};
-        
-        Store.settings.notifications = {
-          discord: document.getElementById("webhook-discord").value,
-          discordRtAlerts: document.getElementById("discord-rt-alerts").checked,
-          discordDailyRep: document.getElementById("discord-daily-rep").checked,
-          discordWeeklyRep: document.getElementById("discord-weekly-rep").checked,
-          discordMonthlyRep: document.getElementById("discord-monthly-rep").checked,
-          
-          telegramToken: document.getElementById("webhook-telegram-token").value,
-          telegramChat: document.getElementById("webhook-telegram-chat").value,
-          telegramRtAlerts: document.getElementById("telegram-rt-alerts").checked,
-          telegramDailyRep: document.getElementById("telegram-daily-rep").checked,
-          telegramWeeklyRep: document.getElementById("telegram-weekly-rep").checked,
-          telegramMonthlyRep: document.getElementById("telegram-monthly-rep").checked,
-          
-          dailyTime: document.getElementById("notif-daily-time").value,
-          monthlyTime: document.getElementById("notif-monthly-time").value,
-          weeklyDay: document.getElementById("notif-weekly-day").value,
-          weeklyTime: document.getElementById("notif-weekly-time").value,
-          
-          lossThresh: parseInt(document.getElementById("notif-loss-thresh").value) || 50,
-          ddThresh: parseInt(document.getElementById("notif-dd-thresh").value) || 70,
-          streakThresh: parseInt(document.getElementById("notif-streak-thresh").value) || 3,
-          eqHigh: document.getElementById("notif-eq-high").checked,
-          psychEscalation: document.getElementById("notif-psych-escalation").checked,
-          tradeLogged: document.getElementById("notif-trade-logged").checked,
-        };
-        Store.save();
+        if (window.NotificationEngine) {
+          window.NotificationEngine.saveSettings();
+        }
       };
-      
+
       // Kept for UI buttons that might still call it
       window.saveWebhooks = window.saveNotificationSettings;
 
@@ -7788,63 +7744,12 @@ Keep the response cleanly formatted with lists or bold text.`;
         }
       };
 
-      window.checkScheduledNotifications = function() {
-         const notifs = Store.settings.notifications;
-         if (!notifs) return;
-         if (!Store.notificationHistory) Store.notificationHistory = {};
-
-         const now = new Date();
-         const dateKey = now.toISOString().split("T")[0];
-         const hhmm = String(now.getUTCHours()).padStart(2,"0") + ":" + String(now.getUTCMinutes()).padStart(2,"0");
-         const dayOfWeek = now.getUTCDay().toString();
-         
-         const totalBal = Store.accounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-         const totalEq = Store.accounts.reduce((sum, a) => sum + (a.equity || 0), 0);
-
-         // Daily Check
-         if (hhmm === (notifs.dailyTime || "21:00")) {
-            const histKey = `daily_${dateKey}`;
-            if (!Store.notificationHistory[histKey]) {
-                const recentTrades = Store.trades.filter(t => t.date === dateKey);
-                const pnl = recentTrades.reduce((s, t) => s + (parseFloat(t.pnlAmount)||0), 0);
-                const msg = `📊 **Daily Report - ${dateKey}**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}\nTrades Today: ${recentTrades.length}\nToday's PNL: $${pnl.toFixed(2)}`;
-                window.sendNotification(msg, "dailyRep");
-                Store.notificationHistory[histKey] = true;
-                Store.save();
-            }
-         }
-
-         // Weekly Check
-         if (dayOfWeek === (notifs.weeklyDay || "0") && hhmm === (notifs.weeklyTime || "20:00")) {
-             const yearWeek = dateKey + "_W"; // Simplified uniqueness key
-             const histKey = `weekly_${yearWeek}`;
-             if (!Store.notificationHistory[histKey]) {
-                const msg = `📅 **Weekly Report**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}\nPlease perform your weekly active review to get deeper insights.`;
-                window.sendNotification(msg, "weeklyRep");
-                Store.notificationHistory[histKey] = true;
-                Store.save();
-             }
-         }
-
-         // Monthly Check
-         if (now.getUTCDate() === 1 && hhmm === (notifs.monthlyTime || "08:00")) {
-             const yyyymm = dateKey.slice(0, 7);
-             const histKey = `monthly_${yyyymm}`;
-             if (!Store.notificationHistory[histKey]) {
-                 const msg = `📈 **Monthly Summary - ${yyyymm}**\nTotal Balance: $${totalBal.toFixed(2)}\nTotal Equity: $${totalEq.toFixed(2)}`;
-                 window.sendNotification(msg, "monthlyRep");
-                 Store.notificationHistory[histKey] = true;
-                 Store.save();
-             }
-         }
-      };
+      // checkScheduledNotifications removed per manual report directive
 
       setInterval(() => {
          checkDailySnapshots();
-         checkScheduledNotifications();
       }, 60000); // Check every minute
       checkDailySnapshots(); // Check on load
-      checkScheduledNotifications();
 
       // --- UI Logic ---
       window.switchView = function (viewId) {
@@ -10100,6 +10005,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("trade-date").value = new Date().toISOString().split('T')[0];
         document.getElementById("trade-entry-time").value = "";
         document.getElementById("trade-exit-time").value = "";
+        document.getElementById("trade-exit-price").value = "";
         document.getElementById("trade-session").value = "New York";
         document.getElementById("trade-type").value = "Buy";
         document.getElementById("trade-execution").value = "Market";
@@ -10148,6 +10054,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("trade-date").value = trade.date || "";
         document.getElementById("trade-entry-time").value = trade.entryTime || "";
         document.getElementById("trade-exit-time").value = trade.exitTime || "";
+        document.getElementById("trade-exit-price").value = trade.exitPrice || "";
         document.getElementById("trade-session").value = trade.session || "New York";
         document.getElementById("trade-type").value = trade.tradeType || "Buy";
         document.getElementById("trade-execution").value = trade.executionType || "Market";

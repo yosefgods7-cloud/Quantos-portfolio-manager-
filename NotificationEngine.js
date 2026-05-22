@@ -6,35 +6,59 @@ class NotificationEngine {
     }
 
     init() {
-        if (!Store.settings.notifications) {
+        if (!Store.settings.notifications || typeof Store.settings.notifications.discord === 'string') {
+            const old = Store.settings.notifications || {};
             Store.settings.notifications = {
-                discord: { url: '', alerts: true, daily: true, weekly: true, monthly: false },
-                telegram: { token: '', chatId: '', alerts: true, daily: true, weekly: true, monthly: false },
+                discord: { 
+                    url: typeof old.discord === 'string' ? old.discord : '', 
+                    alerts: old.discordRtAlerts !== false, 
+                    daily: old.discordDailyRep !== false, 
+                    weekly: old.discordWeeklyRep !== false, 
+                    monthly: !!old.discordMonthlyRep 
+                },
+                telegram: { 
+                    token: typeof old.telegramToken === 'string' ? old.telegramToken : '', 
+                    chatId: typeof old.telegramChat === 'string' ? old.telegramChat : '', 
+                    alerts: old.telegramRtAlerts !== false, 
+                    daily: old.telegramDailyRep !== false, 
+                    weekly: old.telegramWeeklyRep !== false, 
+                    monthly: !!old.telegramMonthlyRep 
+                },
                 schedule: { dailyTime: '21:00', monthlyTime: '08:00', weeklyDay: 0, weeklyTime: '20:00' },
-                thresholds: { lossWarn: 50, ddWarn: 70, streak: 3, eqHigh: true, psychEscalate: true, tradeLogged: false }
+                thresholds: { 
+                    lossWarn: old.lossThresh || 50, 
+                    ddWarn: old.ddThresh || 70, 
+                    streak: old.streakThresh || 3, 
+                    eqHigh: old.eqHigh !== false, 
+                    psychEscalate: old.psychEscalation !== false, 
+                    tradeLogged: !!old.tradeLogged 
+                }
             };
         }
         // Load into UI
         const cfg = Store.settings.notifications;
-        document.getElementById('webhook-discord').value = cfg.discord.url || '';
-        document.getElementById('discord-rt-alerts').checked = cfg.discord.alerts;
-        document.getElementById('discord-daily-rep').checked = cfg.discord.daily;
-        document.getElementById('discord-weekly-rep').checked = cfg.discord.weekly;
-        document.getElementById('discord-monthly-rep').checked = cfg.discord.monthly;
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
         
-        document.getElementById('webhook-telegram-token').value = cfg.telegram.token || '';
-        document.getElementById('webhook-telegram-chat').value = cfg.telegram.chatId || '';
-        document.getElementById('telegram-rt-alerts').checked = cfg.telegram.alerts;
-        document.getElementById('telegram-daily-rep').checked = cfg.telegram.daily;
-        document.getElementById('telegram-weekly-rep').checked = cfg.telegram.weekly;
-        document.getElementById('telegram-monthly-rep').checked = cfg.telegram.monthly;
+        setVal('webhook-discord', cfg.discord.url || '');
+        setCheck('discord-rt-alerts', cfg.discord.alerts);
+        setCheck('discord-daily-rep', cfg.discord.daily);
+        setCheck('discord-weekly-rep', cfg.discord.weekly);
+        setCheck('discord-monthly-rep', cfg.discord.monthly);
+        
+        setVal('webhook-telegram-token', cfg.telegram.token || '');
+        setVal('webhook-telegram-chat', cfg.telegram.chatId || '');
+        setCheck('telegram-rt-alerts', cfg.telegram.alerts);
+        setCheck('telegram-daily-rep', cfg.telegram.daily);
+        setCheck('telegram-weekly-rep', cfg.telegram.weekly);
+        setCheck('telegram-monthly-rep', cfg.telegram.monthly);
 
-        document.getElementById('notif-loss-thresh').value = cfg.thresholds.lossWarn || 50;
-        document.getElementById('notif-dd-thresh').value = cfg.thresholds.ddWarn || 70;
-        document.getElementById('notif-streak-thresh').value = cfg.thresholds.streak || 3;
-        document.getElementById('notif-eq-high').checked = cfg.thresholds.eqHigh;
-        document.getElementById('notif-psych-escalation').checked = cfg.thresholds.psychEscalate;
-        document.getElementById('notif-trade-logged').checked = cfg.thresholds.tradeLogged;
+        setVal('notif-loss-thresh', cfg.thresholds.lossWarn || 50);
+        setVal('notif-dd-thresh', cfg.thresholds.ddWarn || 70);
+        setVal('notif-streak-thresh', cfg.thresholds.streak || 3);
+        setCheck('notif-eq-high', cfg.thresholds.eqHigh);
+        setCheck('notif-psych-escalation', cfg.thresholds.psychEscalate);
+        setCheck('notif-trade-logged', cfg.thresholds.tradeLogged);
 
         // Start background loop
         this.startEngine();
@@ -46,36 +70,41 @@ class NotificationEngine {
     }
 
     saveSettings() {
+        const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const getCheck = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+        const getInt = (id, def) => { const el = document.getElementById(id); return el ? parseInt(el.value) || def : def; };
+
         Store.settings.notifications = {
             discord: {
-                url: document.getElementById('webhook-discord').value,
-                alerts: document.getElementById('discord-rt-alerts').checked,
-                daily: document.getElementById('discord-daily-rep').checked,
-                weekly: document.getElementById('discord-weekly-rep').checked,
-                monthly: document.getElementById('discord-monthly-rep').checked
+                url: getVal('webhook-discord'),
+                alerts: getCheck('discord-rt-alerts'),
+                daily: getCheck('discord-daily-rep'),
+                weekly: getCheck('discord-weekly-rep'),
+                monthly: getCheck('discord-monthly-rep')
             },
             telegram: {
-                token: document.getElementById('webhook-telegram-token').value,
-                chatId: document.getElementById('webhook-telegram-chat').value,
-                alerts: document.getElementById('telegram-rt-alerts').checked,
-                daily: document.getElementById('telegram-daily-rep').checked,
-                weekly: document.getElementById('telegram-weekly-rep').checked,
-                monthly: document.getElementById('telegram-monthly-rep').checked
+                token: getVal('webhook-telegram-token'),
+                chatId: getVal('webhook-telegram-chat'),
+                alerts: getCheck('telegram-rt-alerts'),
+                daily: getCheck('telegram-daily-rep'),
+                weekly: getCheck('telegram-weekly-rep'),
+                monthly: getCheck('telegram-monthly-rep')
             },
             // Schedule removed for manual report generation
             thresholds: {
-                lossWarn: parseInt(document.getElementById('notif-loss-thresh').value),
-                ddWarn: parseInt(document.getElementById('notif-dd-thresh').value),
-                streak: parseInt(document.getElementById('notif-streak-thresh').value),
-                eqHigh: document.getElementById('notif-eq-high').checked,
-                psychEscalate: document.getElementById('notif-psych-escalation').checked,
-                tradeLogged: document.getElementById('notif-trade-logged').checked
+                lossWarn: getInt('notif-loss-thresh', 50),
+                ddWarn: getInt('notif-dd-thresh', 70),
+                streak: getInt('notif-streak-thresh', 3),
+                eqHigh: getCheck('notif-eq-high'),
+                psychEscalate: getCheck('notif-psych-escalation'),
+                tradeLogged: getCheck('notif-trade-logged')
             }
         };
         Store.save();
     }
 
     manualReport(type) {
+        this.saveSettings(); // Ensure we have the latest inputs (e.g. if user hasn't blurred yet)
         const statusEl = document.getElementById('notif-test-status');
         if (statusEl) {
             statusEl.innerText = 'Generating...';
@@ -121,9 +150,15 @@ class NotificationEngine {
 
         if(p.length > 0) {
             try {
-                await Promise.allSettled(p);
+                const results = await Promise.allSettled(p);
+                for (let r of results) {
+                    if (r.status === 'rejected') {
+                        throw new Error(r.reason.message || r.reason);
+                    }
+                }
             } catch(e) {
                 console.error("Notification send error", e);
+                throw e;
             }
         }
     }
@@ -149,8 +184,17 @@ class NotificationEngine {
                 text: text,
                 parse_mode: 'HTML'
             })
-        }).then(res => {
-            if(!res.ok) throw new Error("Telegram error " + res.status);
+        }).then(async res => {
+            if(!res.ok) {
+                let errDetails = "";
+                try {
+                    const data = await res.json();
+                    errDetails = data.description || res.statusText;
+                } catch(e) {
+                    errDetails = res.statusText;
+                }
+                throw new Error(`Telegram error ${res.status}: ${errDetails}`);
+            }
             return res;
         });
     }
@@ -562,11 +606,13 @@ class NotificationEngine {
 
 
     test(type) {
+        this.saveSettings();
         document.getElementById('notif-test-status').innerText = 'Sending...';
         document.getElementById('notif-test-status').style.color = 'var(--text)';
         
-        const finish = (msg) => {
+        const finish = (msg, isError = false) => {
             document.getElementById('notif-test-status').innerText = msg;
+            document.getElementById('notif-test-status').style.color = isError ? 'var(--danger)' : 'var(--text)';
         };
 
         let accnt = {name: "Test Account"};
@@ -575,12 +621,12 @@ class NotificationEngine {
                 this.dispatchLossWarning(accnt, -1.5, 3.0, 0.5);
                 finish("Test Alert dispatched");
             } else if (type === 'daily') {
-                this.sendDailyReport().then(()=> finish("Test Daily dispatched"));
+                this.sendDailyReport().then(()=> finish("Test Daily dispatched")).catch(err => finish("Error: " + err.message, true));
             } else if (type === 'weekly') {
-                this.sendWeeklyReport().then(()=> finish("Test Weekly dispatched"));
+                this.sendWeeklyReport().then(()=> finish("Test Weekly dispatched")).catch(err => finish("Error: " + err.message, true));
             }
         } catch (e) {
-            finish("Error: " + e.message);
+            finish("Error: " + e.message, true);
         }
     }
 

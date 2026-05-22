@@ -6029,7 +6029,10 @@
         // Indices (point-based, per contract)
         "US30":   { pipSize: 1,      pipValue: 1   },
         "NAS100": { pipSize: 1,      pipValue: 1   },
-        "SPX500": { pipSize: 0.1,    pipValue: 1   },
+        "SPX500": { pipSize: 1,      pipValue: 1   },
+        "US100":  { pipSize: 1,      pipValue: 1   },
+        "USTEC":  { pipSize: 1,      pipValue: 1   },
+        "US500":  { pipSize: 1,      pipValue: 1   },
         "GER40":  { pipSize: 1,      pipValue: 1   },
         "UK100":  { pipSize: 1,      pipValue: 1   },
 
@@ -9882,6 +9885,7 @@
         document.getElementById("trade-date").value = new Date().toISOString().split('T')[0];
         document.getElementById("trade-entry-time").value = "";
         document.getElementById("trade-exit-time").value = "";
+        document.getElementById("trade-exit-price").value = "";
         document.getElementById("trade-session").value = "New York";
         document.getElementById("trade-type").value = "Buy";
         document.getElementById("trade-execution").value = "Market";
@@ -9929,6 +9933,7 @@
         document.getElementById("trade-date").value = trade.date || "";
         document.getElementById("trade-entry-time").value = trade.entryTime || "";
         document.getElementById("trade-exit-time").value = trade.exitTime || "";
+        document.getElementById("trade-exit-price").value = trade.exitPrice || "";
         document.getElementById("trade-session").value = trade.session || "New York";
         document.getElementById("trade-type").value = trade.tradeType || "Buy";
         document.getElementById("trade-execution").value = trade.executionType || "Market";

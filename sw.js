@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quantos-v6';
+const CACHE_NAME = 'quantos-v7';
 const ASSETS = [
     './',
     './index.html',
