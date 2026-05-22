@@ -4021,69 +4021,83 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px;">
                 <!-- Discord Config -->
                 <div style="background: var(--bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
-                    <h3 style="font-size: 1rem; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; color: #5865F2;">
-                        <i data-lucide="message-square"></i> Discord Configuration
+                    <h3 style="font-size: 1rem; margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between; color: #5865F2;">
+                        <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="message-square"></i> Discord</span>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text); font-weight: normal;">
+                            <input type="checkbox" id="discord-enabled" onchange="window.saveNotificationSettings()">
+                            Enable
+                        </label>
                     </h3>
                     <div class="form-group">
                         <label>Webhook URL</label>
                         <div class="input-wrapper">
                             <i data-lucide="link"></i>
-                            <input type="text" id="webhook-discord" placeholder="https://discord.com/api/webhooks/..." onchange="window.saveNotificationSettings()" />
+                            <input type="text" id="webhook-discord" placeholder="https://discord.com/api/webhooks/..." />
                         </div>
                     </div>
                     <div style="margin-bottom: 16px;">
                         <label style="font-size: 0.85rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 8px;">Enable for:</label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="discord-rt-alerts" onchange="window.saveNotificationSettings()" checked> Real-time Alerts
+                                <input type="checkbox" id="discord-rt-alerts" checked> Real-time Alerts
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="discord-daily-rep" onchange="window.saveNotificationSettings()" checked> Daily Report
+                                <input type="checkbox" id="discord-daily-rep" checked> Daily Report
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="discord-weekly-rep" onchange="window.saveNotificationSettings()" checked> Weekly Digest
+                                <input type="checkbox" id="discord-weekly-rep" checked> Weekly Digest
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="discord-monthly-rep" onchange="window.saveNotificationSettings()"> Monthly Summary
+                                <input type="checkbox" id="discord-monthly-rep"> Monthly Summary
                             </label>
                         </div>
                     </div>
+                    <button class="secondary" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="window.saveNotificationSettings()">
+                        <i data-lucide="save"></i> Save Discord Settings
+                    </button>
                 </div>
 
                 <!-- Telegram Config -->
                 <div style="background: var(--bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
-                    <h3 style="font-size: 1rem; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; color: #0088cc;">
-                        <i data-lucide="send"></i> Telegram Configuration
+                    <h3 style="font-size: 1rem; margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between; color: #0088cc;">
+                        <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="send"></i> Telegram</span>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text); font-weight: normal;">
+                            <input type="checkbox" id="telegram-enabled" onchange="window.saveNotificationSettings()">
+                            Enable
+                        </label>
                     </h3>
                     <div class="form-group" style="margin-bottom: 8px;">
                         <div class="input-wrapper">
                             <i data-lucide="key"></i>
-                            <input type="text" id="webhook-telegram-token" placeholder="Bot Token (e.g. 123456:ABC-DEF)" onchange="window.saveNotificationSettings()" />
+                            <input type="text" id="webhook-telegram-token" placeholder="Bot Token (e.g. 123456:ABC-DEF)" />
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i data-lucide="message-circle"></i>
-                            <input type="text" id="webhook-telegram-chat" placeholder="Chat ID (e.g. -100123...)" onchange="window.saveNotificationSettings()" />
+                            <input type="text" id="webhook-telegram-chat" placeholder="Chat ID (e.g. -100123...)" />
                         </div>
                     </div>
                     <div style="margin-bottom: 16px;">
                         <label style="font-size: 0.85rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 8px;">Enable for:</label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="telegram-rt-alerts" onchange="window.saveNotificationSettings()" checked> Real-time Alerts
+                                <input type="checkbox" id="telegram-rt-alerts" checked> Real-time Alerts
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="telegram-daily-rep" onchange="window.saveNotificationSettings()" checked> Daily Report
+                                <input type="checkbox" id="telegram-daily-rep" checked> Daily Report
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="telegram-weekly-rep" onchange="window.saveNotificationSettings()" checked> Weekly Digest
+                                <input type="checkbox" id="telegram-weekly-rep" checked> Weekly Digest
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text);">
-                                <input type="checkbox" id="telegram-monthly-rep" onchange="window.saveNotificationSettings()"> Monthly Summary
+                                <input type="checkbox" id="telegram-monthly-rep"> Monthly Summary
                             </label>
                         </div>
                     </div>
+                    <button class="secondary" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="window.saveNotificationSettings()">
+                        <i data-lucide="save"></i> Save Telegram Settings
+                    </button>
                 </div>
             </div>
 

@@ -14,7 +14,8 @@ class NotificationEngine {
                     alerts: old.discordRtAlerts !== false, 
                     daily: old.discordDailyRep !== false, 
                     weekly: old.discordWeeklyRep !== false, 
-                    monthly: !!old.discordMonthlyRep 
+                    monthly: !!old.discordMonthlyRep,
+                    enabled: old.discordEnabled !== false
                 },
                 telegram: { 
                     token: typeof old.telegramToken === 'string' ? old.telegramToken : '', 
@@ -22,7 +23,8 @@ class NotificationEngine {
                     alerts: old.telegramRtAlerts !== false, 
                     daily: old.telegramDailyRep !== false, 
                     weekly: old.telegramWeeklyRep !== false, 
-                    monthly: !!old.telegramMonthlyRep 
+                    monthly: !!old.telegramMonthlyRep,
+                    enabled: old.telegramEnabled !== false
                 },
                 schedule: { dailyTime: '21:00', monthlyTime: '08:00', weeklyDay: 0, weeklyTime: '20:00' },
                 thresholds: { 
@@ -41,6 +43,7 @@ class NotificationEngine {
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
         
         setVal('webhook-discord', cfg.discord.url || '');
+        setCheck('discord-enabled', cfg.discord.enabled !== false);
         setCheck('discord-rt-alerts', cfg.discord.alerts);
         setCheck('discord-daily-rep', cfg.discord.daily);
         setCheck('discord-weekly-rep', cfg.discord.weekly);
@@ -48,6 +51,7 @@ class NotificationEngine {
         
         setVal('webhook-telegram-token', cfg.telegram.token || '');
         setVal('webhook-telegram-chat', cfg.telegram.chatId || '');
+        setCheck('telegram-enabled', cfg.telegram.enabled !== false);
         setCheck('telegram-rt-alerts', cfg.telegram.alerts);
         setCheck('telegram-daily-rep', cfg.telegram.daily);
         setCheck('telegram-weekly-rep', cfg.telegram.weekly);
@@ -77,6 +81,7 @@ class NotificationEngine {
         Store.settings.notifications = {
             discord: {
                 url: getVal('webhook-discord'),
+                enabled: getCheck('discord-enabled'),
                 alerts: getCheck('discord-rt-alerts'),
                 daily: getCheck('discord-daily-rep'),
                 weekly: getCheck('discord-weekly-rep'),
@@ -85,6 +90,7 @@ class NotificationEngine {
             telegram: {
                 token: getVal('webhook-telegram-token'),
                 chatId: getVal('webhook-telegram-chat'),
+                enabled: getCheck('telegram-enabled'),
                 alerts: getCheck('telegram-rt-alerts'),
                 daily: getCheck('telegram-daily-rep'),
                 weekly: getCheck('telegram-weekly-rep'),
@@ -121,11 +127,11 @@ class NotificationEngine {
 
         try {
             if (type === 'daily') {
-                this.sendDailyReport().then(()=> finish("Daily report generated & sent")).catch(err => finish("Error: " + err.message, true));
+                this.sendDailyReport(true).then(()=> finish("Daily report generated & sent")).catch(err => finish("Error: " + err.message, true));
             } else if (type === 'weekly') {
-                this.sendWeeklyReport().then(()=> finish("Weekly report generated & sent")).catch(err => finish("Error: " + err.message, true));
+                this.sendWeeklyReport(true).then(()=> finish("Weekly report generated & sent")).catch(err => finish("Error: " + err.message, true));
             } else if (type === 'monthly') {
-                this.sendMonthlyReport().then(()=> finish("Monthly report generated & sent")).catch(err => finish("Error: " + err.message, true));
+                this.sendMonthlyReport(true).then(()=> finish("Monthly report generated & sent")).catch(err => finish("Error: " + err.message, true));
             }
         } catch (e) {
             finish("Error: " + e.message, true);
@@ -134,18 +140,27 @@ class NotificationEngine {
 
     // Automated scheduling check logic removed
 
-    async doSend(payloadFunc, flags) {
+    async doSend(payloadFunc, flags, force = false) {
         const cfg = Store.settings.notifications;
         let p = [];
 
-        if (flags.discord && cfg.discord.url) {
+        const useDiscord = cfg.discord.enabled && cfg.discord.url && (force || flags.discord);
+        if (useDiscord) {
             const dp = payloadFunc('discord');
             if(dp) p.push(this.postDiscord(cfg.discord.url, dp));
         }
 
-        if (flags.telegram && cfg.telegram.token && cfg.telegram.chatId) {
+        const useTelegram = cfg.telegram.enabled && cfg.telegram.token && cfg.telegram.chatId && (force || flags.telegram);
+        if (useTelegram) {
             const tp = payloadFunc('telegram');
-            if(tp) p.push(this.postTelegram(cfg.telegram.token, cfg.telegram.chatId, tp));
+            if(tp) {
+                // simple rate limiting wait
+                if (this.lastTelegramSent && Date.now() - this.lastTelegramSent < 1100) {
+                    await new Promise(r => setTimeout(r, 1100 - (Date.now() - this.lastTelegramSent)));
+                }
+                this.lastTelegramSent = Date.now();
+                p.push(this.postTelegram(cfg.telegram.token, cfg.telegram.chatId, tp));
+            }
         }
 
         if(p.length > 0) {
@@ -212,6 +227,7 @@ class NotificationEngine {
     // Expected object containing account name, loss, limit, usedPct, remaining
     dispatchLossWarning(accnt, rLoss, limit, allow) {
         const cfg = Store.settings.notifications;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('loss_warn_'+accnt.name, 10)) return;
 
@@ -237,6 +253,7 @@ class NotificationEngine {
 
     dispatchLossHit(accnt, rLoss, limit) {
         const cfg = Store.settings.notifications;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('loss_hit_'+accnt.name, 60)) return;
 
@@ -259,6 +276,7 @@ class NotificationEngine {
     dispatchEquityHigh(accnt, newMax, prevMax) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.eqHigh) return;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         
         const gain = newMax - prevMax;
@@ -282,6 +300,7 @@ class NotificationEngine {
 
     dispatchConsecutiveLoss(streak, trades) {
         const cfg = Store.settings.notifications;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('streak_loss', 30)) return;
 
@@ -308,6 +327,7 @@ class NotificationEngine {
     dispatchPsychEscalation(level, avgEmotion, losses) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.psychEscalate) return;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('psych_escalation', 60)) return;
 
@@ -332,6 +352,7 @@ class NotificationEngine {
     dispatchTradeLogged(trade) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.tradeLogged) return;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
 
         let prefix = parseFloat(trade.r) >= 0 ? '+' : '';
@@ -355,6 +376,7 @@ class NotificationEngine {
 
     dispatchDrawdownWarning(accnt, currentDd, maxDd, usedPct) {
         const cfg = Store.settings.notifications;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('dd_warn_'+accnt.name, 60)) return;
 
@@ -381,6 +403,7 @@ class NotificationEngine {
 
     dispatchPropTargetReached(accnt, achievedAmount, targetAmount) {
         const cfg = Store.settings.notifications;
+        if (!cfg.discord.enabled && !cfg.telegram.enabled) return;
         if (!cfg.discord.alerts && !cfg.telegram.alerts) return;
         if (this.isSpam('prop_target_'+accnt.name, 1440)) return; // 1 day cooldown
 
@@ -411,7 +434,7 @@ class NotificationEngine {
 
     // --- REPORTS ---
 
-    async sendDailyReport() {
+    async sendDailyReport(forceManual = false) {
         // Collect past 24h trades
         const now = new Date();
         const yest = new Date(now.getTime() - 86400000);
@@ -426,7 +449,7 @@ class NotificationEngine {
                 const text = `📋 Daily Report — No trades logged today\n${now.toISOString().split("T")[0]} | Rest day or market avoidance noted.`;
                 return isDiscord ? { embeds: [{ title: "📋 Daily Report — No trades", description: text, color: 8421504 }] } : `📋 <b>Daily Report</b> — No trades logged\n\n${text}`;
             };
-            await this.doSend(emptyMsg, dFlags);
+            await this.doSend(emptyMsg, dFlags, forceManual);
             return;
         }
 
@@ -484,10 +507,10 @@ class NotificationEngine {
             }
         };
 
-        await this.doSend(message, dFlags);
+        await this.doSend(message, dFlags, forceManual);
     }
 
-    async sendWeeklyReport() {
+    async sendWeeklyReport(forceManual = false) {
         // Build data similar to WeeklyReviewModal but summarized
         if (typeof window.getLocalWeekBoundaries !== 'function') return; // Requires weeklyReview.js 
 
@@ -538,7 +561,7 @@ class NotificationEngine {
                 const text = `week ${weekInfo.weekNum} complete! 0 trades logged. Enjoy your weekend.`;
                 return type === 'discord' ? { embeds: [{ title: "📈 WEEKLY DIGEST", description: text, color: 8421504 }] } : `📈 <b>WEEKLY DIGEST</b>\n\n${text}`;
             };
-            await this.doSend(emptyMsg, dFlags);
+            await this.doSend(emptyMsg, dFlags, forceManual);
             return;
         }
 
@@ -557,10 +580,10 @@ class NotificationEngine {
             }
         };
 
-        await this.doSend(msg, dFlags);
+        await this.doSend(msg, dFlags, forceManual);
     }
 
-    async sendMonthlyReport() {
+    async sendMonthlyReport(forceManual = false) {
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth()-1, 1);
         const monthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
@@ -599,8 +622,8 @@ class NotificationEngine {
             }
         };
 
-        if(mTrades.length > 0) {
-            await this.doSend(msg, dFlags);
+        if(mTrades.length >= 0) { // always send manual report even if 0 trades
+            await this.doSend(msg, dFlags, forceManual);
         }
     }
 
@@ -619,11 +642,13 @@ class NotificationEngine {
         try {
             if (type === 'alert') {
                 this.dispatchLossWarning(accnt, -1.5, 3.0, 0.5);
-                finish("Test Alert dispatched");
+                // Also force it since tests should always trigger if enabled
+                const buildMsg = (typeStr) => typeStr === 'discord' ? {embeds:[{title:"🔔 TEST ALERT", description:"This is a test alert from Quant Edge OS.", color:3066993}]} : "🔔 <b>TEST ALERT</b>\n\nThis is a test alert from Quant Edge OS.";
+                this.doSend(buildMsg, {}, true).then(()=> finish("Test Alert dispatched")).catch(err => finish("Error: " + err.message, true));
             } else if (type === 'daily') {
-                this.sendDailyReport().then(()=> finish("Test Daily dispatched")).catch(err => finish("Error: " + err.message, true));
+                this.sendDailyReport(true).then(()=> finish("Test Daily dispatched")).catch(err => finish("Error: " + err.message, true));
             } else if (type === 'weekly') {
-                this.sendWeeklyReport().then(()=> finish("Test Weekly dispatched")).catch(err => finish("Error: " + err.message, true));
+                this.sendWeeklyReport(true).then(()=> finish("Test Weekly dispatched")).catch(err => finish("Error: " + err.message, true));
             }
         } catch (e) {
             finish("Error: " + e.message, true);
