@@ -4032,7 +4032,7 @@
                         <label>Webhook URL</label>
                         <div class="input-wrapper">
                             <i data-lucide="link"></i>
-                            <input type="text" id="webhook-discord" placeholder="https://discord.com/api/webhooks/..." />
+                            <input type="text" id="webhook-discord" placeholder="https://discord.com/api/webhooks/..." onchange="window.saveNotificationSettings()" />
                         </div>
                     </div>
                     <div style="margin-bottom: 16px;">
@@ -4069,13 +4069,13 @@
                     <div class="form-group" style="margin-bottom: 8px;">
                         <div class="input-wrapper">
                             <i data-lucide="key"></i>
-                            <input type="text" id="webhook-telegram-token" placeholder="Bot Token (e.g. 123456:ABC-DEF)" />
+                            <input type="text" id="webhook-telegram-token" placeholder="Bot Token (e.g. 123456:ABC-DEF)" onchange="window.saveNotificationSettings()" />
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i data-lucide="message-circle"></i>
-                            <input type="text" id="webhook-telegram-chat" placeholder="Chat ID (e.g. -100123...)" />
+                            <input type="text" id="webhook-telegram-chat" placeholder="Chat ID (e.g. -100123...)" onchange="window.saveNotificationSettings()" />
                         </div>
                     </div>
                     <div style="margin-bottom: 16px;">
@@ -4136,17 +4136,23 @@
             </div>
 
             <!-- Testing Actions -->
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding-top: 16px; border-top: 1px solid var(--border);">
-                <span id="notif-test-status" style="font-size: 0.85rem; color: var(--muted); margin-right: auto;"></span>
-                <button class="secondary" onclick="window.NotificationEngine.test('alert')"><i data-lucide="bell"></i> Test Alert</button>
-                <button class="secondary" onclick="window.NotificationEngine.test('daily')"><i data-lucide="file-text"></i> Test Daily</button>
-                <button class="secondary" onclick="window.NotificationEngine.test('weekly')"><i data-lucide="calendar"></i> Test Weekly</button>
-                <button class="secondary" onclick="window.NotificationEngine.preview()"><i data-lucide="eye"></i> Preview in App</button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 8px; background: rgba(168, 85, 247, 0.05);">
+                <div style="display: flex; flex-direction: column; gap: 4px; margin-right: auto;">
+                    <strong style="font-size: 0.95rem; color: var(--text);">Testing & Diagnostic</strong>
+                    <span id="notif-test-status" style="font-size: 0.85rem; color: var(--muted); min-height: 18px;">Run a test to ensure webhooks are properly configured.</span>
+                </div>
+                <button class="secondary" onclick="window.NotificationEngine.test('alert')" style="background: var(--bg);"><i data-lucide="bell"></i> Test Alert</button>
+                <button class="secondary" onclick="window.NotificationEngine.test('daily')" style="background: var(--bg);"><i data-lucide="file-text"></i> Test Daily</button>
+                <button class="secondary" onclick="window.NotificationEngine.test('weekly')" style="background: var(--bg);"><i data-lucide="calendar"></i> Test Weekly</button>
+                <button class="secondary" onclick="window.NotificationEngine.preview()" style="background: var(--bg);"><i data-lucide="eye"></i> Preview in App</button>
             </div>
             
             <!-- Manual Reports -->
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px;">
-                <span style="font-size: 0.85rem; color: var(--muted); margin-right: auto;">Manual Reports:</span>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 8px; background: rgba(59, 130, 246, 0.05); margin-top: 16px;">
+                <div style="display: flex; flex-direction: column; gap: 4px; margin-right: auto;">
+                    <strong style="font-size: 0.95rem; color: var(--text);">Manual Reports Generation</strong>
+                    <span style="font-size: 0.85rem; color: var(--muted);">Force dispatch a report independent of any schedule rules.</span>
+                </div>
                 <button class="primary" onclick="window.NotificationEngine.manualReport('daily')"><i data-lucide="file-text"></i> Get Daily Report</button>
                 <button class="primary" onclick="window.NotificationEngine.manualReport('weekly')"><i data-lucide="calendar"></i> Get Weekly Report</button>
                 <button class="primary" onclick="window.NotificationEngine.manualReport('monthly')"><i data-lucide="bar-chart-2"></i> Get Monthly Report</button>
@@ -6012,7 +6018,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
           <div style="display: flex; gap: 12px;" id="weekly-review-read-only-actions">
           </div>
-          <div style="display: flex; gap: 12px; margin-left: auto;">
+          <div style="display: flex; gap: 12px; margin-left: auto; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text);" id="wr-skip-ai-wrap">
+              <input type="checkbox" id="wr-skip-ai"> Skip AI Analysis
+            </label>
             <button class="secondary" onclick="closeModal('modal-weekly-review')">Cancel</button>
             <button id="btn-save-weekly-review" onclick="window.saveWeeklyReview()" style="background: var(--primary); color: white; border: none;">Submit Review</button>
           </div>

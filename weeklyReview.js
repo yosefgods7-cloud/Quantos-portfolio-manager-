@@ -138,12 +138,16 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
             <button class="secondary" onclick="exportWeeklyReviewPDF()"><i data-lucide="file-text"></i> Export PDF</button>
             <button class="secondary" onclick="shareWeeklyReviewDiscord()" style="background: #5865F2; color: white; border: none;"><i data-lucide="message-square"></i> Share to Discord</button>
         `;
+        const skipAiWrap = document.getElementById("wr-skip-ai-wrap");
+        if(skipAiWrap) skipAiWrap.style.display = "none";
     } else {
         label.innerText = "Draft Mode";
         label.style.background = "var(--surface)";
         label.style.color = "var(--warning)";
         saveBtn.style.display = "block";
         actions.innerHTML = "";
+        const skipAiWrap = document.getElementById("wr-skip-ai-wrap");
+        if(skipAiWrap) skipAiWrap.style.display = "flex";
     }
     
     let html = `
@@ -433,13 +437,20 @@ window.saveWeeklyReview = async function() {
     };
     
     const saveBtn = document.getElementById("btn-save-weekly-review");
-    saveBtn.innerText = "Generating AI Report...";
+    saveBtn.innerText = "Processing...";
     saveBtn.disabled = true;
     
-    try {
-        await generateWeeklyReviewAI(data);
-    } catch(e) {
-        console.error("AI Generation failed inline", e);
+    const skipAI = document.getElementById("wr-skip-ai")?.checked;
+    
+    if (!skipAI) {
+        saveBtn.innerText = "Generating AI Report...";
+        try {
+            await generateWeeklyReviewAI(data);
+        } catch(e) {
+            console.error("AI Generation failed inline", e);
+        }
+    } else {
+        data.aiSummary = `<div style="color: var(--muted); font-style: italic;">AI analysis was skipped manually to save cost.</div>`;
     }
     
     let exists = Store.weeklyReviews.findIndex(r => r.key === data.key);
@@ -465,7 +476,7 @@ window.generateWeeklyReviewAI = async function(reviewData) {
     const ai = new GoogleGenAI({ apiKey: window.ENV_GEMINI_API_KEY });
     
     const prompt = `
-    Analyze this trader's weekly performance.
+    Analyze this trader's weekly performance. Minimal, concise response to save tokens.
     Week: ${reviewData.weekNum}
     Total Trades: ${reviewData.totalTrades}
     Win Rate: ${reviewData.winRate.toFixed(1)}%
@@ -481,27 +492,26 @@ window.generateWeeklyReviewAI = async function(reviewData) {
     - Focus Next Week: ${reviewData.manual.nextFocus}
     - Rule to Enforce: ${reviewData.manual.ruleEnforce}
     
-    Return a structured HTML report with NO markdown fences.
+    Return a short, structured HTML report with NO markdown fences.
     Include these sections (use <h4> tags with style="color:var(--text); margin-bottom:8px; margin-top:24px;"):
-    1. Verdict (2-3 sentences max)
-    2. Primary Edge Observed
-    3. Critical Risk Identified 
-    4. Psychological Assessment
-    5. Actionable Advice (bullet points for next week)
+    1. Verdict (1-2 sentences)
+    2. Primary Edge
+    3. Critical Risk
+    4. Actionable Advice
     `;
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-3.5-flash",
             contents: prompt,
             config: {
-                systemInstruction: "You are an elite trading performance psychologist and quant coach. Be direct, objective, and deeply insightful. Use clear HTML formatting."
+                systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."
             }
         });
         reviewData.aiSummary = (response?.text || "").replace(/```html/g, '').replace(/```/g, '');
     } catch (e) {
         console.error("AI Error:", e);
-        reviewData.aiSummary = `<span style="color:var(--danger)">AI generation failed. Model may be overloaded.</span>`;
+        reviewData.aiSummary = `<span style="color:var(--danger)">AI generation failed. Please try again later or skip AI analysis. Error: ${e.message}</span>`;
     }
 };
 

@@ -148,6 +148,8 @@ class NotificationEngine {
         if (useDiscord) {
             const dp = payloadFunc('discord');
             if(dp) p.push(this.postDiscord(cfg.discord.url, dp));
+        } else if (force && cfg.discord.enabled && !cfg.discord.url) {
+            p.push(Promise.reject(new Error("Discord Webhook URL is missing.")));
         }
 
         const useTelegram = cfg.telegram.enabled && cfg.telegram.token && cfg.telegram.chatId && (force || flags.telegram);
@@ -161,6 +163,8 @@ class NotificationEngine {
                 this.lastTelegramSent = Date.now();
                 p.push(this.postTelegram(cfg.telegram.token, cfg.telegram.chatId, tp));
             }
+        } else if (force && cfg.telegram.enabled && (!cfg.telegram.token || !cfg.telegram.chatId)) {
+            p.push(Promise.reject(new Error("Telegram Bot Token or Chat ID is missing.")));
         }
 
         if(p.length > 0) {
@@ -175,6 +179,8 @@ class NotificationEngine {
                 console.error("Notification send error", e);
                 throw e;
             }
+        } else if (force) {
+            throw new Error("No platforms are enabled for notifications.");
         }
     }
 
@@ -190,7 +196,8 @@ class NotificationEngine {
     }
 
     async postTelegram(token, chatId, text) {
-        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+        const cleanToken = token.startsWith('bot') ? token.substring(3) : token;
+        const url = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
         return fetch(url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
