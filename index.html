@@ -6415,9 +6415,7 @@
           if (Notification.permission === "granted") {
             new Notification("QuantEdge Alert", { body: msg });
           }
-          if (window.sendNotification) {
-             window.sendNotification(`🚨 **DRAWDOWN ALERT** 🚨\n${msg}`, "rtAlerts");
-          }
+
         });
       };
 
@@ -7371,66 +7369,6 @@ Keep the response cleanly formatted with lists or bold text.`;
         }, 500); // Wait for charts to render
       };
 
-      window.sendTestWebhook = async function () {
-        const notifs = Store.settings.notifications || Store.settings.webhooks;
-        if (!notifs) {
-          alert("Please configure webhook URLs first.");
-          return;
-        }
-
-        const totalBal = Store.accounts.reduce(
-          (sum, a) => sum + (a.balance || 0),
-          0,
-        );
-        const totalEq = Store.accounts.reduce(
-          (sum, a) => sum + (a.equity || 0),
-          0,
-        );
-        const message = `📊 **QuantEdge Daily Summary**\nDate: ${new Date().toLocaleDateString()}\nTotal Balance: $${totalBal.toLocaleString()}\nTotal Equity: $${totalEq.toLocaleString()}`;
-
-        try {
-          if (notifs.telegramToken && notifs.telegramChat) {
-            const tToken = notifs.telegramToken.replace(/\s+/g, '');
-            const url = `https://api.telegram.org/bot${tToken}/sendMessage`;
-            const body = new URLSearchParams();
-            body.append("chat_id", notifs.telegramChat.trim());
-            body.append("text", message);
-
-            const doFallback = () => {
-                const getUrl = `${url}?chat_id=${encodeURIComponent(notifs.telegramChat.trim())}&text=${encodeURIComponent(message)}`;
-                const img = new Image();
-                img.src = getUrl;
-                return { ok: true, fallback: true };
-            };
-
-            let res;
-            try {
-                res = await fetch(url, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: body,
-                });
-            } catch(e) {
-                res = doFallback();
-            }
-
-            if (!res.fallback && !res.ok) {
-                let errText = "Unknown error";
-                try {
-                    const data = await res.json();
-                    errText = data.description || res.statusText;
-                } catch(err) {
-                    errText = res.statusText;
-                }
-                throw new Error(`Telegram error ${res.status}: ${errText}`);
-            }
-          }
-          alert("Test webhook sent successfully!");
-        } catch (e) {
-          alert("Error sending webhook: " + e.message);
-        }
-      };
-
       window.importData = function (event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -7704,48 +7642,6 @@ Keep the response cleanly formatted with lists or bold text.`;
             Store.save();
             console.log(`Daily snapshot taken for ${dateStr}`);
           }
-        }
-      };
-
-      // --- Notifications Engine ---
-      window.sendNotification = async function(message, type = "rtAlerts") {
-        const notifs = Store.settings.notifications;
-        if (!notifs) return;
-
-        try {
-          // Telegram support
-          const tKey = "telegram" + type.charAt(0).toUpperCase() + type.slice(1);
-          if (notifs.telegramToken && notifs.telegramChat && notifs[tKey] !== false) {
-            const tToken = notifs.telegramToken.replace(/\s+/g, '');
-            const url = `https://api.telegram.org/bot${tToken}/sendMessage`;
-            const body = new URLSearchParams();
-            body.append("chat_id", notifs.telegramChat.trim());
-            body.append("text", message);
-            body.append("parse_mode", "Markdown");
-
-            const doFallback = () => {
-                const getUrl = `${url}?chat_id=${encodeURIComponent(notifs.telegramChat.trim())}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
-                const img = new Image();
-                img.src = getUrl;
-            };
-
-            fetch(url, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: body
-            }).then(async res => {
-                if (!res.ok) {
-                    let errText = await res.text().catch(() => res.statusText);
-                    console.error(`Telegram webhook HTTP error ${res.status}:`, errText);
-                    // It failed but server responded, don't fallback, just log
-                }
-            }).catch(e => {
-                console.warn("Telegram explicit fetch failed, attempting Image beacon fallback...");
-                doFallback();
-            });
-          }
-        } catch(e) {
-          console.error("General notification error", e);
         }
       };
 
@@ -10695,10 +10591,7 @@ Keep the response cleanly formatted with lists or bold text.`;
             window.SyncEngine.syncTrade(newTrade);
         }
         
-        if (Store.settings.notifications && Store.settings.notifications.tradeLogged) {
-            const pnlStr = pnlAmount !== 0 ? ` ($${pnlAmount})` : "";
-            window.sendNotification(`📝 **Trade Logged**\nAsset: ${newTrade.asset}\nResult: ${newTrade.r}R${pnlStr}\nAccount: ${act ? act.name : 'Unknown'}`, "rtAlerts");
-        }
+
         
         closeModal();
         renderAll();
@@ -11881,11 +11774,7 @@ Keep the response cleanly formatted with lists or bold text.`;
              const now = new Date().toISOString().split("T")[0];
              const histKey = `psych_${now}_${consecutiveLosses}`;
              if (!Store.notificationHistory) Store.notificationHistory = {};
-             if (!Store.notificationHistory[histKey]) {
-                window.sendNotification(`🚨 **PSYCH ENGINE ESCALATION: STOP TRADING** 🚨\nYou have hit ${consecutiveLosses} consecutive losses. Your psychological state may be compromised. Step away from the charts immediately.`, "rtAlerts");
-                Store.notificationHistory[histKey] = true;
-                Store.save();
-             }
+
           }
         } else if (consecutiveLosses === 2) {
           riskBadge.innerText = "WARNING";
