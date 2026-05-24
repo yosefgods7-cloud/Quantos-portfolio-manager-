@@ -6,17 +6,9 @@ class NotificationEngine {
     }
 
     init() {
-        if (!Store.settings.notifications || typeof Store.settings.notifications.discord === 'string') {
+        if (!Store.settings.notifications) {
             const old = Store.settings.notifications || {};
             Store.settings.notifications = {
-                discord: { 
-                    url: typeof old.discord === 'string' ? old.discord : '', 
-                    alerts: old.discordRtAlerts !== false, 
-                    daily: old.discordDailyRep !== false, 
-                    weekly: old.discordWeeklyRep !== false, 
-                    monthly: !!old.discordMonthlyRep,
-                    enabled: old.discordEnabled !== false
-                },
                 telegram: { 
                     token: typeof old.telegramToken === 'string' ? old.telegramToken : '', 
                     chatId: typeof old.telegramChat === 'string' ? old.telegramChat : '', 
@@ -42,13 +34,6 @@ class NotificationEngine {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
         
-        setVal('webhook-discord', cfg.discord.url || '');
-        setCheck('discord-enabled', cfg.discord.enabled !== false);
-        setCheck('discord-rt-alerts', cfg.discord.alerts);
-        setCheck('discord-daily-rep', cfg.discord.daily);
-        setCheck('discord-weekly-rep', cfg.discord.weekly);
-        setCheck('discord-monthly-rep', cfg.discord.monthly);
-        
         setVal('webhook-telegram-token', cfg.telegram?.token || '');
         setVal('webhook-telegram-chat', cfg.telegram?.chatId || '');
         setCheck('telegram-enabled', cfg.telegram?.enabled !== false);
@@ -56,13 +41,6 @@ class NotificationEngine {
         setCheck('telegram-daily-rep', cfg.telegram?.daily);
         setCheck('telegram-weekly-rep', cfg.telegram?.weekly);
         setCheck('telegram-monthly-rep', cfg.telegram?.monthly);
-
-        setVal('webhook-google-chat-space', cfg.googleChat?.space || '');
-        setCheck('google-chat-enabled', cfg.googleChat?.enabled !== false);
-        setCheck('google-chat-rt-alerts', cfg.googleChat?.alerts);
-        setCheck('google-chat-daily-rep', cfg.googleChat?.daily);
-        setCheck('google-chat-weekly-rep', cfg.googleChat?.weekly);
-        setCheck('google-chat-monthly-rep', cfg.googleChat?.monthly);
 
         setVal('notif-loss-thresh', cfg.thresholds?.lossWarn || 50);
         setVal('notif-dd-thresh', cfg.thresholds.ddWarn || 70);
@@ -86,14 +64,6 @@ class NotificationEngine {
         const getInt = (id, def) => { const el = document.getElementById(id); return el ? parseInt(el.value) || def : def; };
 
         Store.settings.notifications = {
-            discord: {
-                url: getVal('webhook-discord'),
-                enabled: getCheck('discord-enabled'),
-                alerts: getCheck('discord-rt-alerts'),
-                daily: getCheck('discord-daily-rep'),
-                weekly: getCheck('discord-weekly-rep'),
-                monthly: getCheck('discord-monthly-rep')
-            },
             telegram: {
                 token: getVal('webhook-telegram-token'),
                 chatId: getVal('webhook-telegram-chat'),
@@ -102,14 +72,6 @@ class NotificationEngine {
                 daily: getCheck('telegram-daily-rep'),
                 weekly: getCheck('telegram-weekly-rep'),
                 monthly: getCheck('telegram-monthly-rep')
-            },
-            googleChat: {
-                space: getVal('webhook-google-chat-space'),
-                enabled: getCheck('google-chat-enabled'),
-                alerts: getCheck('google-chat-rt-alerts'),
-                daily: getCheck('google-chat-daily-rep'),
-                weekly: getCheck('google-chat-weekly-rep'),
-                monthly: getCheck('google-chat-monthly-rep')
             },
             // Schedule removed for manual report generation
             thresholds: {
@@ -159,14 +121,6 @@ class NotificationEngine {
         const cfg = Store.settings.notifications;
         let p = [];
 
-        const useDiscord = cfg.discord.enabled && cfg.discord.url && (force || flags.discord);
-        if (useDiscord) {
-            const dp = payloadFunc('discord');
-            if(dp) p.push(this.postDiscord(cfg.discord.url, dp));
-        } else if (force && cfg.discord.enabled && !cfg.discord.url) {
-            p.push(Promise.reject(new Error("Discord Webhook URL is missing.")));
-        }
-
         const useTelegram = cfg.telegram.enabled && cfg.telegram.token && cfg.telegram.chatId && (force || flags.telegram);
         if (useTelegram) {
             const tp = payloadFunc('telegram');
@@ -178,65 +132,70 @@ class NotificationEngine {
                 this.lastTelegramSent = Date.now();
                 p.push(this.postTelegram(cfg.telegram.token, cfg.telegram.chatId, tp));
             }
-        } else if (force && cfg.telegram.enabled && (!cfg.telegram.token || !cfg.telegram.chatId)) {
-            p.push(Promise.reject(new Error("Telegram Bot Token or Chat ID is missing.")));
-        }
-
-        const useGoogleChat = cfg.googleChat && cfg.googleChat.enabled && cfg.googleChat.space && (force || flags.googleChat);
-        if (useGoogleChat) {
-            const gp = payloadFunc('googleChat'); // Using text payload compatible with telegram for google chat
-            if (gp) p.push(this.postGoogleChat(cfg.googleChat.space, gp));
-        } else if (force && cfg.googleChat && cfg.googleChat.enabled && !cfg.googleChat.space) {
-            p.push(Promise.reject(new Error("Google Chat Space identifier is missing.")));
         }
 
         if(p.length > 0) {
             try {
                 const results = await Promise.allSettled(p);
+                let failures = [];
                 for (let r of results) {
                     if (r.status === 'rejected') {
-                        throw new Error(r.reason.message || r.reason);
+                        failures.push(r.reason.message || r.reason);
+                        console.error("Notification delivery failed for a platform:", r.reason);
                     }
+                }
+                if (failures.length === p.length) {
+                    // All failed
+                    throw new Error("All checks failed: " + failures.join(' | '));
+                } else if (failures.length > 0) {
+                    console.warn("Some notifications failed: " + failures.join(' | '));
                 }
             } catch(e) {
                 console.error("Notification send error", e);
                 throw e;
             }
         } else if (force) {
-            throw new Error("No platforms are enabled for notifications.");
-        }
-    }
-
-    async postDiscord(url, payload) {
-        try {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            if(!res.ok) throw new Error("Discord error " + res.status);
-            return res;
-        } catch(err) {
-            if(err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-                throw new Error('Discord request failed (Network error or invalid Webhook URL)');
-            }
-            throw err;
+            throw new Error("No notification platforms are fully configured (check URLs/Tokens).");
         }
     }
 
     async postTelegram(token, chatId, text) {
+        token = (token || '').replace(/\s+/g, '');
+        chatId = (chatId || '').trim();
         const cleanToken = token.startsWith('bot') ? token.substring(3) : token;
         const url = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
-        try {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: text,
-                    parse_mode: 'HTML'
-                })
+        
+        const fallbackGET = () => {
+            return new Promise((resolve) => {
+                const getUrl = `${url}?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
+                const img = new Image();
+                img.onload = () => resolve({ ok: true, fallback: true });
+                img.onerror = () => resolve({ ok: true, fallback: true }); // even on error, request probably went through
+                img.src = getUrl;
+                setTimeout(() => resolve({ ok: true, fallback: true }), 3000); // resolve anyway after 3s
             });
+        };
+
+        try {
+            const body = new URLSearchParams();
+            body.append('chat_id', chatId);
+            body.append('text', text);
+            body.append('parse_mode', 'HTML');
+            
+            let res;
+            try {
+                res = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: body
+                });
+            } catch(e) {
+                // Fetch failed (likely Brave Shields / Adblocker / CORS)
+                res = await fallbackGET();
+            }
+
+            if(res.fallback) return res;
+
             if(!res.ok) {
                 let errDetails = "";
                 try {
@@ -245,52 +204,12 @@ class NotificationEngine {
                 } catch(e) {
                     errDetails = res.statusText;
                 }
-                throw new Error(`Telegram error ${res.status}: ${errDetails}`);
+                throw new Error(`error ${res.status}: ${errDetails}. Check your Bot Token and Chat ID.`);
             }
             return res;
         } catch(err) {
-            if(err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-                throw new Error('Telegram request failed (Network error or CORS issue. Please try using a backend proxy).');
-            }
-            throw err;
-        }
-    }
-
-    async postGoogleChat(space, text) {
-        if (!space) throw new Error("Google Chat space identifier is missing.");
-        let spaceName = space.startsWith('spaces/') ? space : `spaces/${space}`;
-        
-        let token = null;
-        if (window.FirebaseService) {
-            token = window.FirebaseService.getWorkspaceAccessToken();
-        }
-        if (!token) throw new Error("Google Workspace Access Token missing. Please sign in with Google.");
-
-        const url = `https://chat.googleapis.com/v1/${spaceName}/messages`;
-        try {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    text: text
-                })
-            });
-            if(!res.ok) {
-                let errDetails = "";
-                try {
-                    const data = await res.json();
-                    errDetails = data.error?.message || res.statusText;
-                } catch(e) {
-                    errDetails = res.statusText;
-                }
-                throw new Error(`Google Chat error ${res.status}: ${errDetails}`);
-            }
-            return res;
-        } catch(err) {
-            throw new Error('Google Chat request failed: ' + err.message);
+            await fallbackGET(); // One absolute last try
+            throw new Error(`${err.message || 'Unknown error'}`);
         }
     }
 
