@@ -1128,6 +1128,9 @@
         <div class="nav-item" onclick="switchView('trading-plan')">
           <i data-lucide="calendar-check"></i> <span>Trading Plan</span>
         </div>
+        <div class="nav-item" onclick="switchView('economic-calendar')">
+          <i data-lucide="globe"></i> <span>Economic Calendar</span>
+        </div>
         <div class="nav-item" onclick="switchView('accounts')">
           <i data-lucide="wallet"></i> <span>Accounts</span>
         </div>
@@ -3281,6 +3284,42 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+      </div>
+
+      <!-- Economic Calendar View -->
+      <div id="economic-calendar" class="view">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1>Daily Economic Calendar</h1>
+            <p>Today's news events fetched via Gemini AI based on active timezone (UTC+3)</p>
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button class="secondary" onclick="fetchEconomicCalendar()" id="btn-refresh-eco">
+              <i data-lucide="refresh-cw"></i> Refresh
+            </button>
+            <select id="eco-pair-filter" style="width: auto;">
+              <option value="ALL">All Pairs</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="JPY">JPY</option>
+              <option value="AUD">AUD</option>
+              <option value="CAD">CAD</option>
+              <option value="CHF">CHF</option>
+              <option value="NZD">NZD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div id="eco-calendar-content">
+            <div style="text-align: center; padding: 40px; color: var(--muted);">
+              Click <strong>Refresh</strong> to fetch today's economic calendar for UTC+3.<br>
+              Uses Gemini AI to retrieve latest events to save costs.<br>
+              Data is cached locally for the day.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -15405,9 +15444,191 @@ window.addEventListener('DOMContentLoaded', () => {
        window.renderAll = function() {
            originalRender();
            renderDebriefHistory();
+           renderEconomicCalendar();
        }
    }
 });
+
+// --- Economic Calendar Logic ---
+window.renderEconomicCalendar = function() {
+  const container = document.getElementById("eco-calendar-content");
+  if (!container) return;
+
+  const filter = document.getElementById("eco-pair-filter")?.value || "ALL";
+  const cachedStr = localStorage.getItem("qe_eco_calendar");
+  
+  if (cachedStr) {
+    try {
+      const cache = JSON.parse(cachedStr);
+      // Optional: Check if we only want today's cache. The prompt says "it will keep it for the whole day or even week until the new refresh"
+      // So we don't automatically invalidate unless "Refresh" is clicked.
+      if (cache.items && cache.fetchDate) {
+        displayEconomicCalendar(cache.items, filter, cache.fetchDate);
+        return;
+      }
+    } catch(e) {}
+  }
+};
+
+document.getElementById("eco-pair-filter")?.addEventListener("change", () => {
+  renderEconomicCalendar();
+});
+
+function displayEconomicCalendar(items, filter, fetchDate) {
+  const container = document.getElementById("eco-calendar-content");
+  if (!container) return;
+
+  const highImpactItems = items.filter(ev => ev.impact && ev.impact.toLowerCase().includes("high"));
+
+  if (highImpactItems.length === 0) {
+    container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--muted);">No high-impact economic events found today.</div>`;
+    return;
+  }
+
+  let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.8rem; color: var(--muted);">
+                <span>Last Refreshed: ${fetchDate ? new Date(fetchDate).toLocaleTimeString() : "Unknown"}</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">`;
+
+  highImpactItems.forEach(ev => {
+    let impactColor = "var(--border)";
+    let impactBg = "transparent";
+    if (ev.impact.toLowerCase().includes("high")) {
+      impactColor = "var(--danger)";
+      impactBg = "rgba(244, 63, 94, 0.1)";
+    } else if (ev.impact.toLowerCase().includes("medium")) {
+      impactColor = "var(--warning)";
+      impactBg = "rgba(245, 158, 11, 0.1)";
+    } else if (ev.impact.toLowerCase().includes("low")) {
+      impactColor = "var(--success)";
+      impactBg = "rgba(16, 185, 129, 0.1)";
+    }
+
+    const isMatch = filter === "ALL" || ev.currency.toUpperCase() === filter.toUpperCase();
+    
+    // Dim non-matching items to highlight the selected pair
+    const opacity = isMatch ? "1" : "0.4";
+    const transform = isMatch ? "scale(1)" : "scale(0.98)";
+    const filterStyle = isMatch ? "" : "filter: grayscale(100%);";
+    const borderGlow = isMatch && filter !== "ALL" ? `border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary);` : `border-color: var(--border);`;
+
+    html += `
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; justify-content: space-between; opacity: ${opacity}; transform: ${transform}; transition: all 0.2s ease; ${filterStyle} ${borderGlow} position: relative; overflow: hidden; gap: 12px;">
+        <div style="position: absolute; top:0; left:0; width: 4px; height: 100%; background: ${impactColor};"></div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; padding-left: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="background: var(--bg); border-radius: 4px; border: 1px solid var(--border); padding: 4px 6px; font-size: 0.8rem; font-weight: 700; color: var(--text);">
+              ${ev.currency}
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="clock" style="width: 12px; height: 12px;"></i> ${ev.time}
+            </div>
+          </div>
+          <div style="font-weight: 500; font-size: 1rem; line-height: 1.3; color: var(--text);">
+            ${ev.event}
+          </div>
+        </div>
+        <div style="display: flex;">
+          <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; border: 1px solid ${impactColor}; color: ${impactColor}; background: ${impactBg}; font-weight: 600; letter-spacing: 0.5px;">
+            ${ev.impact.toUpperCase()}
+          </span>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+  
+  if(window.lucide) {
+    lucide.createIcons({ root: container });
+  }
+}
+
+window.fetchEconomicCalendar = async function() {
+  const container = document.getElementById("eco-calendar-content");
+  if (!container) return;
+  const btn = document.getElementById("btn-refresh-eco");
+
+  const apiKey = localStorage.getItem("qe_gemini_api_key");
+  if (!apiKey) {
+    alert("Please add your Gemini API Key in Settings first.");
+    return;
+  }
+
+  // Rate Limiting (Under free tier cap: 5 per day)
+  const limitsStr = localStorage.getItem("qe_eco_limits");
+  let limits = limitsStr ? JSON.parse(limitsStr) : { date: "", count: 0 };
+  const todayString = new Date().toISOString().split("T")[0];
+  
+  if (limits.date !== todayString) {
+    limits = { date: todayString, count: 0 };
+  }
+  
+  if (limits.count >= 5) {
+    alert("Daily API limit reached for economic calendar (5/5). Please wait until tomorrow. The system has cached today's data.");
+    return;
+  }
+
+  btn.disabled = true;
+  container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--muted);"><i data-lucide="loader-2" class="spin" style="margin-bottom: 12px;"></i><div>Fetching latest economic data for today (UTC+3)...</div><div style="font-size: 0.8rem; margin-top: 8px;">Refreshes used today: ${limits.count}/5.</div></div>`;
+  lucide.createIcons();
+
+  try {
+    const { GoogleGenAI } = await import("https://esm.run/@google/genai");
+    const ai = new GoogleGenAI({ apiKey: apiKey });
+
+    const prompt = `Find today's economic calendar events. Assume the timezone is UTC+3. 
+    Only search for events happening TODAY.
+    CRITICAL: ONLY include HIGH impact events. Ignore all low and medium impact events.
+    Give me the time, currency (e.g. USD, EUR, GBP), event name, and impact ("High").
+    Return ONLY a valid JSON array of objects.
+    Example format:
+    [
+      { "time": "15:30", "currency": "USD", "event": "Nonfarm Payrolls", "impact": "High" },
+      { "time": "16:00", "currency": "CAD", "event": "BoC Interest Rate Decision", "impact": "High" }
+    ]
+    Do not use markdown code blocks like \`\`\`json. Return just the raw JSON text.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    let rawText = response?.text || "[]";
+    // Clean markdown if the model hallucinates it
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    let parsed = [];
+    try {
+      parsed = JSON.parse(rawText);
+    } catch(e) {
+      console.error("Failed to parse calendar JSON:", e, rawText);
+      container.innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;">Failed to parse data. Try again later.</div>`;
+      btn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem("qe_eco_calendar", JSON.stringify({
+      fetchDate: new Date().toISOString(),
+      items: parsed
+    }));
+
+    // Increment limits
+    limits.count += 1;
+    localStorage.setItem("qe_eco_limits", JSON.stringify(limits));
+
+    renderEconomicCalendar();
+
+  } catch(error) {
+    console.error("API Error:", error);
+    container.innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;">Failed to fetch economic calendar. Ensure you have network access and a valid Gemini API key.</div>`;
+  }
+  btn.disabled = false;
+};
 
     </script>
     <script src="weeklyReview.js" type="module"></script>
