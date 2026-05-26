@@ -10669,22 +10669,21 @@ Keep the response cleanly formatted with lists or bold text.`;
         // Aggregate data
         const dayMap = {};
         const portMap = {};
+        const planMap = {};
 
         Store.trades.forEach((t) => {
           const tDate = new Date(t.date);
           if (tDate.getFullYear() === year && tDate.getMonth() === month) {
             const day = tDate.getDate();
-            dayMap[day] = (dayMap[day] || 0) + t.r;
-          }
-        });
-
-        Store.transactions.forEach((c) => {
-          const cDate = new Date(c.date);
-          if (cDate.getFullYear() === year && cDate.getMonth() === month) {
-            const day = cDate.getDate();
-            portMap[day] =
-              (portMap[day] || 0) +
-              (c.type === "Deposit" ? c.amount : -c.amount);
+            dayMap[day] = (dayMap[day] || 0) + (t.r || 0);
+            portMap[day] = (portMap[day] || 0) + (t.pnlAmount || 0);
+            
+            if (!planMap[day]) planMap[day] = { sumPlan: 0, sumAct: 0, count: 0 };
+            if (t.plannedR > 0) {
+              planMap[day].sumPlan += t.plannedR;
+              planMap[day].sumAct += (t.r || 0);
+            }
+            planMap[day].count++;
           }
         });
 
@@ -10736,8 +10735,28 @@ Keep the response cleanly formatted with lists or bold text.`;
               content = `<span style="font-family: var(--font-mono); font-size: 0.875rem; font-weight: 600; color: ${color}; text-align: right;">${p > 0 ? "+" : ""}$${Math.abs(p).toFixed(0)}</span>`;
             }
           } else if (currentCalendarTab === "plan") {
-            // Just a placeholder for daily plans
-            content = `<span style="font-size: 0.7rem; color: var(--muted); text-align: right; cursor: pointer;">+ Plan</span>`;
+            const plan = planMap[i];
+            if (plan !== undefined && plan.count > 0) {
+              if (plan.sumPlan > 0) {
+                const eff = (plan.sumAct / plan.sumPlan) * 100;
+                if (eff >= 80) {
+                  bg = "rgba(16, 185, 129, 0.2)";
+                  color = "var(--success)";
+                } else if (eff >= 50) {
+                  bg = "rgba(245, 158, 11, 0.2)";
+                  color = "var(--warning)";
+                } else {
+                  bg = "rgba(244, 63, 94, 0.2)";
+                  color = "var(--danger)";
+                }
+                content = `<span style="font-family: var(--font-mono); font-size: 0.875rem; font-weight: 600; color: ${color}; text-align: right;">${eff.toFixed(0)}% Eff</span>`;
+              } else {
+                bg = "rgba(255, 255, 255, 0.1)";
+                content = `<span style="font-size: 0.75rem; color: var(--muted); text-align: right;">No Plan</span>`;
+              }
+            } else {
+              content = `<span style="font-size: 0.7rem; color: var(--muted); text-align: right; cursor: pointer;" onclick="openModal('add-trade')">+ Plan</span>`;
+            }
           }
 
           html += `
