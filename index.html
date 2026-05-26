@@ -5977,12 +5977,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
           <div style="display: flex; gap: 12px;" id="weekly-review-read-only-actions">
           </div>
-          <div style="display: flex; gap: 12px; margin-left: auto; align-items: center;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text);" id="wr-skip-ai-wrap">
-              <input type="checkbox" id="wr-skip-ai"> Skip AI Analysis
-            </label>
+          <div style="display: flex; gap: 12px; margin-left: auto; align-items: center;" id="wr-action-buttons">
             <button class="secondary" onclick="closeModal('modal-weekly-review')">Cancel</button>
-            <button id="btn-save-weekly-review" onclick="window.saveWeeklyReview()" style="background: var(--primary); color: white; border: none;">Submit Review</button>
+            <button class="secondary" id="btn-skip-ai-weekly-review" onclick="window.saveWeeklyReview(true)" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">Skip AI & Complete</button>
+            <button id="btn-save-weekly-review" onclick="window.saveWeeklyReview(false)" style="background: var(--primary); color: white; border: none;">Generate AI & Complete</button>
           </div>
         </div>
       </div>

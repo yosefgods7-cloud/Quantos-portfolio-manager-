@@ -134,20 +134,19 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
         label.style.background = "var(--surface)";
         label.style.color = "var(--success)";
         saveBtn.style.display = "none";
+        const skipBtn = document.getElementById("btn-skip-ai-weekly-review");
+        if(skipBtn) skipBtn.style.display = "none";
         actions.innerHTML = `
             <button class="secondary" onclick="exportWeeklyReviewPDF()"><i data-lucide="file-text"></i> Export PDF</button>
-            <button class="secondary" onclick="shareWeeklyReviewDiscord()" style="background: #5865F2; color: white; border: none;"><i data-lucide="message-square"></i> Share to Discord</button>
         `;
-        const skipAiWrap = document.getElementById("wr-skip-ai-wrap");
-        if(skipAiWrap) skipAiWrap.style.display = "none";
     } else {
         label.innerText = "Draft Mode";
         label.style.background = "var(--surface)";
         label.style.color = "var(--warning)";
-        saveBtn.style.display = "block";
+        saveBtn.style.display = "inline-block";
+        const skipBtn = document.getElementById("btn-skip-ai-weekly-review");
+        if(skipBtn) skipBtn.style.display = "inline-block";
         actions.innerHTML = "";
-        const skipAiWrap = document.getElementById("wr-skip-ai-wrap");
-        if(skipAiWrap) skipAiWrap.style.display = "flex";
     }
     
     let html = `
@@ -410,7 +409,7 @@ function getEmotionColor(e) {
     return "var(--warning)";
 }
 
-window.saveWeeklyReview = async function() {
+window.saveWeeklyReview = async function(forceSkipAI = false) {
     const data = window.currentReviewData;
     if (!data) return;
     
@@ -437,10 +436,13 @@ window.saveWeeklyReview = async function() {
     };
     
     const saveBtn = document.getElementById("btn-save-weekly-review");
+    const skipBtn = document.getElementById("btn-skip-ai-weekly-review");
     saveBtn.innerText = "Processing...";
     saveBtn.disabled = true;
+    if(skipBtn) skipBtn.disabled = true;
     
-    const skipAI = document.getElementById("wr-skip-ai")?.checked;
+    // Force skip if parameter is true
+    const skipAI = forceSkipAI;
     
     if (!skipAI) {
         saveBtn.innerText = "Generating AI Report...";
@@ -534,9 +536,7 @@ window.exportWeeklyReviewPDF = function() {
     doc.save(`QuantEdge_WeeklyReview_${window.currentReviewData.startDate}.pdf`);
 };
 
-window.shareWeeklyReviewDiscord = function() {
-   alert("Discord Webhook integration currently unsupported directly in browser due to CORS. Setup via backend in Settings required.");
-};
+
 
 window.openWeeklyReviewModal = async function(dateKey = null) {
     let weekInfo;

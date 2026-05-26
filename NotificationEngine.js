@@ -186,17 +186,21 @@ class NotificationEngine {
             try {
                 res = await fetch(url, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: body
                 });
             } catch(e) {
-                // Fetch failed (likely Brave Shields / Adblocker / CORS)
+                // If even no-cors fails (e.g. adblocker fully blocks api.telegram.org),
+                // we try image beacon GET fallback
                 res = await fallbackGET();
             }
 
-            if(res.fallback) return res;
+            if(res.fallback || res.type === 'opaque') return res;
 
             if(!res.ok) {
+                if (res.status === 0) return res; // opaque response status is 0
+                
                 let errDetails = "";
                 try {
                     const data = await res.json();
@@ -226,8 +230,8 @@ class NotificationEngine {
     // Expected object containing account name, loss, limit, usedPct, remaining
     dispatchLossWarning(accnt, rLoss, limit, allow) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('loss_warn_'+accnt.name, 10)) return;
 
         const blocks = Math.round(allow * 10);
@@ -247,13 +251,13 @@ class NotificationEngine {
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchLossHit(accnt, rLoss, limit) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('loss_hit_'+accnt.name, 60)) return;
 
         const buildMsg = (type) => {
@@ -269,14 +273,14 @@ class NotificationEngine {
                 return `🔴 <b>TRADING LOCKED</b> — Limit Reached\n\n<b>Account:</b> ${accnt.name}\n<b>Loss:</b> ${rLoss.toFixed(2)}R\n<b>Limit:</b> ${limit.toFixed(2)}R\n\nJournal is locked. Complete reflection to unlock.\n<b>Stop. Breathe. Review.</b>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchEquityHigh(accnt, newMax, prevMax) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.eqHigh) return;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         
         const gain = newMax - prevMax;
         const gainPct = (gain / prevMax * 100);
@@ -294,13 +298,13 @@ class NotificationEngine {
                 return `🏆 <b>NEW EQUITY HIGH</b>\n\n<b>Account:</b> ${accnt.name}\n<b>New High:</b> $${parseFloat(newMax).toLocaleString()}\n<b>Previous:</b> $${parseFloat(prevMax).toLocaleString()}\n<b>Gain:</b> +$${parseFloat(gain).toLocaleString()} (+${gainPct.toFixed(1)}%)\n\n<i>Keep building. Stay disciplined.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchConsecutiveLoss(streak, trades) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('streak_loss', 30)) return;
 
         let rTotal = trades.reduce((a, b) => a + parseFloat(b.r), 0);
@@ -320,14 +324,14 @@ class NotificationEngine {
                 return `🔁 <b>LOSS STREAK ALERT</b>\n\n<b>Consecutive Losses:</b> ${streak}\n<b>Last ${streak} trades:</b>\n${listStrTg}\n\n<b>Total loss:</b> ${rTotal.toFixed(2)}R\n<b>Psych Risk:</b> ELEVATED\n\n<i>Consider stepping away. Review before next trade.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchPsychEscalation(level, avgEmotion, losses) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.psychEscalate) return;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('psych_escalation', 60)) return;
 
         let clr = level === "ELEVATED" ? 15105570 : 15158332; // Orange or Red
@@ -345,14 +349,14 @@ class NotificationEngine {
                 return `🧠 <b>PSYCH RISK ESCALATION</b>\n\n<b>Risk Level:</b> ${level === "ELEVATED" ? "🟠 ELEVATED" : "🔴 CRITICAL"}\n<b>Avg Emotion:</b> ${avgEmotion}% Negative\n<b>Consec. Losses:</b> ${losses}\n<b>Recommendation:</b> Reduce risk\n\n<i>Your mental state is affecting performance. Step back.</i>`;
             }
         };
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchTradeLogged(trade) {
         const cfg = Store.settings.notifications;
         if(!cfg.thresholds.tradeLogged) return;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
 
         let prefix = parseFloat(trade.r) >= 0 ? '+' : '';
         let accnt = Store.accounts.find(a => a.id === trade.accountId);
@@ -370,13 +374,13 @@ class NotificationEngine {
             }
         };
         // no spam protection needed, explicitly requested to fire per trade if enabled
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchDrawdownWarning(accnt, currentDd, maxDd, usedPct) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('dd_warn_'+accnt.name, 60)) return;
 
         const blocks = Math.round(usedPct * 10);
@@ -397,13 +401,13 @@ class NotificationEngine {
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     dispatchPropTargetReached(accnt, achievedAmount, targetAmount) {
         const cfg = Store.settings.notifications;
-        if (!cfg.discord?.enabled && !cfg.telegram?.enabled && !cfg.googleChat?.enabled) return;
-        if (!cfg.discord?.alerts && !cfg.telegram?.alerts && !cfg.googleChat?.alerts) return;
+        
+        
         if (this.isSpam('prop_target_'+accnt.name, 1440)) return; // 1 day cooldown
 
         const targetPct = (targetAmount / parseFloat(accnt.balance)) * 100;
@@ -428,7 +432,7 @@ class NotificationEngine {
             }
         };
 
-        this.doSend(buildMsg, {discord: cfg.discord?.alerts, telegram: cfg.telegram?.alerts, googleChat: cfg.googleChat?.alerts});
+        this.doSend(buildMsg, {telegram: cfg.telegram?.alerts});
     }
 
     // --- REPORTS ---
@@ -440,13 +444,12 @@ class NotificationEngine {
         let t24 = Store.trades.filter(t => new Date(t.date) >= yest && new Date(t.date) <= now);
         
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord?.daily, telegram: cfg.telegram?.daily, googleChat: cfg.googleChat?.daily};
+        const dFlags = {telegram: cfg.telegram?.daily};
 
         if (t24.length === 0) {
             const emptyMsg = (type) => {
-                const isDiscord = type === 'discord';
                 const text = `📋 Daily Report — No trades logged today\n${now.toISOString().split("T")[0]} | Rest day or market avoidance noted.`;
-                return isDiscord ? { embeds: [{ title: "📋 Daily Report — No trades", description: text, color: 8421504 }] } : `📋 <b>Daily Report</b> — No trades logged\n\n${text}`;
+                return `📋 <b>Daily Report</b> — No trades logged\n\n${text}`;
             };
             await this.doSend(emptyMsg, dFlags, forceManual);
             return;
@@ -492,18 +495,7 @@ class NotificationEngine {
         }).join('\n');
 
         const message = (type) => {
-            if(type === 'discord') {
-                return {
-                    embeds: [{
-                        title: `📊 DAILY REPORT — ${now.toISOString().split("T")[0]}`,
-                        color: totalR >= 0 ? 3066993 : 15158332,
-                        description: `**PERFORMANCE SUMMARY**\nTotal Trades: ${t24.length}\nWin / Loss: ${wins}W ${losses}L\nWin Rate: ${wr.toFixed(1)}%\nTotal R: ${totalR>=0?'+':''}${totalR.toFixed(2)}R\nTotal P&L: ${totalPnl>=0?'+':''}$${totalPnl.toFixed(2)}\nBest Trade: ${bestText}\nWorst Trade: ${worstText}\n\n**ACCOUNT UPDATES**\n${accText}\n\n**EXECUTION QUALITY**\nAvg Quality: ${aq.toFixed(1)}/10\nRule Adherence: ${ruleAd}/${t24.length}\nGrades: A:${grds.A||0} B:${grds.B||0} C:${grds.C||0} F:${grds.F||0}\n\n**SESSIONS**\n${Array.from(sessions).join(', ') || 'N/A'}`,
-                        footer: {text: "Quant OS Edge"}
-                    }]
-                };
-            } else {
-                return `📊 <b>DAILY REPORT</b> — ${now.toISOString().split("T")[0]}\n\n<b>PERFORMANCE</b>\nTrades: ${t24.length}\nW/L: ${wins}W ${losses}L (${wr.toFixed(1)}%)\nTotal R: ${totalR>=0?'+':''}${totalR.toFixed(2)}R\nTotal P&L: ${totalPnl>=0?'+':''}$${totalPnl.toFixed(2)}\n\n<b>ACCOUNTS</b>\n${accText}\n\n<b>EXECUTION</b>\nQuality: ${aq.toFixed(1)}/10\nRules: ${ruleAd}/${t24.length}`;
-            }
+            return `📊 <b>DAILY REPORT</b> — ${now.toISOString().split("T")[0]}\n\n<b>PERFORMANCE</b>\nTrades: ${t24.length}\nW/L: ${wins}W ${losses}L (${wr.toFixed(1)}%)\nTotal R: ${totalR>=0?'+':''}${totalR.toFixed(2)}R\nTotal P&L: ${totalPnl>=0?'+':''}$${totalPnl.toFixed(2)}\n\n<b>ACCOUNTS</b>\n${accText}\n\n<b>EXECUTION</b>\nQuality: ${aq.toFixed(1)}/10\nRules: ${ruleAd}/${t24.length}`;
         };
 
         await this.doSend(message, dFlags, forceManual);
@@ -553,7 +545,7 @@ class NotificationEngine {
         }
 
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord?.weekly, telegram: cfg.telegram?.weekly, googleChat: cfg.googleChat?.weekly};
+        const dFlags = {telegram: cfg.telegram?.weekly};
 
         if(tradesCount === 0) {
             const emptyMsg = (type) => {
@@ -593,7 +585,7 @@ class NotificationEngine {
         });
 
         const cfg = Store.settings.notifications;
-        const dFlags = {discord: cfg.discord?.monthly, telegram: cfg.telegram?.monthly, googleChat: cfg.googleChat?.monthly};
+        const dFlags = {telegram: cfg.telegram?.monthly};
 
         let wins=0, losses=0, totR=0, totPnl=0;
         mTrades.forEach(t=>{
