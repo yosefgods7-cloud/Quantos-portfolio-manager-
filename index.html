@@ -2748,6 +2748,38 @@
                 <span class="input-suffix">%</span>
               </div>
             </div>
+
+            <div class="form-group" style="margin-top: 16px">
+              <label>Auto-Kill Protocol</label>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: var(--bg);
+                  border: 1px solid var(--border);
+                  padding: 12px;
+                  border-radius: 8px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 0.85rem;
+                    color: var(--muted);
+                    padding-right: 16px;
+                  "
+                >
+                  Lock trading actions for 24h if Daily Discipline Score drops
+                  below 40.
+                </div>
+                <input
+                  type="checkbox"
+                  id="risk-auto-kill"
+                  onchange="updateRiskEngine(true)"
+                  style="transform: scale(1.3); cursor: pointer"
+                />
+              </div>
+            </div>
           </div>
           <div class="card col-6">
             <div class="stat-label">Risk Status</div>
@@ -11246,7 +11278,38 @@ Keep the response cleanly formatted with lists or bold text.`;
         const limitR = Store.settings.dailyLossLimitR || 3;
         const today = new Date().toLocaleDateString();
 
-        // Check if there's an active lock for today
+        // 1. Auto-Kill Check
+        if (Store.settings.autoKillEnabled) {
+          if (Store.settings.autoKillLockUntil) {
+            const unlockTime = new Date(Store.settings.autoKillLockUntil);
+            if (new Date() < unlockTime) {
+              const hrsLeft = ((unlockTime - new Date()) / 3600000).toFixed(1);
+              alert(
+                `Auto-Kill Protocol Active. Trading locked for ${hrsLeft} more hours due to low discipline.`,
+              );
+              return true;
+            } else {
+              Store.settings.autoKillLockUntil = null;
+              Store.save();
+            }
+          }
+
+          if (
+            window._currentDisciplineScore !== undefined &&
+            window._currentDisciplineScore < 40
+          ) {
+            const lockUntil = new Date();
+            lockUntil.setHours(lockUntil.getHours() + 24);
+            Store.settings.autoKillLockUntil = lockUntil.toISOString();
+            Store.save();
+            alert(
+              `Auto-Kill Protocol Triggered! Discipline Score dropped below 40. Trading journal locked for 24 hours.`,
+            );
+            return true;
+          }
+        }
+
+        // 2. Check if there's an active loss limit lock for today
         const activeLock = Store.locks.find(
           (l) => l.date === today && !l.unlockedAt,
         );
@@ -14211,6 +14274,7 @@ Keep the response cleanly formatted with lists or bold text.`;
       };
 
       window.duplicateTrade = function (id) {
+        if (checkDailyLossLock()) return;
         const trade = Store.trades.find((t) => String(t.id) === String(id));
         if (!trade) return;
         window.editingTradeId = null;
@@ -16033,10 +16097,13 @@ Keep the response cleanly formatted with lists or bold text.`;
           if (manualChange) {
             const riskInput = document.getElementById("open-risk-input");
             const ddInput = document.getElementById("max-dd-input");
+            const autoKillInput = document.getElementById("risk-auto-kill");
             if (riskInput)
               Store.settings.openRisk = parseFloat(riskInput.value) || 0;
             if (ddInput)
               Store.settings.maxAllowedDD = parseFloat(ddInput.value) || 10;
+            if (autoKillInput)
+              Store.settings.autoKillEnabled = autoKillInput.checked;
             Store.save();
             return;
           }
@@ -16092,10 +16159,13 @@ Keep the response cleanly formatted with lists or bold text.`;
           // Sync inputs if they exist
           const riskInput = document.getElementById("open-risk-input");
           const ddInput = document.getElementById("max-dd-input");
+          const autoKillInput = document.getElementById("risk-auto-kill");
           if (riskInput && !manualChange)
             riskInput.value = Store.settings.openRisk || 0;
           if (ddInput && !manualChange)
             ddInput.value = Store.settings.maxAllowedDD || 10;
+          if (autoKillInput && !manualChange)
+            autoKillInput.checked = !!Store.settings.autoKillEnabled;
 
           if (typeof renderRiskHeatmap === "function") renderRiskHeatmap();
           if (typeof updateExposureAnalysis === "function")
@@ -16348,6 +16418,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         }
 
         disciplineScore = Math.max(0, disciplineScore);
+        window._currentDisciplineScore = disciplineScore;
 
         const scoreEl = document.getElementById("discipline-score");
         const statusEl = document.getElementById("discipline-status");
@@ -20408,7 +20479,7 @@ Keep the response cleanly formatted with lists or bold text.`;
                 cache.items,
                 filter,
                 cache.fetchDate,
-                cache.headlines || []
+                cache.headlines || [],
               );
               return;
             }
@@ -20422,7 +20493,12 @@ Keep the response cleanly formatted with lists or bold text.`;
           renderEconomicCalendar();
         });
 
-      function displayEconomicCalendar(items, filter, fetchDate, headlines = []) {
+      function displayEconomicCalendar(
+        items,
+        filter,
+        fetchDate,
+        headlines = [],
+      ) {
         const container = document.getElementById("eco-calendar-content");
         if (!container) return;
 
@@ -20493,14 +20569,14 @@ Keep the response cleanly formatted with lists or bold text.`;
     `;
         });
         html += `</div>`;
-        
+
         if (headlines.length > 0) {
           html += `<div style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
                      <h3 style="font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                        <i data-lucide="newspaper"></i> Top Forex Headlines Today
                      </h3>
                      <div style="display: flex; flex-direction: column; gap: 12px;">`;
-          headlines.forEach(hl => {
+          headlines.forEach((hl) => {
             html += `<div style="background: var(--surface); border-left: 3px solid var(--primary); padding: 12px 16px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.95rem; line-height: 1.4; color: var(--text);">
                        ${hl}
                      </div>`;
@@ -20564,7 +20640,7 @@ Format your output EXACTLY as this JSON object:
               tools: [{ googleSearch: {} }],
               responseMimeType: "application/json",
               maxOutputTokens: 600,
-              temperature: 0.1
+              temperature: 0.1,
             },
           });
 
