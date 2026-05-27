@@ -9463,6 +9463,29 @@
         typeof process !== "undefined" ? process.env.GEMINI_API_KEY : "";
     </script>
     <script>
+      window.animateStatValue = function (el, newValue) {
+        if (!el) return;
+        if (el.innerText !== newValue) {
+          // Exit animation
+          el.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(-5px)';
+          
+          setTimeout(() => {
+            el.innerText = newValue;
+            // Reset for entry animation
+            el.style.transform = 'translateY(5px)';
+            
+            // Force reflow
+            void el.offsetWidth;
+            
+            // Entry animation
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, 200);
+        }
+      };
+
       const PAIR_CONFIG = {
         // Standard forex (USD quote) — pip = 0.0001, pip value = $10 per standard lot
         EURUSD: { pipSize: 0.0001, pipValue: 10 },
@@ -16270,8 +16293,8 @@ Keep the response cleanly formatted with lists or bold text.`;
           const dashboardStatus = document.getElementById("risk-status");
 
           const riskText = riskPct.toFixed(2) + "%";
-          if (meter) meter.innerText = riskText;
-          if (dashboardRisk) dashboardRisk.innerText = riskText;
+          if (meter) window.animateStatValue(meter, riskText);
+          if (dashboardRisk) window.animateStatValue(dashboardRisk, riskText);
 
           let statusLabel = "SAFE";
           let statusColor = "var(--success)";
@@ -17563,10 +17586,9 @@ Keep the response cleanly formatted with lists or bold text.`;
           const equityEl = document.getElementById("total-equity");
           const flowEl = document.getElementById("net-cashflow");
 
-          if (aumEl) aumEl.innerText = `$${(totalAUM || 0).toLocaleString()}`;
-          if (equityEl)
-            equityEl.innerText = `$${(totalEquity || 0).toLocaleString()}`;
-          if (flowEl) flowEl.innerText = `$${(netFlow || 0).toLocaleString()}`;
+          if (aumEl) window.animateStatValue(aumEl, `$${(totalAUM || 0).toLocaleString()}`);
+          if (equityEl) window.animateStatValue(equityEl, `$${(totalEquity || 0).toLocaleString()}`);
+          if (flowEl) window.animateStatValue(flowEl, `$${(netFlow || 0).toLocaleString()}`);
 
           if (typeof renderInvestments === "function") renderInvestments();
           if (typeof renderScalingMilestones === "function")
