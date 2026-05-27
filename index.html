@@ -9701,7 +9701,7 @@
           const { GoogleGenAI } = await import("https://esm.run/@google/genai");
           const ai = new GoogleGenAI({ apiKey: apiKey });
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
               systemInstruction:
@@ -10882,7 +10882,7 @@ Keep the response cleanly formatted with lists or bold text.`;
                 `;
 
           const response = await ai.models.generateContent({
-            model: "gemini-3.1-pro-preview",
+            model: "gemini-2.5-pro",
             contents: prompt,
           });
 
@@ -20758,7 +20758,7 @@ Keep the response cleanly formatted with lists or bold text.`;
     `;
 
           const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
               systemInstruction:
@@ -20986,11 +20986,10 @@ Format your output EXACTLY as this JSON object:
 }`;
 
           const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
               tools: [{ googleSearch: {} }],
-              responseMimeType: "application/json",
               maxOutputTokens: 600,
               temperature: 0.1,
             },
