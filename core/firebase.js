@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -42,6 +42,27 @@ export const FirebaseService = {
     }
 
     auth = getAuth(app);
+
+    // Check for redirect result on load
+    getRedirectResult(auth).then((result) => {
+      if (result) {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        if (credential && credential.accessToken) {
+           cachedWorkspaceAccessToken = credential.accessToken;
+           // Wait a tiny bit for UI, then trigger sync update
+           setTimeout(() => {
+             if (window.updateGDriveStatusIndicator) {
+               window.updateGDriveStatusIndicator();
+               // Try to auto sync if we just logged in via redirect
+               if (window.handleGDriveSync) window.handleGDriveSync();
+             }
+           }, 1000);
+        }
+      }
+    }).catch((err) => {
+      console.error("Redirect login error:", err);
+    });
+
     db = getFirestore(app);
     storage = getStorage(app);
 
@@ -91,8 +112,10 @@ export const FirebaseService = {
   async loginWithGoogle() {
     if (!auth) throw new Error("Firebase not initialized");
     const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/chat.messages');
     provider.addScope('https://www.googleapis.com/auth/drive.file');
+    provider.setCustomParameters({
+      prompt: 'consent'
+    });
     try {
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -102,6 +125,15 @@ export const FirebaseService = {
       return { user: result.user, accessToken: cachedWorkspaceAccessToken };
     } catch(err) {
       console.error("Google Auth failed:", err);
+      // Fallback for popup blocked on GitHub Pages or if redirect is better
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/unauthorized-domain') {
+        const wantsRedirect = window.confirm("Popup login was blocked. Do you want to redirect to the login page?");
+        if (wantsRedirect) {
+           await signInWithRedirect(auth, provider);
+           return null;
+        }
+        throw new Error("Google login blocked. If on GitHub Pages, add your custom Firebase Config in Settings with Authorized Domains.");
+      }
       throw err;
     }
   },

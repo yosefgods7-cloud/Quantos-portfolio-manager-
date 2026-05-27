@@ -8,13 +8,18 @@ export const GDriveSync = {
   async login() {
     try {
       const result = await FirebaseService.loginWithGoogle();
+      if (result === null) {
+        // Redirecting, don't throw
+        return false;
+      }
       if (result && result.accessToken) {
         return true;
       }
-      return false;
+      throw new Error("Google Drive permission was not granted. Please ensure you check the box to allow Google Drive access during sign-in.");
     } catch(err) {
       console.error("GDrive Login failed:", err);
-      return false;
+      // Let handleGDriveSync catch and display this error
+      throw err;
     }
   },
 
@@ -27,7 +32,13 @@ export const GDriveSync = {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    if (data.error) {
+       let errorMsg = data.error.message;
+       if (data.error.code === 403) {
+          errorMsg += " (If you are using a custom Firebase Config, please ensure the 'Google Drive API' is ENABLED in your Google Cloud Console project).";
+       }
+       throw new Error(errorMsg);
+    }
     if (data.files && data.files.length > 0) {
       return data.files[0];
     }
