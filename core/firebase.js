@@ -92,6 +92,7 @@ export const FirebaseService = {
     if (!auth) throw new Error("Firebase not initialized");
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/chat.messages');
+    provider.addScope('https://www.googleapis.com/auth/drive.file');
     try {
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);

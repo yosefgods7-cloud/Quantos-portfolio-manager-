@@ -27,6 +27,7 @@
       }
     </script>
     <script type="module" src="./core/sync.js"></script>
+    <script type="module" src="./core/gdrive.js"></script>
     <script type="module" src="theme-manager.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
@@ -352,6 +353,21 @@
       .input-wrapper input,
       .input-wrapper select {
         padding-left: 42px;
+      }
+
+      .toggle-visibility {
+        position: absolute;
+        right: 14px;
+        color: var(--muted);
+        cursor: pointer;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .toggle-visibility i {
+         position: static;
+         pointer-events: auto;
       }
 
       .input-suffix {
@@ -1030,9 +1046,13 @@
                   font-size: 1.25rem;
                   padding: 16px;
                   padding-left: 48px;
+                  padding-right: 48px;
                   letter-spacing: 0.1em;
                 "
               />
+              <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('lock-password', this)">
+                <i data-lucide="eye"></i>
+              </div>
             </div>
           </div>
           <div
@@ -1051,9 +1071,13 @@
                   font-size: 1.1rem;
                   padding: 16px;
                   padding-left: 48px;
+                  padding-right: 48px;
                   letter-spacing: 0.1em;
                 "
               />
+              <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('lock-secondary-password', this)">
+                <i data-lucide="eye"></i>
+              </div>
             </div>
             <span
               class="helper-text"
@@ -1120,9 +1144,13 @@
                   font-size: 1.1rem;
                   padding: 16px;
                   padding-left: 48px;
+                  padding-right: 48px;
                   letter-spacing: 0.1em;
                 "
               />
+              <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('recovery-password', this)">
+                <i data-lucide="eye"></i>
+              </div>
             </div>
           </div>
           <button
@@ -2579,21 +2607,26 @@
             <div class="header">
               <h2>Payout Tracking & Reinvestment</h2>
             </div>
-            <div class="table-container">
-              <table class="data-table" id="cms-payouts-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Account</th>
-                    <th>Firm</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="payout-history-body">
-                  <!-- Injected -->
-                </tbody>
-              </table>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+              <div class="table-container" style="max-height: 350px; overflow-y: auto;">
+                <table class="data-table" id="cms-payouts-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Account</th>
+                      <th>Firm</th>
+                      <th>Amount</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="payout-history-body">
+                    <!-- Injected -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="cms-payouts-chart-container">
+                <canvas id="cmsPayoutsChart" style="max-height: 350px; width: 100%;"></canvas>
+              </div>
             </div>
             <div
               id="payout-reinvestment-recommendation"
@@ -6224,6 +6257,32 @@
             </button>
           </div>
           <div class="card col-12" style="margin-top: 24px">
+            <div class="stat-label">Google Drive Sync</div>
+            <p
+              style="
+                font-size: 0.95rem;
+                color: var(--muted);
+                margin-bottom: 24px;
+                line-height: 1.6;
+              "
+            >
+              Export and import your entire QuantEdge workspace into your personal Google Drive account.
+              This allows you to backup data completely to your own cloud storage and sync between devices.
+            </p>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+              <button class="primary" onclick="handleGDriveExport()">
+                <i data-lucide="upload-cloud"></i> Export to Google Drive
+              </button>
+              <button class="secondary" onclick="handleGDriveImport()">
+                <i data-lucide="download-cloud"></i> Import from Google Drive
+              </button>
+              <button class="danger" onclick="handleGDriveDelete()" style="background-color: transparent; border: 1px solid var(--danger); color: var(--danger);">
+                <i data-lucide="trash-2"></i> Delete Sync File
+              </button>
+            </div>
+          </div>
+
+          <div class="card col-12" style="margin-top: 24px">
             <div class="stat-label">Cloud Sync Setup (Firebase)</div>
             <p
               style="
@@ -6269,7 +6328,12 @@
             >
               <div class="form-group">
                 <label>API Key</label>
-                <input type="text" id="fb-apiKey" placeholder="AIzaSy..." />
+                <div class="input-wrapper">
+                  <input type="password" id="fb-apiKey" placeholder="AIzaSy..." style="width: 100%; padding-right: 48px;" />
+                  <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('fb-apiKey', this)">
+                    <i data-lucide="eye"></i>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
                 <label>Auth Domain</label>
@@ -6346,12 +6410,17 @@
                     placeholder="Email"
                     style="flex: 1"
                   />
-                  <input
-                    type="password"
-                    id="auth-password"
-                    placeholder="Password"
-                    style="flex: 1"
-                  />
+                  <div class="input-wrapper" style="flex: 1;">
+                    <input
+                      type="password"
+                      id="auth-password"
+                      placeholder="Password"
+                      style="width: 100%; padding-right: 48px"
+                    />
+                    <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('auth-password', this)">
+                      <i data-lucide="eye"></i>
+                    </div>
+                  </div>
                 </div>
                 <div style="display: flex; gap: 12px">
                   <button onclick="handleLogin()">Login</button>
@@ -6404,7 +6473,11 @@
                   type="password"
                   id="api-key-input"
                   placeholder="AIzaSy..."
+                  style="padding-right: 48px;"
                 />
+                <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('api-key-input', this)">
+                  <i data-lucide="eye"></i>
+                </div>
               </div>
             </div>
             <button onclick="saveApiKey()">
@@ -11104,6 +11177,22 @@ Keep the response cleanly formatted with lists or bold text.`;
       checkDailySnapshots(); // Check on load
 
       // --- UI Logic ---
+      window.toggleSecretVisibility = function(inputId, buttonEl) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          buttonEl.innerHTML = '<i data-lucide="eye-off"></i>';
+        } else {
+          input.type = 'password';
+          buttonEl.innerHTML = '<i data-lucide="eye"></i>';
+        }
+        if (window.lucide) {
+          lucide.createIcons({ root: buttonEl });
+        }
+      };
+
       window.switchView = function (viewId) {
         document
           .querySelectorAll(".view")
@@ -18716,8 +18805,10 @@ Keep the response cleanly formatted with lists or bold text.`;
 
             // Calculate Drawdown
             let peak = -Infinity;
+            const peakData = [];
             const drawdownData = history.map((val) => {
               if (val > peak) peak = val;
+              peakData.push(peak);
               return peak - val;
             });
 
@@ -18736,14 +18827,15 @@ Keep the response cleanly formatted with lists or bold text.`;
                     zIndex: 2,
                   },
                   {
-                    label: "Drawdown Area",
-                    data: history.map((val, i) => ({
-                      x: labels[i],
-                      y: val,
-                      y0: history[i] + drawdownData[i],
-                    })),
-                    hidden: true,
-                  },
+                    label: "Peak High",
+                    data: peakData,
+                    borderColor: "transparent",
+                    pointRadius: 0,
+                    fill: "-1",
+                    backgroundColor: "rgba(244, 63, 94, 0.15)",
+                    tension: 0.4,
+                    zIndex: 1,
+                  }
                 ],
               },
               options: {
@@ -18753,15 +18845,21 @@ Keep the response cleanly formatted with lists or bold text.`;
                   legend: { display: false },
                   tooltip: {
                     callbacks: {
+                      title: function(context) {
+                        return "Date: " + context[0].label;
+                      },
                       label: function (context) {
-                        let label = context.dataset.label || "";
-                        if (label) label += ": ";
-                        if (context.parsed.y !== null) {
-                          label += context.parsed.y + "%";
-                          const dd = drawdownData[context.dataIndex];
-                          if (dd > 0) label += ` (DD: -${dd.toFixed(1)}%)`;
-                        }
-                        return label;
+                        if (context.dataset.label === "Peak High") return null;
+                        
+                        let val = context.parsed.y;
+                        let ddAmount = drawdownData[context.dataIndex];
+                        let peakVal = peakData[context.dataIndex];
+                        let ddPct = peakVal > 0 ? (ddAmount / peakVal) * 100 : 0;
+                        
+                        return [
+                         `Balance: $${val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+                         `Drawdown: -${ddPct.toFixed(2)}%`
+                        ];
                       },
                     },
                   },
@@ -18771,34 +18869,71 @@ Keep the response cleanly formatted with lists or bold text.`;
                     grid: { color: "#27272a" },
                     ticks: {
                       color: "#71717a",
-                      callback: (value) => value + "%",
+                      callback: (value) => "$" + value.toLocaleString(),
                     },
                   },
                   x: { grid: { display: false }, ticks: { color: "#71717a" } },
                 },
               },
             });
+          }
 
-            // To actually shade the drawdown, we can add a dataset that represents the "Peak"
-            // and use the 'fill' property to fill down to the 'Portfolio Growth' dataset.
-            const peakData = [];
-            let currentPeak = -Infinity;
-            history.forEach((val) => {
-              if (val > currentPeak) currentPeak = val;
-              peakData.push(currentPeak);
+          // Payouts Bar Chart
+          const payoutCanvas = document.getElementById("cmsPayoutsChart");
+          if (payoutCanvas && Store.payouts && Store.payouts.length > 0) {
+            const payoutCtx = payoutCanvas.getContext("2d");
+            const existingPayout = Chart.getChart("cmsPayoutsChart");
+            if (existingPayout) existingPayout.destroy();
+            if (window.payoutChartObj) window.payoutChartObj.destroy();
+
+            const payoutsByMonth = {};
+            Store.payouts.forEach(p => {
+                if (p.date) {
+                    const d = new Date(p.date);
+                    if (!isNaN(d.getTime())) {
+                        const month = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                        payoutsByMonth[month] = (payoutsByMonth[month] || 0) + (p.amount || 0);
+                    }
+                }
             });
 
-            window.equityChartObj.data.datasets.push({
-              label: "Peak High",
-              data: peakData,
-              borderColor: "transparent",
-              pointRadius: 0,
-              fill: "-1", // Fill to the previous dataset (Portfolio Growth)
-              backgroundColor: "rgba(244, 63, 94, 0.15)", // Danger color for drawdown
-              tension: 0.4,
-              zIndex: 1,
+            const labels = Object.keys(payoutsByMonth).sort();
+            const data = labels.map(l => payoutsByMonth[l]);
+
+            window.payoutChartObj = new Chart(payoutCtx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Monthly Payouts",
+                        data: data,
+                        backgroundColor: "#10b981", // var(--success) essentially
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `$${context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: "#27272a" },
+                            ticks: {
+                                color: "#71717a",
+                                callback: (value) => "$" + value.toLocaleString()
+                            }
+                        },
+                        x: { grid: { display: false }, ticks: { color: "#71717a" } }
+                    }
+                }
             });
-            window.equityChartObj.update();
           }
         } catch (e) {
           console.error("Error in updateCharts:", e);
