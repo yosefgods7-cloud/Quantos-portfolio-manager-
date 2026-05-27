@@ -309,6 +309,7 @@ export const SyncEngine = {
             };
           }
           if (data.debriefs) window.Store.debriefs = data.debriefs;
+          if (data.dailyGoals) window.Store.dailyGoals = data.dailyGoals;
           if (data.weeklyReviews) window.Store.weeklyReviews = data.weeklyReviews;
           
           // Save to local storage without triggering sync loop
@@ -331,6 +332,7 @@ export const SyncEngine = {
           localStorage.setItem("qe_locks", JSON.stringify(window.Store.locks));
           localStorage.setItem("qe_journal_config", JSON.stringify(window.Store.journalConfig));
           localStorage.setItem("qe_debriefs", JSON.stringify(window.Store.debriefs));
+          localStorage.setItem("qe_daily_goals", JSON.stringify(window.Store.dailyGoals));
           localStorage.setItem("qe_weekly_reviews", JSON.stringify(window.Store.weeklyReviews));
           
           if (window.renderAll) window.renderAll();
@@ -488,6 +490,7 @@ export const SyncEngine = {
         locks: store.locks || [],
         journalConfig: store.journalConfig || {},
         debriefs: store.debriefs || [],
+        dailyGoals: store.dailyGoals || [],
         weeklyReviews: store.weeklyReviews || []
       };
       

@@ -204,6 +204,7 @@ window.doGDriveExport = async function() {
       locks: window.Store.locks || [],
       journalConfig: window.Store.journalConfig || {},
       debriefs: window.Store.debriefs || [],
+      dailyGoals: window.Store.dailyGoals || [],
       weeklyReviews: window.Store.weeklyReviews || [],
       accounts: window.Store.accounts || [],
       settings: window.Store.settings || {},
@@ -265,6 +266,7 @@ window.doGDriveImport = async function() {
         locks: "qe_locks",
         journalConfig: "qe_journal_config",
         debriefs: "qe_debriefs",
+        dailyGoals: "qe_daily_goals",
         weeklyReviews: "qe_weekly_reviews"
     };
 

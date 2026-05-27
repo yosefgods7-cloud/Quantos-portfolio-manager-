@@ -1429,6 +1429,25 @@
             </div>
           </div>
 
+          <div class="card col-12" data-id="daily-goals">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 16px;
+              "
+            >
+              <div class="stat-label">Daily Trading Goals</div>
+              <button class="secondary" onclick="openModal('add-daily-goal')">
+                <i data-lucide="plus"></i> Add Goal
+              </button>
+            </div>
+            <div id="daily-goals-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Goals go here -->
+            </div>
+          </div>
+
           <div class="card col-12" data-id="milestones">
             <div
               style="
@@ -6737,6 +6756,41 @@
       </div>
     </div>
 
+    <!-- Add Daily Goal Modal -->
+    <div id="modal-add-daily-goal" class="modal-overlay">
+      <div class="modal">
+        <div
+          class="header"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2>Add Daily Goal</h2>
+          <i
+            data-lucide="x"
+            onclick="closeModal('add-daily-goal')"
+            style="cursor: pointer"
+          ></i>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label>Goal Description</label>
+          <div class="input-wrapper">
+            <i data-lucide="target"></i>
+            <input
+              type="text"
+              id="daily-goal-text"
+              placeholder="e.g. No revenge trading"
+            />
+          </div>
+        </div>
+        <button class="primary" style="width: 100%" onclick="saveDailyGoal()">
+          Save Goal
+        </button>
+      </div>
+    </div>
+
     <!-- Add Milestone Modal -->
     <div id="modal-add-milestone" class="modal-overlay">
       <div class="modal">
@@ -11071,6 +11125,7 @@ Keep the response cleanly formatted with lists or bold text.`;
         payouts: getLocal("qe_payouts", []),
         milestones: getLocal("qe_milestones", []),
         trades: getLocal("qe_trades", []),
+        dailyGoals: getLocal("qe_daily_goals", []),
         activeTrades: getLocal("qe_active_trades", []),
         plannedTrades: getLocal("qe_planned_trades", []),
         backtests: getLocal("qe_backtests", []),
@@ -11125,6 +11180,7 @@ Keep the response cleanly formatted with lists or bold text.`;
             "equity-chart",
             "dist-chart",
             "leaderboard",
+            "daily-goals",
             "milestones",
             "engines",
           ]),
@@ -11184,6 +11240,7 @@ Keep the response cleanly formatted with lists or bold text.`;
             JSON.stringify(this.milestones),
           );
           localStorage.setItem("qe_trades", JSON.stringify(this.trades));
+          localStorage.setItem("qe_daily_goals", JSON.stringify(this.dailyGoals));
           localStorage.setItem(
             "qe_active_trades",
             JSON.stringify(this.activeTrades),
@@ -11658,6 +11715,85 @@ Keep the response cleanly formatted with lists or bold text.`;
           },
           "Delete Account",
         );
+      };
+
+      // --- Daily Goals Logic ---
+      window.saveDailyGoal = function () {
+        const text = document.getElementById("daily-goal-text").value;
+        if (!text) {
+          alert("Please enter a goal description.");
+          return;
+        }
+
+        Store.dailyGoals = Store.dailyGoals || [];
+        Store.dailyGoals.push({
+          id: Date.now(),
+          text,
+          completedOn: null,
+        });
+
+        Store.save();
+        closeModal('add-daily-goal');
+        document.getElementById("daily-goal-text").value = "";
+        if (typeof renderDailyGoals === "function") renderDailyGoals();
+      };
+
+      window.toggleDailyGoal = function (id) {
+        Store.dailyGoals = Store.dailyGoals || [];
+        const goal = Store.dailyGoals.find((g) => g.id === id);
+        if (goal) {
+          const today = new Date().toISOString().split("T")[0];
+          if (goal.completedOn === today) {
+            goal.completedOn = null; // uncheck
+          } else {
+            goal.completedOn = today; // check
+          }
+          Store.save();
+          if (typeof renderDailyGoals === "function") renderDailyGoals();
+        }
+      };
+
+      window.deleteDailyGoal = function (id) {
+        customConfirm("Delete this goal?", () => {
+          Store.dailyGoals = Store.dailyGoals.filter((g) => g.id !== id);
+          Store.save();
+          if (typeof renderDailyGoals === "function") renderDailyGoals();
+        }, "Delete Goal");
+      };
+
+      window.renderDailyGoals = function () {
+        const listDiv = document.getElementById("daily-goals-list");
+        if (!listDiv) return;
+
+        Store.dailyGoals = Store.dailyGoals || [];
+        const today = new Date().toISOString().split("T")[0];
+        
+        let html = "";
+        
+        if (Store.dailyGoals.length === 0) {
+            html = `<div style="text-align: center; color: var(--muted); padding: 16px; font-size: 0.9rem;">No daily goals set.</div>`;
+        } else {
+            Store.dailyGoals.forEach((goal) => {
+              const isChecked = goal.completedOn === today;
+              const textStyle = isChecked ? "text-decoration: line-through; color: var(--muted);" : "";
+              const bgStyle = isChecked ? "background: rgba(0,255,136,0.05);" : "background: var(--bg);";
+              
+              html += `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid var(--border); border-radius: 8px; ${bgStyle}">
+                  <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="toggleDailyGoal(${goal.id})">
+                    <div style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid ${isChecked ? 'var(--success)' : 'var(--border)'}; display: flex; align-items: center; justify-content: center; background: ${isChecked ? 'var(--success)' : 'transparent'};">
+                        ${isChecked ? '<i data-lucide="check" style="width: 14px; height: 14px; color: #000"></i>' : ''}
+                    </div>
+                    <span style="${textStyle}">${goal.text}</span>
+                  </div>
+                  <i data-lucide="trash-2" style="width: 16px; height: 16px; color: var(--danger); cursor: pointer;" onclick="deleteDailyGoal(${goal.id})"></i>
+                </div>
+              `;
+            });
+        }
+        
+        listDiv.innerHTML = html;
+        lucide.createIcons({ root: listDiv });
       };
 
       // --- Milestone Logic ---
@@ -17526,6 +17662,7 @@ Keep the response cleanly formatted with lists or bold text.`;
       };
 
       function renderAll() {
+        if (typeof renderDailyGoals === "function") renderDailyGoals();
         if (typeof renderJournalConfig === "function") renderJournalConfig();
         if (typeof populateTradeDropdowns === "function")
           populateTradeDropdowns();
