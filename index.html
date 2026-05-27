@@ -1281,6 +1281,7 @@
             font-size: 0.85rem;
             color: var(--danger);
             cursor: pointer;
+            margin-bottom: 8px;
           "
           onclick="switchView('settings')"
         >
@@ -1294,6 +1295,21 @@
             "
           ></span>
           <span id="sidebar-firebase-text">Offline</span>
+        </div>
+        <div
+          id="sidebar-gdrive-status"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            cursor: pointer;
+          "
+          onclick="switchView('settings')"
+        >
+          <i data-lucide="cloud" style="width: 14px; height: 14px;"></i>
+          <span id="sidebar-gdrive-text">Drive: Not Synced</span>
         </div>
       </div>
     </aside>

@@ -23,7 +23,7 @@ export const GDriveSync = {
     const token = this.getAccessToken();
     if (!token) throw new Error("No Drive access token. Please login with Google.");
 
-    const res = await fetch('https://www.googleapis.com/drive/v3/files?q=name="quantedge_sync.json" and trashed=false', {
+    const res = await fetch('https://www.googleapis.com/drive/v3/files?q=name="quantedge_sync.json" and trashed=false&fields=files(id,name,modifiedTime)', {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -128,10 +128,57 @@ export const GDriveSync = {
       throw new Error(`Failed to delete file from Drive. ${res.statusText}`);
     }
     alert("Sync file deleted from Google Drive.");
+    window.updateGDriveStatusIndicator();
   }
 };
 
 window.GDriveSync = GDriveSync;
+
+window.updateGDriveStatusIndicator = async function() {
+  const statusIcon = document.querySelector("#sidebar-gdrive-status i");
+  const statusText = document.getElementById("sidebar-gdrive-text");
+  
+  if (!statusText || !statusIcon) return;
+
+  if (!GDriveSync.getAccessToken()) {
+    statusIcon.style.color = "var(--muted)";
+    statusText.style.color = "var(--muted)";
+    statusText.innerText = "Drive: Not Connected";
+    return;
+  }
+
+  statusText.innerText = "Drive: Checking...";
+  statusIcon.style.color = "var(--warning)";
+  statusText.style.color = "var(--warning)";
+
+  try {
+    const file = await GDriveSync.findSyncFile();
+    if (file && file.modifiedTime) {
+      const date = new Date(file.modifiedTime);
+      statusIcon.style.color = "var(--success)";
+      statusText.style.color = "var(--success)";
+      statusText.innerText = `Drive: Synced at ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    } else {
+      statusIcon.style.color = "var(--muted)";
+      statusText.style.color = "var(--muted)";
+      statusText.innerText = "Drive: No Sync File";
+    }
+  } catch (error) {
+    statusIcon.style.color = "var(--danger)";
+    statusText.style.color = "var(--danger)";
+    statusText.innerText = "Drive: Error";
+  }
+};
+
+// Initialize the status indicator if token is available
+setTimeout(() => {
+  if (window.FirebaseService) {
+    // Wait for auth to settle
+    setTimeout(() => {
+      window.updateGDriveStatusIndicator();
+    }, 1500);
+  }
+}, 500);
 
 // Attach functions to window for UI usage
 window.handleGDriveExport = async function() {
@@ -177,6 +224,7 @@ window.handleGDriveExport = async function() {
     
     if (overlay) overlay.style.display = 'none';
     alert("Success! Data successfully exported to Google Drive.");
+    window.updateGDriveStatusIndicator();
   } catch (error) {
     const overlay = document.getElementById('sync-loading-overlay');
     if (overlay) overlay.style.display = 'none';
