@@ -6286,14 +6286,11 @@
               This allows you to backup data completely to your own cloud storage and sync between devices.
             </p>
             <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-              <button class="primary" onclick="handleGDriveExport()">
-                <i data-lucide="upload-cloud"></i> Export to Google Drive
-              </button>
-              <button class="secondary" onclick="handleGDriveImport()">
-                <i data-lucide="download-cloud"></i> Import from Google Drive
+              <button class="primary" onclick="handleGDriveSync()">
+                <i data-lucide="refresh-cw"></i> Sync with Google Drive
               </button>
               <button class="danger" onclick="handleGDriveDelete()" style="background-color: transparent; border: 1px solid var(--danger); color: var(--danger);">
-                <i data-lucide="trash-2"></i> Delete Sync File
+                <i data-lucide="trash-2"></i> Delete Cloud Data
               </button>
             </div>
           </div>
@@ -9417,6 +9414,50 @@
       </div>
     </div>
 
+    <!-- GDrive Conflict Modal -->
+    <div
+      id="modal-gdrive-conflict"
+      class="modal-overlay"
+      style="background: rgba(0, 0, 0, 0.6)"
+    >
+      <div class="modal" style="max-width: 600px">
+        <div
+          class="header"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2><i data-lucide="alert-triangle" style="color: var(--warning);"></i> Version Conflict Detected</h2>
+          <i
+            data-lucide="x"
+            onclick="closeModal('modal-gdrive-conflict')"
+            style="cursor: pointer"
+          ></i>
+        </div>
+        <div style="margin-top: 16px; font-size: 0.95rem; line-height: 1.6; color: var(--muted);">
+          <p id="gdrive-conflict-msg">A conflict was detected between your local data and the cloud data. Please select which version you would like to keep. The other version will be overwritten.</p>
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+            <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg);">
+              <h3 style="margin-top: 0;">Local Data</h3>
+              <p style="margin-bottom: 8px; font-size: 0.85rem;" id="gdrive-local-time">Last modified: -</p>
+              <button class="primary" style="width: 100%;" onclick="window.resolveGDriveConflict('local')">
+                Keep Local (Overwrite Cloud)
+              </button>
+            </div>
+            <div style="padding: 16px; border: 1px solid var(--primary); border-radius: 8px; background: rgba(0, 210, 255, 0.05);">
+              <h3 style="margin-top: 0; color: var(--primary);">Cloud Data</h3>
+              <p style="margin-bottom: 8px; font-size: 0.85rem;" id="gdrive-cloud-time">Last modified: -</p>
+              <button class="primary" style="width: 100%;" onclick="window.resolveGDriveConflict('cloud')">
+                Keep Cloud (Overwrite Local)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script type="module">
       window.ENV_GEMINI_API_KEY =
         typeof process !== "undefined" ? process.env.GEMINI_API_KEY : "";
@@ -11099,6 +11140,7 @@ Keep the response cleanly formatted with lists or bold text.`;
 
       Store.save = function () {
         try {
+          localStorage.setItem("qe_last_modified", new Date().toISOString());
           localStorage.setItem("qe_accounts", JSON.stringify(this.accounts));
           localStorage.setItem(
             "qe_transactions",

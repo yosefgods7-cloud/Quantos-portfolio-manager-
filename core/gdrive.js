@@ -50,8 +50,6 @@ export const GDriveSync = {
 
     if (existingFile && existingFile.id) {
       fileId = existingFile.id;
-      const confirmed = window.confirm("You are about to overwrite your existing Google Drive sync file. If you haven't pulled recent changes, they will be lost. Continue with export?");
-      if (!confirmed) return;
     } else {
       // 1. Create the file metadata
       const metaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
@@ -91,9 +89,6 @@ export const GDriveSync = {
 
     const file = await this.findSyncFile();
     if (!file) throw new Error("No quantedge_sync.json file found in Google Drive.");
-
-    const confirmed = window.confirm("You are about to overwrite all local QuantEdge data with the data from Google Drive. This cannot be undone. Continue?");
-    if (!confirmed) return null;
 
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -181,12 +176,7 @@ setTimeout(() => {
 }, 500);
 
 // Attach functions to window for UI usage
-window.handleGDriveExport = async function() {
-  try {
-    if (!GDriveSync.getAccessToken()) {
-       const loggedIn = await GDriveSync.login();
-       if (!loggedIn) return;
-    }
+window.doGDriveExport = async function() {
     const overlay = document.getElementById('sync-loading-overlay');
     const overlayText = document.getElementById('sync-loading-text');
     if (overlay) {
@@ -217,40 +207,36 @@ window.handleGDriveExport = async function() {
       weeklyReviews: window.Store.weeklyReviews || [],
       accounts: window.Store.accounts || [],
       settings: window.Store.settings || {},
-      trades: window.Store.trades || [] // Note: Large arrays of trades might impact size limits if not careful
+      trades: window.Store.trades || []
     };
 
     await GDriveSync.exportData(dataToSync);
     
+    // update local synced time
+    const updatedFile = await GDriveSync.findSyncFile();
+    if (updatedFile && updatedFile.modifiedTime) {
+        localStorage.setItem('qe_last_synced', updatedFile.modifiedTime);
+    } else {
+        localStorage.setItem('qe_last_synced', new Date().toISOString());
+    }
+    
     if (overlay) overlay.style.display = 'none';
     alert("Success! Data successfully exported to Google Drive.");
     window.updateGDriveStatusIndicator();
-  } catch (error) {
-    const overlay = document.getElementById('sync-loading-overlay');
-    if (overlay) overlay.style.display = 'none';
-    alert("Export failed: " + error.message);
-  }
-};
+}
 
-window.handleGDriveImport = async function() {
-  try {
-    if (!GDriveSync.getAccessToken()) {
-       const loggedIn = await GDriveSync.login();
-       if (!loggedIn) return;
-    }
-
+window.doGDriveImport = async function() {
     const overlay = document.getElementById('sync-loading-overlay');
     const overlayText = document.getElementById('sync-loading-text');
     
     const data = await GDriveSync.importData();
-    if (!data) return; // User cancelled
+    if (!data) return;
 
     if (overlay) {
       overlay.style.display = 'flex';
       if (overlayText) overlayText.innerText = 'Importing data from Google Drive...';
     }
 
-    // Process and save all data properties locally
     const saveToLocal = (keyMap, data) => {
         for (const [key, localKey] of Object.entries(keyMap)) {
             if (data[key] !== undefined) {
@@ -283,10 +269,16 @@ window.handleGDriveImport = async function() {
     };
 
     saveToLocal(coreKeys, data);
-
     if (data.accounts) localStorage.setItem('qe_accounts', JSON.stringify(data.accounts));
     if (data.settings) localStorage.setItem('qe_settings', JSON.stringify(data.settings));
     if (data.trades) localStorage.setItem('qe_trades', JSON.stringify(data.trades));
+
+    // Update synced times
+    const syncedFile = await GDriveSync.findSyncFile();
+    const syncTime = (syncedFile && syncedFile.modifiedTime) ? syncedFile.modifiedTime : new Date().toISOString();
+    
+    localStorage.setItem('qe_last_synced', syncTime);
+    localStorage.setItem('qe_last_modified', syncTime);
 
     if (overlay) overlay.style.display = 'none';
     
@@ -296,11 +288,73 @@ window.handleGDriveImport = async function() {
         alert("Import successful! Reloading page...");
         window.location.reload();
     }
-  } catch (error) {
+}
+
+window.handleGDriveSync = async function() {
+  try {
+    if (!GDriveSync.getAccessToken()) {
+       const loggedIn = await GDriveSync.login();
+       if (!loggedIn) return;
+    }
+    
+    const overlay = document.getElementById('sync-loading-overlay');
+    if (overlay) {
+      overlay.style.display = 'flex';
+      document.getElementById('sync-loading-text').innerText = 'Checking Cloud Version...';
+    }
+
+    const file = await GDriveSync.findSyncFile();
+    
+    const localModifiedRaw = localStorage.getItem('qe_last_modified');
+    const localSyncedRaw = localStorage.getItem('qe_last_synced') || "1970-01-01T00:00:00.000Z";
+    const localModTime = localModifiedRaw ? new Date(localModifiedRaw).getTime() : 0;
+    const localSyncTime = new Date(localSyncedRaw).getTime();
+
+    if (overlay) overlay.style.display = 'none';
+
+    if (!file) {
+        // No cloud file, safe to export
+        await window.doGDriveExport();
+        return;
+    }
+
+    const cloudTime = new Date(file.modifiedTime).getTime();
+    
+    const localNewer = localModTime > localSyncTime;
+    const cloudNewer = cloudTime > localSyncTime;
+
+    if (localNewer && cloudNewer) {
+        // CONFLICT
+        document.getElementById('gdrive-local-time').innerText = "Last modified: " + new Date(localModTime).toLocaleString();
+        document.getElementById('gdrive-cloud-time').innerText = "Last modified: " + new Date(cloudTime).toLocaleString();
+        window.openModal('modal-gdrive-conflict');
+    } else if (cloudNewer) {
+        // Safe to import
+        await window.doGDriveImport();
+    } else if (localNewer) {
+        // Safe to export
+        await window.doGDriveExport();
+    } else {
+        alert("Your data is already perfectly in sync with Google Drive.");
+    }
+  } catch(error) {
     const overlay = document.getElementById('sync-loading-overlay');
     if (overlay) overlay.style.display = 'none';
-    alert("Import failed: " + error.message);
+    alert("Sync failed: " + error.message);
   }
+};
+
+window.resolveGDriveConflict = async function(choice) {
+    window.closeModal('modal-gdrive-conflict');
+    try {
+        if (choice === 'local') {
+            await window.doGDriveExport();
+        } else {
+            await window.doGDriveImport();
+        }
+    } catch(err) {
+        alert("Action failed: " + err.message);
+    }
 };
 
 window.handleGDriveDelete = async function() {
