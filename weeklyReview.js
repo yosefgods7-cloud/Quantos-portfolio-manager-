@@ -469,14 +469,6 @@ window.saveWeeklyReview = async function(forceSkipAI = false) {
 };
 
 window.generateWeeklyReviewAI = async function(reviewData) {
-    if (!window.ENV_GEMINI_API_KEY) {
-        reviewData.aiSummary = `<div style="text-align: center; color: var(--muted);"><i data-lucide="key" style="margin-bottom: 8px;"></i><br/>Add your Gemini API key in Settings to unlock the AI weekly report.</div>`;
-        return;
-    }
-    
-    const { GoogleGenAI } = await import("https://esm.run/@google/genai");
-    const ai = new GoogleGenAI({ apiKey: window.ENV_GEMINI_API_KEY });
-    
     const prompt = `
     Analyze this trader's weekly performance. Minimal, concise response to save tokens.
     Week: ${reviewData.weekNum}
@@ -503,14 +495,12 @@ window.generateWeeklyReviewAI = async function(reviewData) {
     `;
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: prompt,
-            config: {
-                systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."
-            }
+        const text = await window.callServerGemini({
+            prompt,
+            model: "gemini-3.8-flash",
+            systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."
         });
-        reviewData.aiSummary = (response?.text || "").replace(/```html/g, '').replace(/```/g, '');
+        reviewData.aiSummary = (text || "").replace(/```html/g, '').replace(/```/g, '');
     } catch (e) {
         console.error("AI Error:", e);
         reviewData.aiSummary = `<span style="color:var(--danger)">AI generation failed. Please try again later or skip AI analysis. Error: ${e.message}</span>`;

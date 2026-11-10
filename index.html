@@ -1020,11 +1020,148 @@
         display: block;
       }
 
+      /* Core Section Mobile Styles */
+      .acc-mobile-card,
+      .cms-mobile-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: border-color 0.2s ease;
+      }
+      .acc-mobile-card:hover,
+      .cms-mobile-card:hover {
+        border-color: var(--primary);
+      }
+      .acc-card-top,
+      .cms-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .acc-card-title,
+      .cms-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .acc-card-badges,
+      .cms-card-badges {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .acc-card-metrics,
+      .cms-card-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 10px 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .acc-card-progress {
+        padding: 10px 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .acc-card-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 4px;
+      }
+
+      /* View Header Actions */
+      .view-header-desktop {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .view-header-mobile {
+        display: none;
+        width: 100%;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .view-dropdown-wrap {
+        position: relative;
+      }
+      .view-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 200px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+        z-index: 60;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .view-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text);
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+      }
+      .view-dropdown-item:hover,
+      .view-dropdown-item:active {
+        background: var(--bg);
+      }
+      .view-dropdown-item i {
+        width: 16px;
+        height: 16px;
+        opacity: 0.85;
+      }
+
+      /* Responsive Grids */
+      .cms-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      .cms-allocation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .finance-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
       @media (max-width: 768px) {
-        .tj-desktop-actions {
+        .tj-desktop-actions,
+        .view-header-desktop {
           display: none !important;
         }
-        .tj-mobile-actions-wrap {
+        .tj-mobile-actions-wrap,
+        .view-header-mobile {
           display: flex !important;
         }
         .tj-3col-grid {
@@ -1033,6 +1170,15 @@
         }
         .tj-3col-grid > :nth-child(3) {
           grid-column: span 2 !important;
+        }
+        .cms-summary-grid,
+        .finance-stats-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px !important;
+        }
+        .cms-allocation-grid {
+          grid-template-columns: 1fr !important;
+          gap: 12px !important;
         }
         .desktop-only-table {
           display: none !important;
@@ -1584,11 +1730,56 @@
             <h1>Portfolio Overview</h1>
             <p>Institutional Capital Aggregate</p>
           </div>
-          <div style="display: flex; gap: 12px">
+          <div class="view-header-desktop">
             <button class="secondary" onclick="exportToPDF()">
               <i data-lucide="file-text"></i> Export Report
             </button>
             <button onclick="openModal('add-account')">Add Account</button>
+          </div>
+          <div class="view-header-mobile">
+            <button
+              onclick="openModal('add-account')"
+              style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-weight: 600;
+                min-height: 44px;
+              "
+            >
+              <i data-lucide="plus"></i> Add Account
+            </button>
+            <div class="view-dropdown-wrap" id="dash-menu-wrap">
+              <button
+                type="button"
+                class="secondary"
+                onclick="toggleGenericMenu('dash-dropdown', event)"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  padding: 10px 14px;
+                  min-height: 44px;
+                "
+                aria-label="Dashboard Actions"
+              >
+                <i data-lucide="more-horizontal"></i>
+                <span>Actions</span>
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px"></i>
+              </button>
+              <div id="dash-dropdown" class="view-dropdown-menu" style="display: none">
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); exportToPDF()"
+                >
+                  <i data-lucide="file-text"></i> Export Report
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1683,7 +1874,7 @@
 
           <div class="card col-12" data-id="engines">
             <div class="stat-label">Active Engines</div>
-            <div style="overflow-x: auto">
+            <div class="desktop-only-table" style="overflow-x: auto">
               <table id="accounts-table-mini">
                 <thead>
                   <tr>
@@ -1699,6 +1890,9 @@
                 </thead>
                 <tbody></tbody>
               </table>
+            </div>
+            <div id="dashboard-accounts-mobile-cards" class="mobile-only-cards">
+              <!-- Rendered on mobile by renderTable -->
             </div>
           </div>
         </div>
@@ -2625,11 +2819,16 @@
             <h1>Account Management</h1>
             <p>Manage Live and Prop Firm Engines</p>
           </div>
-          <button onclick="openModal('add-account')">New Engine</button>
+          <button
+            onclick="openModal('add-account')"
+            style="min-height: 44px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px;"
+          >
+            <i data-lucide="plus"></i> New Engine
+          </button>
         </div>
         <div class="grid">
           <div class="card col-12">
-            <div style="overflow-x: auto">
+            <div class="desktop-only-table" style="overflow-x: auto">
               <table id="accounts-table-full">
                 <thead>
                   <tr>
@@ -2646,6 +2845,9 @@
                 </thead>
                 <tbody></tbody>
               </table>
+            </div>
+            <div id="accounts-mobile-cards" class="mobile-only-cards">
+              <!-- Rendered on mobile by renderTable -->
             </div>
           </div>
         </div>
@@ -2801,7 +3003,7 @@
               Portfolio-level decision engine for prop firm and live accounts
             </p>
           </div>
-          <div style="display: flex; gap: 8px">
+          <div class="view-header-desktop">
             <button
               class="secondary"
               onclick="openModal('modal-scaling-milestone')"
@@ -2811,16 +3013,68 @@
             <button class="secondary" onclick="openModal('add-payout')">
               <i data-lucide="plus"></i> Record Payout
             </button>
+            <button onclick="openModal('add-account')">
+              <i data-lucide="plus"></i> Add Account
+            </button>
+          </div>
+          <div class="view-header-mobile">
+            <button
+              onclick="openModal('add-account')"
+              style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-weight: 600;
+                min-height: 44px;
+              "
+            >
+              <i data-lucide="plus"></i> Add Account
+            </button>
+            <div class="view-dropdown-wrap" id="cms-menu-wrap">
+              <button
+                type="button"
+                class="secondary"
+                onclick="toggleGenericMenu('cms-dropdown', event)"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  padding: 10px 14px;
+                  min-height: 44px;
+                "
+                aria-label="CMS Actions"
+              >
+                <i data-lucide="more-horizontal"></i>
+                <span>Actions</span>
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px"></i>
+              </button>
+              <div id="cms-dropdown" class="view-dropdown-menu" style="display: none">
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); openModal('modal-scaling-milestone')"
+                >
+                  <i data-lucide="map"></i> Scaling Roadmap
+                </button>
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); openModal('add-payout')"
+                >
+                  <i data-lucide="plus"></i> Record Payout
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="grid">
           <!-- Portfolio Dashboard Summary -->
           <div class="card col-12">
-            <div
-              class="grid"
-              style="grid-template-columns: repeat(4, 1fr); gap: 16px"
-            >
+            <div class="cms-summary-grid">
               <div>
                 <div class="stat-label">Total Capital</div>
                 <div class="stat-value" id="cms-total-capital">$0.00</div>
@@ -2861,7 +3115,7 @@
                 <i data-lucide="plus"></i> Add Account
               </button>
             </div>
-            <div class="table-container">
+            <div class="desktop-only-table table-container">
               <table class="data-table" id="cms-accounts-table">
                 <thead>
                   <tr>
@@ -2879,6 +3133,9 @@
                 </tbody>
               </table>
             </div>
+            <div id="cms-accounts-mobile-cards" class="mobile-only-cards">
+              <!-- Mobile Drawdown Cards Injected by JS -->
+            </div>
           </div>
 
           <!-- Capital Allocation & Scaling Engine -->
@@ -2887,9 +3144,8 @@
               <h2>Capital Allocation & Scaling Engine</h2>
             </div>
             <div
-              class="grid"
+              class="cms-allocation-grid"
               id="cms-allocation-grid"
-              style="grid-template-columns: repeat(3, 1fr); gap: 16px"
             >
               <!-- Primary, Secondary, Protected injected here -->
             </div>
@@ -3638,7 +3894,7 @@
         <div class="header">
           <div>
             <h1>AI Portfolio Analysis</h1>
-            <p>Institutional-grade insights powered by Gemini 3.1 Pro</p>
+            <p>Institutional-grade insights powered by Gemini 3.8 Flash</p>
           </div>
           <button onclick="generateAIInsights()" id="ai-gen-btn">
             <i data-lucide="sparkles"></i> Generate Analysis
@@ -4075,7 +4331,7 @@
             <h1>Finance Module</h1>
             <p>Budgeting, Expense Tracking, and Passive Income</p>
           </div>
-          <div style="display: flex; gap: 8px">
+          <div class="view-header-desktop">
             <button class="secondary" onclick="openModal('modal-add-expense')">
               <i data-lucide="minus-circle"></i> Log Expense
             </button>
@@ -4088,6 +4344,65 @@
             <button class="secondary" onclick="openModal('modal-add-budget')">
               <i data-lucide="target"></i> Set Budget
             </button>
+          </div>
+          <div class="view-header-mobile">
+            <button
+              onclick="openModal('modal-add-expense')"
+              style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-weight: 600;
+                min-height: 44px;
+              "
+            >
+              <i data-lucide="minus-circle"></i> Log Expense
+            </button>
+            <div class="view-dropdown-wrap" id="finance-menu-wrap">
+              <button
+                type="button"
+                class="secondary"
+                onclick="toggleGenericMenu('finance-dropdown', event)"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  padding: 10px 14px;
+                  min-height: 44px;
+                "
+                aria-label="Finance Actions"
+              >
+                <i data-lucide="more-horizontal"></i>
+                <span>Actions</span>
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px"></i>
+              </button>
+              <div id="finance-dropdown" class="view-dropdown-menu" style="display: none">
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); openModal('modal-add-dividend')"
+                >
+                  <i data-lucide="plus-circle"></i> Log Dividend
+                </button>
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); openModal('modal-add-stock')"
+                >
+                  <i data-lucide="briefcase"></i> Add Stock
+                </button>
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); openModal('modal-add-budget')"
+                >
+                  <i data-lucide="target"></i> Set Budget
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4123,14 +4438,7 @@
               <i data-lucide="alert-triangle"></i>
               <span id="finance-budget-alert-text"></span>
             </div>
-            <div
-              class="grid"
-              style="
-                grid-template-columns: repeat(4, 1fr);
-                gap: 16px;
-                margin-bottom: 24px;
-              "
-            >
+            <div class="finance-stats-grid">
               <div>
                 <div class="stat-label">Total Monthly Spend</div>
                 <div class="stat-value" id="finance-total-spend">$0.00</div>
@@ -9782,9 +10090,30 @@
       </div>
     </div>
 
-    <script type="module">
-      window.ENV_GEMINI_API_KEY =
-        typeof process !== "undefined" ? process.env.GEMINI_API_KEY : "";
+    <script>
+      window.ENV_GEMINI_API_KEY = "";
+      window.callServerGemini = async function({ prompt, contents, systemInstruction, model = "gemini-3.8-flash", responseMimeType }) {
+        const customKey = localStorage.getItem("qe_gemini_api_key");
+        const headers = { "Content-Type": "application/json" };
+        if (customKey) {
+          headers["x-gemini-api-key"] = customKey;
+        }
+        const response = await fetch("/api/gemini/generate", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            prompt: contents || prompt,
+            systemInstruction,
+            model,
+            responseMimeType
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.error) {
+          throw new Error(data.error || `Request failed with status ${response.status}`);
+        }
+        return data.text || "";
+      };
     </script>
     <script>
       window.animateStatValue = function (el, newValue) {
@@ -9952,14 +10281,6 @@
 
         if (!outputEl || !btnEl) return;
 
-        const apiKey =
-          localStorage.getItem("qe_gemini_api_key") ||
-          window.ENV_GEMINI_API_KEY;
-        if (!apiKey) {
-          outputEl.innerHTML = `<span style="color: var(--warning)">API Key Missing. Please configure it in Settings.</span>`;
-          return;
-        }
-
         const originalBtnText = btnEl.innerHTML;
         btnEl.innerHTML =
           '<i data-lucide="loader-2" class="spin"></i> Analyzing...';
@@ -9968,17 +10289,13 @@
         lucide.createIcons();
 
         try {
-          const { GoogleGenAI } = await import("https://esm.run/@google/genai");
-          const ai = new GoogleGenAI({ apiKey: apiKey });
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: prompt,
-            config: {
-              systemInstruction:
-                "You are an expert quantitative trading analyst and risk manager. Provide concise, actionable, and data-driven insights. Format your response using HTML (e.g., <strong>, <ul>, <li>) for readability, but do not wrap it in a markdown code block. Keep it brief and highly relevant to the provided data.",
-            },
+          const text = await window.callServerGemini({
+            prompt,
+            model: "gemini-3.8-flash",
+            systemInstruction:
+              "You are an expert quantitative trading analyst and risk manager. Provide concise, actionable, and data-driven insights. Format your response using HTML (e.g., <strong>, <ul>, <li>) for readability, but do not wrap it in a markdown code block. Keep it brief and highly relevant to the provided data.",
           });
-          outputEl.innerHTML = response.text;
+          outputEl.innerHTML = text;
         } catch (error) {
           console.error("AI Analysis Error:", error);
           outputEl.innerHTML = `<span style="color: var(--danger)">Failed to generate insight: ${error.message}</span>`;
@@ -11064,30 +11381,11 @@ Keep the response cleanly formatted with lists or bold text.`;
           return;
         }
 
-        const apiKey =
-          localStorage.getItem("qe_gemini_api_key") ||
-          window.ENV_GEMINI_API_KEY;
-        if (!apiKey) {
-          responseDiv.innerHTML = `
-                    <div style="color: var(--warning); text-align: center; margin-top: 50px;">
-                        <i data-lucide="key" style="width: 48px; height: 48px; margin-bottom: 16px;"></i>
-                        <p>API Key Missing</p>
-                        <p style="font-size: 0.9rem; margin-top: 8px; opacity: 0.8;">Please configure your Gemini API Key in the Settings menu to use this feature.</p>
-                        <button onclick="switchView('settings')" style="margin-top: 16px;">Go to Settings</button>
-                    </div>
-                `;
-          lucide.createIcons();
-          return;
-        }
-
         btn.disabled = true;
         loading.style.display = "flex";
         responseDiv.innerHTML = "";
 
         try {
-          const { GoogleGenAI } = await import("https://esm.run/@google/genai");
-          const ai = new GoogleGenAI({ apiKey: apiKey });
-
           const portfolioData = {
             accounts: Store.accounts.map((a) => ({
               name: a.name,
@@ -11151,12 +11449,10 @@ Keep the response cleanly formatted with lists or bold text.`;
                     Ensure the tone is highly professional, analytical, and actionable.
                 `;
 
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-pro",
-            contents: prompt,
+          const text = await window.callServerGemini({
+            prompt,
+            model: "gemini-3.8-flash",
           });
-
-          const text = response.text;
 
           // Simple markdown-like formatter
           const formattedText = text
@@ -15852,24 +16148,37 @@ Keep the response cleanly formatted with lists or bold text.`;
         );
       };
 
-      window.toggleTjMoreMenu = function (e) {
+      window.toggleGenericMenu = function (menuId, e) {
         if (e) e.stopPropagation();
-        const menu = document.getElementById("tj-more-dropdown");
+        const menu = document.getElementById(menuId);
         if (!menu) return;
         const isShown =
           menu.style.display === "flex" || menu.style.display === "block";
-        menu.style.display = isShown ? "none" : "flex";
+        window.closeAllGenericMenus();
+        if (!isShown) {
+          menu.style.display = "flex";
+        }
+      };
+
+      window.closeAllGenericMenus = function () {
+        document
+          .querySelectorAll(".view-dropdown-menu, .tj-dropdown-menu")
+          .forEach((m) => {
+            m.style.display = "none";
+          });
+      };
+
+      window.toggleTjMoreMenu = function (e) {
+        window.toggleGenericMenu("tj-more-dropdown", e);
       };
 
       window.closeTjMoreMenu = function () {
-        const menu = document.getElementById("tj-more-dropdown");
-        if (menu) menu.style.display = "none";
+        window.closeAllGenericMenus();
       };
 
       document.addEventListener("click", function (e) {
-        const wrap = document.getElementById("tj-more-menu-wrap");
-        if (wrap && !wrap.contains(e.target)) {
-          window.closeTjMoreMenu();
+        if (!e.target.closest(".view-dropdown-wrap, .tj-dropdown-wrap")) {
+          window.closeAllGenericMenus();
         }
       });
 
@@ -17594,8 +17903,12 @@ Keep the response cleanly formatted with lists or bold text.`;
 
         // 2. Drawdown Pressure Monitor & Account Registry
         const tbody = document.getElementById("cms-accounts-body");
+        const mobileCmsCards = document.getElementById(
+          "cms-accounts-mobile-cards",
+        );
         if (tbody) {
           let html = "";
+          let mobileHtml = "";
           Store.accounts.forEach((acc) => {
             const startBal =
               acc.initialBalance || acc.history?.[0]?.balance || acc.balance;
@@ -17636,8 +17949,52 @@ Keep the response cleanly formatted with lists or bold text.`;
                     </tr>
                     ${generateProgressTrackerHTML(acc).replace('colspan="9"', 'colspan="7"')}
                 `;
+
+            mobileHtml += `
+              <div class="cms-mobile-card">
+                <div class="cms-card-top">
+                  <div>
+                    <div class="cms-card-title">${acc.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">
+                      ${acc.type} ${acc.firm ? `(${acc.firm})` : ""} · ${acc.status || "Active"}
+                    </div>
+                  </div>
+                  <div class="cms-card-badges">
+                    <span class="risk-badge risk-low">${acc.phase || "Live"}</span>
+                    <span class="risk-badge" style="background: ${ddColor}20; color: ${ddColor}; border: 1px solid ${ddColor}40;">${ddZone}</span>
+                  </div>
+                </div>
+                <div class="cms-card-metrics">
+                  <div>
+                    <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Balance</div>
+                    <div class="font-mono font-bold" style="font-size: 0.95rem;">$${currentBal.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Start Bal</div>
+                    <div class="font-mono font-bold" style="font-size: 0.95rem; color: var(--muted);">$${startBal.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Drawdown</div>
+                    <div class="font-mono font-bold" style="font-size: 0.95rem; color: ${ddColor};">
+                      ${ddPct > 0 ? "-" : "+"}${Math.abs(ddPct).toFixed(2)}%
+                    </div>
+                  </div>
+                </div>
+                <div class="acc-card-actions">
+                  <button class="icon-btn tj-action-touch" onclick="deleteAccount('${acc.id}')" title="Delete Account" aria-label="Delete">
+                    <i data-lucide="trash-2" style="color: var(--danger); width: 17px; height: 17px;"></i>
+                  </button>
+                </div>
+              </div>
+            `;
           });
           tbody.innerHTML = html;
+          if (mobileCmsCards) {
+            mobileCmsCards.innerHTML =
+              Store.accounts.length === 0
+                ? `<div style="text-align: center; padding: 24px 16px; color: var(--muted); font-size: 0.85rem;">No accounts registered in CMS. Tap "Add Account" to begin.</div>`
+                : mobileHtml;
+          }
         }
 
         const atRiskEl = document.getElementById("cms-at-risk");
@@ -18466,6 +18823,56 @@ Keep the response cleanly formatted with lists or bold text.`;
                 `,
           );
 
+          // Mobile Cards for Dashboard Active Engines
+          const dashMobileContainer = document.getElementById(
+            "dashboard-accounts-mobile-cards",
+          );
+          if (dashMobileContainer) {
+            const topAccounts = Store.accounts.slice(0, 5);
+            if (topAccounts.length === 0) {
+              dashMobileContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px 16px; color: var(--muted); font-size: 0.85rem;">
+                  No active engines registered. Tap "Add Account" to create one.
+                </div>
+              `;
+            } else {
+              dashMobileContainer.innerHTML = topAccounts
+                .map(
+                  (a) => `
+                <div class="acc-mobile-card">
+                  <div class="acc-card-top">
+                    <div>
+                      <div class="acc-card-title">${a.name}</div>
+                      <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">
+                        ${a.firm || a.assetClass || "Trading Engine"} · ${a.type || "Live"}
+                      </div>
+                    </div>
+                    <div class="acc-card-badges">
+                      <span class="risk-badge risk-low">${a.phase || "Phase 1"}</span>
+                      <span class="risk-badge" style="color: var(--success);">${a.status || "Active"}</span>
+                    </div>
+                  </div>
+                  <div class="acc-card-metrics">
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Balance</div>
+                      <div class="font-mono font-bold" style="font-size: 0.95rem;">$${(a.balance || 0).toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Equity</div>
+                      <div class="font-mono font-bold" style="font-size: 0.95rem; color: var(--primary);">$${(a.equity || 0).toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Risk Level</div>
+                      <div style="font-size: 0.85rem; font-weight: 600;">Low (${a.risk || 1}%)</div>
+                    </div>
+                  </div>
+                </div>
+              `,
+                )
+                .join("");
+            }
+          }
+
           renderTable(
             "accounts-table-full",
             Store.accounts,
@@ -18487,6 +18894,63 @@ Keep the response cleanly formatted with lists or bold text.`;
                     ${generateProgressTrackerHTML(a)}
                 `,
           );
+
+          // Mobile Cards for Account Management
+          const accMobileContainer = document.getElementById(
+            "accounts-mobile-cards",
+          );
+          if (accMobileContainer) {
+            if (Store.accounts.length === 0) {
+              accMobileContainer.innerHTML = `
+                <div style="text-align: center; padding: 28px 16px; color: var(--muted); font-size: 0.9rem;">
+                  No trading engines created yet. Tap "New Engine" above.
+                </div>
+              `;
+            } else {
+              accMobileContainer.innerHTML = Store.accounts
+                .map(
+                  (a) => `
+                <div class="acc-mobile-card">
+                  <div class="acc-card-top">
+                    <div>
+                      <div class="acc-card-title">${a.name}</div>
+                      <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">
+                        ${a.assetClass || "Forex"} · ${a.firm || "Direct"} · ${a.type || "Live"}
+                      </div>
+                    </div>
+                    <div class="acc-card-badges">
+                      <span class="risk-badge risk-low">${a.phase || "Phase 1"}</span>
+                      <span class="risk-badge" style="color: var(--success);">${a.status || "Active"}</span>
+                    </div>
+                  </div>
+                  <div class="acc-card-metrics">
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Balance</div>
+                      <div class="font-mono font-bold" style="font-size: 0.95rem;">$${(a.balance || 0).toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Equity</div>
+                      <div class="font-mono font-bold" style="font-size: 0.95rem; color: var(--primary);">$${(a.equity || 0).toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Risk %</div>
+                      <div class="font-mono font-bold" style="font-size: 0.95rem;">${a.risk || 0}%</div>
+                    </div>
+                  </div>
+                  <div class="acc-card-actions">
+                    <button class="icon-btn tj-action-touch" onclick="openUpdateBalanceModal('${a.id}')" title="Update Balance" aria-label="Update Balance">
+                      <i data-lucide="edit-2" style="width: 17px; height: 17px; color: var(--primary);"></i>
+                    </button>
+                    <button class="icon-btn tj-action-touch" onclick="deleteAccount('${a.id}')" title="Remove" aria-label="Remove">
+                      <i data-lucide="trash-2" style="width: 17px; height: 17px; color: var(--danger);"></i>
+                    </button>
+                  </div>
+                </div>
+              `,
+                )
+                .join("");
+            }
+          }
 
           renderTable(
             "alloc-history",
@@ -21141,21 +21605,10 @@ Keep the response cleanly formatted with lists or bold text.`;
         const container = document.getElementById("debrief-ai-canvas");
         if (!container) return;
 
-        const apiKey =
-          localStorage.getItem("qe_gemini_api_key") ||
-          window.ENV_GEMINI_API_KEY;
-        if (!apiKey) {
-          container.innerHTML = `<span style="color: var(--warning)">Add your Gemini API key in Settings to enable AI summaries.</span>`;
-          return;
-        }
-
         container.innerHTML = `<span style="color:var(--muted)"><i data-lucide="loader-2" class="spin"></i> Generating deep analysis of your session...</span>`;
         lucide.createIcons();
 
         try {
-          const { GoogleGenAI } = await import("https://esm.run/@google/genai");
-          const ai = new GoogleGenAI({ apiKey: apiKey });
-
           const prompt = `Analyze this daily trading session data and provide a concise structured debrief.
     DATA:
     Date: ${debrief.date}
@@ -21178,16 +21631,14 @@ Keep the response cleanly formatted with lists or bold text.`;
     6. A single actionable intention for the next session
     `;
 
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: prompt,
-            config: {
-              systemInstruction:
-                "You are an elite trading performance psychologist and quant coach. Be direct, objective, and deeply insightful.",
-            },
+          const text = await window.callServerGemini({
+            prompt,
+            model: "gemini-3.8-flash",
+            systemInstruction:
+              "You are an elite trading performance psychologist and quant coach. Be direct, objective, and deeply insightful.",
           });
 
-          debrief.aiSummary = response?.text || "No insights generated.";
+          debrief.aiSummary = text || "No insights generated.";
           container.innerHTML = debrief.aiSummary;
           Store.save();
 
@@ -21195,7 +21646,7 @@ Keep the response cleanly formatted with lists or bold text.`;
           renderSessionDebriefModal(debrief);
         } catch (error) {
           console.error("AI Error:", error);
-          container.innerHTML = `<span style="color: var(--danger)">AI Generation failed.</span>`;
+          container.innerHTML = `<span style="color: var(--danger)">AI Generation failed: ${error.message}</span>`;
         }
       };
 
@@ -21229,6 +21680,9 @@ Keep the response cleanly formatted with lists or bold text.`;
             originalRender();
             renderDebriefHistory();
             renderEconomicCalendar();
+            if (window.lucide) {
+              lucide.createIcons();
+            }
           };
         }
       });
@@ -21368,13 +21822,6 @@ Keep the response cleanly formatted with lists or bold text.`;
         const container = document.getElementById("eco-calendar-content");
         if (!container) return;
         const btn = document.getElementById("btn-refresh-eco");
-
-        const apiKey = localStorage.getItem("qe_gemini_api_key");
-        if (!apiKey) {
-          alert("Please add your Gemini API Key in Settings first.");
-          return;
-        }
-
         // Rate Limiting (Under free tier cap: 5 per day)
         const limitsStr = localStorage.getItem("qe_eco_limits");
         let limits = limitsStr ? JSON.parse(limitsStr) : { date: "", count: 0 };
@@ -21396,9 +21843,6 @@ Keep the response cleanly formatted with lists or bold text.`;
         lucide.createIcons();
 
         try {
-          const { GoogleGenAI } = await import("https://esm.run/@google/genai");
-          const ai = new GoogleGenAI({ apiKey: apiKey });
-
           const prompt = `Return strictly TODAY's HIGH impact economic forex events in UTC+3 timezone, AND the top 2 global forex news headlines for today.
 Format your output EXACTLY as this JSON object:
 {
@@ -21406,16 +21850,11 @@ Format your output EXACTLY as this JSON object:
   "headlines": ["Headline 1", "Headline 2"]
 }`;
 
-          const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: prompt,
-            config: {
-              maxOutputTokens: 600,
-              temperature: 0.1,
-            },
+          const rawText = await window.callServerGemini({
+            prompt,
+            model: "gemini-3.8-flash",
+            responseMimeType: "application/json",
           });
-
-          let rawText = response?.text || "[]";
           // Clean markdown if the model hallucinates it
           rawText = rawText
             .replace(/```json/g, "")
@@ -21448,7 +21887,57 @@ Format your output EXACTLY as this JSON object:
           renderEconomicCalendar();
         } catch (error) {
           console.error("API Error:", error);
-          container.innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;">Failed to fetch economic calendar. Ensure you have network access and a valid Gemini API key.</div>`;
+          const cachedStr = localStorage.getItem("qe_eco_calendar");
+          if (cachedStr) {
+            try {
+              const cache = JSON.parse(cachedStr);
+              if (cache.items && cache.items.length > 0) {
+                displayEconomicCalendar(
+                  cache.items,
+                  document.getElementById("eco-pair-filter")?.value || "ALL",
+                  cache.fetchDate,
+                  cache.headlines || [],
+                );
+                const noticeHtml = `<div style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.85rem; color: var(--warning); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                    <span>Could not refresh live events (${error.message}). Displaying cached calendar. Please verify your API key in Settings &gt; Secrets.</span>
+                  </div>
+                </div>`;
+                container.insertAdjacentHTML('afterbegin', noticeHtml);
+                if (window.lucide) lucide.createIcons({ root: container });
+                btn.disabled = false;
+                return;
+              }
+            } catch (e) {}
+          }
+
+          // Fallback: Default standard high-impact market risk sessions so calendar is functional
+          const fallbackEvents = [
+            { time: "10:00", currency: "EUR", event: "European Market Core Session & ECB Policy Window", impact: "High" },
+            { time: "11:30", currency: "GBP", event: "UK Economic Activity & BOE Rate Assessment", impact: "High" },
+            { time: "15:30", currency: "USD", event: "US Core Economic Data (NFP / CPI / Core Retail)", impact: "High" },
+            { time: "17:00", currency: "USD", event: "US ISM & Fed Speaker Risk Window", impact: "High" },
+            { time: "21:00", currency: "USD", event: "FOMC Rate Decision / Monetary Policy Minutes", impact: "High" }
+          ];
+          const fallbackHeadlines = [
+            "Global FX Watch: Major currency pairs consolidating ahead of institutional liquidity windows.",
+            "Risk Management: Volatility spikes expected during 10:00 UTC+3 (London) and 15:30 UTC+3 (New York)."
+          ];
+          displayEconomicCalendar(
+            fallbackEvents,
+            document.getElementById("eco-pair-filter")?.value || "ALL",
+            new Date().toISOString(),
+            fallbackHeadlines
+          );
+          const noticeHtml = `<div style="background: rgba(244, 63, 94, 0.1); border: 1px solid var(--danger); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.85rem; color: var(--danger); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="alert-circle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+              <span>${error.message || "Live AI refresh failed. Displaying standard high-impact forex risk windows. Please verify your API key in Settings > Secrets."}</span>
+            </div>
+          </div>`;
+          container.insertAdjacentHTML('afterbegin', noticeHtml);
+          if (window.lucide) lucide.createIcons({ root: container });
         }
         btn.disabled = false;
       };
