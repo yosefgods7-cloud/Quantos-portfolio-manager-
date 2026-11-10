@@ -734,6 +734,9 @@
       }
 
       @media (max-width: 768px) {
+        .col-2 {
+          grid-column: span 6;
+        }
         .col-3,
         .col-4,
         .col-6,
@@ -843,6 +846,217 @@
       #modal-add-trade select:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      }
+
+      /* Trade Journal Mobile Optimizations */
+      .tj-desktop-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .tj-mobile-actions-wrap {
+        display: none;
+        width: 100%;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .tj-dropdown-wrap {
+        position: relative;
+      }
+      .tj-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 210px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+        z-index: 60;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .tj-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text);
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+      }
+      .tj-dropdown-item:hover, .tj-dropdown-item:active {
+        background: var(--bg);
+      }
+      .tj-dropdown-item i {
+        width: 16px;
+        height: 16px;
+        opacity: 0.85;
+      }
+      .tj-3col-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .tj-mobile-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .tj-mobile-card:hover {
+        border-color: var(--primary);
+      }
+      .tj-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .tj-card-asset {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+      .tj-card-date {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-family: var(--font-mono);
+      }
+      .tj-card-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 10px 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .tj-metric-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .tj-metric-label {
+        font-size: 0.68rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .tj-metric-val {
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+      .tj-card-details {
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+      }
+      .tj-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px 12px;
+        font-size: 0.8rem;
+      }
+      .tj-details-grid .text-muted {
+        color: var(--muted);
+        margin-right: 4px;
+      }
+      .tj-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 4px;
+      }
+      .tj-expand-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 6px;
+      }
+      .tj-expand-btn:hover {
+        color: var(--text);
+        background: var(--bg);
+      }
+      .tj-actions-group {
+        display: flex;
+        gap: 6px;
+      }
+      .tj-action-touch {
+        min-width: 40px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+      }
+      .mobile-only-cards {
+        display: none;
+      }
+      .desktop-only-table {
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        .tj-desktop-actions {
+          display: none !important;
+        }
+        .tj-mobile-actions-wrap {
+          display: flex !important;
+        }
+        .tj-3col-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px !important;
+        }
+        .tj-3col-grid > :nth-child(3) {
+          grid-column: span 2 !important;
+        }
+        .desktop-only-table {
+          display: none !important;
+        }
+        .mobile-only-cards {
+          display: flex !important;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 12px;
+        }
+        #trade-calendar {
+          gap: 4px !important;
+        }
+        #weekly-review-alert,
+        #daily-loss-alert {
+          flex-direction: column !important;
+          align-items: stretch !important;
+          gap: 12px !important;
+        }
+        #weekly-review-alert button,
+        #daily-loss-alert button {
+          width: 100% !important;
+          text-align: center !important;
+        }
       }
     </style>
   </head>
@@ -1504,14 +1718,7 @@
             <h1>Trade Journal & Strategies</h1>
             <p>Log trades, analyze performance, and track backtests</p>
           </div>
-          <div
-            style="
-              display: flex;
-              gap: 8px;
-              flex-wrap: wrap;
-              justify-content: flex-end;
-            "
-          >
+          <div class="tj-desktop-actions">
             <button class="secondary" onclick="openModal('journal-settings')">
               <i data-lucide="settings"></i> Journal Settings
             </button>
@@ -1546,6 +1753,80 @@
             <button onclick="openAddTradeModal()">
               <i data-lucide="plus"></i> Log Trade
             </button>
+          </div>
+          <!-- Mobile Actions: Prominent Log Trade + More Actions Menu -->
+          <div class="tj-mobile-actions-wrap">
+            <button
+              onclick="openAddTradeModal()"
+              style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 16px;
+                font-weight: 600;
+                min-height: 44px;
+              "
+            >
+              <i data-lucide="plus"></i> Log Trade
+            </button>
+            <div class="tj-dropdown-wrap" id="tj-more-menu-wrap">
+              <button
+                type="button"
+                class="secondary tj-more-btn"
+                onclick="toggleTjMoreMenu(event)"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  padding: 10px 14px;
+                  min-height: 44px;
+                "
+                aria-label="More Journal Actions"
+              >
+                <i data-lucide="more-horizontal"></i>
+                <span>Actions</span>
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px"></i>
+              </button>
+              <div id="tj-more-dropdown" class="tj-dropdown-menu" style="display: none">
+                <button
+                  type="button"
+                  class="tj-dropdown-item"
+                  onclick="closeTjMoreMenu(); openWeeklyReviewModal()"
+                >
+                  <i data-lucide="calendar-check"></i> Weekly Review
+                </button>
+                <button
+                  type="button"
+                  class="tj-dropdown-item"
+                  onclick="closeTjMoreMenu(); openSessionDebriefModal()"
+                >
+                  <i data-lucide="clipboard-list"></i> Session Debrief
+                </button>
+                <button
+                  type="button"
+                  class="tj-dropdown-item"
+                  onclick="closeTjMoreMenu(); openModal('modal-pre-trade')"
+                >
+                  <i data-lucide="shield-check" style="color: var(--warning)"></i> Pre-Trade Plan
+                </button>
+                <button
+                  type="button"
+                  class="tj-dropdown-item"
+                  onclick="closeTjMoreMenu(); openModal('add-backtest')"
+                >
+                  <i data-lucide="flask-conical"></i> Log Backtest
+                </button>
+                <button
+                  type="button"
+                  class="tj-dropdown-item"
+                  onclick="closeTjMoreMenu(); openModal('journal-settings')"
+                >
+                  <i data-lucide="settings"></i> Journal Settings
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1629,14 +1910,7 @@
                 Normal
               </div>
             </div>
-            <div
-              class="grid"
-              style="
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-                margin-top: 16px;
-              "
-            >
+            <div class="tj-3col-grid">
               <div
                 style="
                   text-align: center;
@@ -1701,14 +1975,7 @@
                 Cost of breaking discipline
               </p>
             </div>
-            <div
-              class="grid"
-              style="
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-                margin-top: 16px;
-              "
-            >
+            <div class="tj-3col-grid">
               <div
                 style="
                   text-align: center;
@@ -2244,7 +2511,7 @@
               </select>
             </div>
           </div>
-          <div style="overflow-x: auto">
+          <div class="desktop-only-table" style="overflow-x: auto">
             <table id="trades-table">
               <thead>
                 <tr>
@@ -2269,6 +2536,9 @@
                 <!-- Trades go here -->
               </tbody>
             </table>
+          </div>
+          <div id="trades-mobile-cards" class="mobile-only-cards">
+            <!-- Mobile Trade Cards rendered here -->
           </div>
         </div>
 
@@ -15582,6 +15852,44 @@ Keep the response cleanly formatted with lists or bold text.`;
         );
       };
 
+      window.toggleTjMoreMenu = function (e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById("tj-more-dropdown");
+        if (!menu) return;
+        const isShown =
+          menu.style.display === "flex" || menu.style.display === "block";
+        menu.style.display = isShown ? "none" : "flex";
+      };
+
+      window.closeTjMoreMenu = function () {
+        const menu = document.getElementById("tj-more-dropdown");
+        if (menu) menu.style.display = "none";
+      };
+
+      document.addEventListener("click", function (e) {
+        const wrap = document.getElementById("tj-more-menu-wrap");
+        if (wrap && !wrap.contains(e.target)) {
+          window.closeTjMoreMenu();
+        }
+      });
+
+      window.toggleTradeCardDetails = function (tradeId) {
+        const detailsEl = document.getElementById(
+          "tj-card-details-" + tradeId,
+        );
+        const iconEl = document.getElementById("tj-expand-icon-" + tradeId);
+        const textEl = document.getElementById("tj-expand-text-" + tradeId);
+        if (!detailsEl) return;
+        const isHidden = detailsEl.style.display === "none";
+        detailsEl.style.display = isHidden ? "block" : "none";
+        if (iconEl) {
+          iconEl.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+        }
+        if (textEl) {
+          textEl.textContent = isHidden ? "Hide" : "Details";
+        }
+      };
+
       window.renderTradeTable = function () {
         const assetFilter = document.getElementById("filter-asset").value;
         const sessionFilter = document.getElementById("filter-session").value;
@@ -15593,6 +15901,7 @@ Keep the response cleanly formatted with lists or bold text.`;
           return assetMatch && sessionMatch;
         });
 
+        // 1. Desktop Table Rendering
         renderTable("trades-table-body", filteredTrades, (t) => {
           let resultColor = "var(--muted)";
           if (t.resultType === "Win" || t.resultType === "Partial Win")
@@ -15639,6 +15948,118 @@ Keep the response cleanly formatted with lists or bold text.`;
                 </tr>
             `;
         });
+
+        // 2. Mobile Responsive Cards Rendering
+        const mobileContainer = document.getElementById("trades-mobile-cards");
+        if (mobileContainer) {
+          if (filteredTrades.length === 0) {
+            mobileContainer.innerHTML = `
+              <div style="text-align: center; padding: 24px 16px; color: var(--muted); font-size: 0.9rem;">
+                No trades match the selected filters.
+              </div>
+            `;
+          } else {
+            mobileContainer.innerHTML = filteredTrades
+              .map((t) => {
+                let resultColor = "var(--muted)";
+                let resultBg = "rgba(148, 163, 184, 0.1)";
+                if (t.resultType === "Win" || t.resultType === "Partial Win") {
+                  resultColor = "var(--success)";
+                  resultBg = "rgba(16, 185, 129, 0.12)";
+                } else if (t.resultType === "Loss") {
+                  resultColor = "var(--danger)";
+                  resultBg = "rgba(244, 63, 94, 0.12)";
+                } else if (t.resultType === "Break Even") {
+                  resultColor = "var(--warning)";
+                  resultBg = "rgba(234, 179, 8, 0.12)";
+                }
+
+                let pnlColor = "var(--muted)";
+                if (t.pnlAmount > 0) pnlColor = "var(--success)";
+                else if (t.pnlAmount < 0) pnlColor = "var(--danger)";
+
+                const typeBg =
+                  t.tradeType === "Buy"
+                    ? "rgba(16, 185, 129, 0.15)"
+                    : "rgba(244, 63, 94, 0.15)";
+                const typeColor =
+                  t.tradeType === "Buy" ? "var(--success)" : "var(--danger)";
+
+                return `
+                  <div class="tj-mobile-card" id="tj-card-${t.id}">
+                    <div class="tj-card-top">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="tj-card-asset">${t.asset}</span>
+                        <span class="risk-badge" style="background: ${typeBg}; color: ${typeColor}; font-weight: 700;">${t.tradeType || "-"}</span>
+                        <span class="risk-badge" style="background: ${resultBg}; color: ${resultColor}; font-weight: 600;">${t.resultType || "-"}</span>
+                      </div>
+                      <div class="tj-card-date">${t.date} ${t.entryTime || ""}</div>
+                    </div>
+
+                    <div class="tj-card-metrics">
+                      <div class="tj-metric-item">
+                        <span class="tj-metric-label">Actual Return</span>
+                        <span class="tj-metric-val font-mono" style="color: ${t.r >= 0 ? "var(--success)" : "var(--danger)"};">
+                          ${t.r > 0 ? "+" : ""}${(t.r || 0).toFixed(2)}R
+                        </span>
+                      </div>
+                      <div class="tj-metric-item">
+                        <span class="tj-metric-label">Net P&L</span>
+                        <span class="tj-metric-val font-mono" style="color: ${pnlColor};">
+                          ${t.pnlAmount > 0 ? "+" : ""}$${(t.pnlAmount || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div class="tj-metric-item">
+                        <span class="tj-metric-label">Setup / Grade</span>
+                        <span class="tj-metric-val" style="font-size: 0.82rem; font-weight: 500;">
+                          ${t.setupType || "-"} <span style="opacity: 0.5;">·</span> ${t.tradeGrade || "-"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div id="tj-card-details-${t.id}" class="tj-card-details" style="display: none;">
+                      <div class="tj-details-grid">
+                        <div><span class="text-muted">Session:</span> ${t.session || "-"}</div>
+                        <div><span class="text-muted">Planned R:</span> ${(t.plannedR || 0).toFixed(2)}R</div>
+                        <div><span class="text-muted">Duration:</span> ${t.duration || "-"}</div>
+                        <div><span class="text-muted">Quality:</span> ${t.qualityScore ? t.qualityScore + "/10" : "-"}</div>
+                        <div><span class="text-muted">News:</span> ${t.newsEvent || "None"}</div>
+                        <div><span class="text-muted">Fees/Slip:</span> $${(t.fees || 0).toFixed(2)}</div>
+                        ${t.mistake && t.mistake !== "None" ? `<div style="grid-column: span 2; color: var(--danger);"><span class="text-muted">Mistake:</span> ${t.mistake}</div>` : ""}
+                        ${t.preEmotion ? `<div><span class="text-muted">Pre-Emotion:</span> ${t.preEmotion}</div>` : ""}
+                        ${t.postEmotion ? `<div><span class="text-muted">Post-Emotion:</span> ${t.postEmotion}</div>` : ""}
+                        ${t.tags && (Array.isArray(t.tags) ? t.tags.length : t.tags) ? `<div style="grid-column: span 2;"><span class="text-muted">Tags:</span> ${Array.isArray(t.tags) ? t.tags.join(", ") : t.tags}</div>` : ""}
+                        ${t.notes ? `<div style="grid-column: span 2; font-style: italic; background: var(--bg); padding: 8px; border-radius: 6px;"><span class="text-muted">Notes:</span> ${t.notes}</div>` : ""}
+                      </div>
+                    </div>
+
+                    <div class="tj-card-footer">
+                      <button type="button" class="tj-expand-btn" onclick="toggleTradeCardDetails('${t.id}')" aria-label="Toggle details">
+                        <span id="tj-expand-text-${t.id}">Details</span>
+                        <i data-lucide="chevron-down" id="tj-expand-icon-${t.id}" style="width: 16px; height: 16px; transition: transform 0.2s;"></i>
+                      </button>
+                      <div class="tj-actions-group">
+                        <button class="icon-btn tj-action-touch" onclick="viewTrade('${t.id}')" title="View Trade Details" aria-label="View">
+                          <i data-lucide="eye" style="color: var(--warning); width: 17px; height: 17px;"></i>
+                        </button>
+                        <button class="icon-btn tj-action-touch" onclick="editTrade('${t.id}')" title="Edit Trade" aria-label="Edit">
+                          <i data-lucide="edit-2" style="color: var(--primary); width: 17px; height: 17px;"></i>
+                        </button>
+                        <button class="icon-btn tj-action-touch" onclick="duplicateTrade('${t.id}')" title="Duplicate Trade" aria-label="Duplicate">
+                          <i data-lucide="copy" style="color: var(--text); width: 17px; height: 17px;"></i>
+                        </button>
+                        <button class="icon-btn tj-action-touch" onclick="deleteTrade('${t.id}')" title="Delete Trade" aria-label="Delete">
+                          <i data-lucide="trash-2" style="color: var(--danger); width: 17px; height: 17px;"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              })
+              .join("");
+          }
+        }
+
         lucide.createIcons();
       };
 
