@@ -1,6 +1,6 @@
 {
-  "summary":  "Comprehensive mobile optimization plan across core application views: Account Management, Prop Tracker / Capital Management System, Dashboard, and Finance. Introduces responsive cards for account and engine data tables, adaptive 2-column KPI grids, and mobile action dropdown menus for multi-button headers.",
-  "updatedAt":  "2026-11-10T10:13:12.817276942Z",
+  "summary":  "Implementation plan for adding a live, zero-cost trading session and killzone time indicator to the home page dashboard. Defines the full-width layout, countdown engine, status indicators, and UTC/local time tracking.",
+  "updatedAt":  "2026-11-11T13:35:37.341434708Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
