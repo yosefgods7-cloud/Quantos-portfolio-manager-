@@ -1,6 +1,0 @@
-{
-  "summary":  "Implementation plan for adding a live, zero-cost trading session and killzone time indicator to the home page dashboard. Defines the full-width layout, countdown engine, status indicators, and UTC/local time tracking.",
-  "updatedAt":  "2026-11-11T13:35:37.341434708Z",
-  "requestFeedback":  true,
-  "userFacing":  true
-}

@@ -281,6 +281,93 @@ app.get('/api/market/ticker', async (_req, res) => {
   }
 });
 
+// Telegram Alert Relay Endpoint (Bypasses Browser CORS & provides detailed error diagnostics)
+app.post('/api/telegram/send', async (req, res) => {
+  try {
+    const { token, chatId, text, parse_mode = 'HTML' } = req.body;
+    if (!token || !chatId || !text) {
+      return res.status(400).json({ ok: false, error: 'Bot Token, Chat ID, and message text are required.' });
+    }
+
+    let cleanToken = String(token).trim().replace(/\s+/g, '');
+    if (cleanToken.toLowerCase().startsWith('bot')) {
+      cleanToken = cleanToken.substring(3);
+    }
+    const cleanChatId = String(chatId).trim();
+
+    const telegramUrl = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
+
+    // Attempt 1: with parse_mode
+    let response = await fetch(telegramUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: cleanChatId,
+        text: text,
+        parse_mode: parse_mode,
+      }),
+    });
+
+    let data: any = await response.json().catch(() => ({}));
+
+    // If failed due to HTML parse error, try standard blockquote or plain text
+    if (!response.ok && data?.description && (data.description.includes("can't parse entities") || data.description.includes('Character') || data.description.includes('tag'))) {
+      console.warn('Telegram HTML parse warning, attempting fallback:', data.description);
+      
+      // Step A: if contains expandable blockquote, try standard blockquote first
+      if (text.includes('<blockquote expandable>')) {
+        const standardHtml = text.replace(/<blockquote expandable>/g, '<blockquote>');
+        response = await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: cleanChatId,
+            text: standardHtml,
+            parse_mode: parse_mode,
+          }),
+        });
+        data = await response.json().catch(() => ({}));
+      }
+
+      // Step B: if still failing, retry cleanly as plain text
+      if (!response.ok && data?.description && (data.description.includes("can't parse entities") || data.description.includes('Character') || data.description.includes('tag'))) {
+        const plainText = text.replace(/<[^>]*>/g, '');
+        response = await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: cleanChatId,
+            text: plainText,
+          }),
+        });
+        data = await response.json().catch(() => ({}));
+      }
+    }
+
+    if (!response.ok || !data.ok) {
+      let friendlyError = data?.description || `Telegram API error (${response.status})`;
+      if (friendlyError.includes('chat not found')) {
+        friendlyError += '. Tip: Make sure you opened your bot in Telegram and clicked /start, and that your Chat ID is correct.';
+      } else if (friendlyError.includes('Unauthorized')) {
+        friendlyError += '. Tip: Double check your Bot Token from @BotFather.';
+      } else if (friendlyError.includes('Not Found') || response.status === 404) {
+        friendlyError = 'Invalid Bot Token. Ensure your Bot Token has the full format (e.g. 123456789:ABC-DEF...) from @BotFather.';
+      } else if (friendlyError.includes('bot was blocked')) {
+        friendlyError += '. Tip: You have blocked this bot on Telegram. Unblock it to receive alerts.';
+      }
+      return res.status(response.status >= 400 && response.status < 600 ? response.status : 400).json({
+        ok: false,
+        error: friendlyError,
+      });
+    }
+
+    res.json({ ok: true, result: data.result });
+  } catch (err: any) {
+    console.error('Telegram Server Relay Error:', err);
+    res.status(500).json({ ok: false, error: err?.message || 'Failed to relay telegram alert' });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', hasGeminiKey: Boolean(process.env.GEMINI_API_KEY) });

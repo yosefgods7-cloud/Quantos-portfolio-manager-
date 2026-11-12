@@ -1153,6 +1153,46 @@
         gap: 16px;
         margin-bottom: 24px;
       }
+      .finance-stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .finance-split-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+      .finance-mobile-nav {
+        display: none;
+      }
+      .finance-card-row {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .finance-card-left {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+      .finance-card-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
 
       @media (max-width: 768px) {
         .tj-desktop-actions,
@@ -1162,6 +1202,58 @@
         .tj-mobile-actions-wrap,
         .view-header-mobile {
           display: flex !important;
+        }
+        .finance-mobile-nav {
+          display: flex !important;
+          gap: 8px;
+          padding: 8px 0 12px;
+          margin-bottom: 16px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          border-bottom: 1px solid var(--border);
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          background: var(--bg);
+        }
+        .finance-nav-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          white-space: nowrap;
+          border-radius: 6px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          color: var(--muted);
+          cursor: pointer;
+          min-height: 40px;
+          transition: all 0.15s ease;
+        }
+        .finance-nav-btn.active {
+          background: var(--primary);
+          color: #fff;
+          border-color: var(--primary);
+        }
+        .finance-split-grid {
+          grid-template-columns: 1fr !important;
+          gap: 16px !important;
+          margin-bottom: 16px !important;
+        }
+        .finance-split-grid canvas {
+          max-height: 220px !important;
+          width: 100% !important;
+        }
+        .finance-header-flex {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+        }
+        .finance-header-flex button {
+          width: 100% !important;
+          justify-content: center !important;
         }
         .tj-3col-grid {
           grid-template-columns: repeat(2, 1fr) !important;
@@ -1173,7 +1265,17 @@
         .cms-summary-grid,
         .finance-stats-grid {
           grid-template-columns: repeat(2, 1fr) !important;
-          gap: 12px !important;
+          gap: 10px !important;
+        }
+        .finance-stat-card {
+          padding: 10px 12px !important;
+        }
+        .finance-stat-card .stat-label {
+          font-size: 0.72rem !important;
+          line-height: 1.2 !important;
+        }
+        .finance-stat-card .stat-value {
+          font-size: 1.15rem !important;
         }
         .cms-allocation-grid {
           grid-template-columns: 1fr !important;
@@ -1927,71 +2029,6 @@
             <div class="stat-delta delta-up">MTD</div>
           </div>
 
-          <div class="card col-12" data-id="trading-sessions" id="trading-sessions-bar" style="padding: 20px 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--primary);"></i>
-                  <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text);">Live Trading Sessions</span>
-                </div>
-                <div id="session-overlap-badge" style="display: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; background: rgba(0, 210, 255, 0.12); border: 1px solid var(--primary); color: var(--primary); letter-spacing: 0.4px;">
-                  PEAK OVERLAP (LONDON + NY)
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 16px; font-size: 0.82rem; font-family: var(--font-mono); color: var(--muted); flex-wrap: wrap;">
-                <span>UTC: <strong id="clock-utc" style="color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</strong></span>
-                <span>Local: <strong id="clock-local" style="color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</strong></span>
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;" id="trading-sessions-grid">
-              <!-- Asian Range -->
-              <div class="session-card" id="session-asian" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                  <div>
-                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">Asian Range</div>
-                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">00:00 – 08:00 UTC (Tokyo / Sydney)</div>
-                  </div>
-                  <span id="badge-asian" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-                  <span id="label-asian" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
-                  <span id="countdown-asian" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
-                </div>
-              </div>
-
-              <!-- London Open -->
-              <div class="session-card" id="session-london" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                  <div>
-                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">London Open</div>
-                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">07:00 – 16:00 UTC (Core: 07:00 – 10:00)</div>
-                  </div>
-                  <span id="badge-london" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-                  <span id="label-london" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
-                  <span id="countdown-london" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
-                </div>
-              </div>
-
-              <!-- New York Open -->
-              <div class="session-card" id="session-ny" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                  <div>
-                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">New York Open</div>
-                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">12:00 – 21:00 UTC (Core: 12:00 – 15:00)</div>
-                  </div>
-                  <span id="badge-ny" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-                  <span id="label-ny" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
-                  <span id="countdown-ny" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Live Macro Price Index Bar (Homepage Dashboard) -->
           <div class="card col-12" data-id="macro-price-index" id="macro-price-bar" style="padding: 20px 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
@@ -2089,6 +2126,72 @@
                 <div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; align-items: baseline; justify-content: space-between;">
                   <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;">Live Exchange</span>
                   <span id="dash-price-EURUSD" class="dash-price-val" style="font-family: var(--font-mono); font-size: 1.28rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; transition: color 0.4s ease, text-shadow 0.4s ease;">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Trading Sessions Bar -->
+          <div class="card col-12" data-id="trading-sessions" id="trading-sessions-bar" style="padding: 20px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                  <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text);">Live Trading Sessions</span>
+                </div>
+                <div id="session-overlap-badge" style="display: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; background: rgba(0, 210, 255, 0.12); border: 1px solid var(--primary); color: var(--primary); letter-spacing: 0.4px;">
+                  PEAK OVERLAP (LONDON + NY)
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 16px; font-size: 0.82rem; font-family: var(--font-mono); color: var(--muted); flex-wrap: wrap;">
+                <span>UTC: <strong id="clock-utc" style="color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</strong></span>
+                <span>Local: <strong id="clock-local" style="color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</strong></span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;" id="trading-sessions-grid">
+              <!-- Asian Range -->
+              <div class="session-card" id="session-asian" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">Asian Range</div>
+                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">00:00 – 08:00 UTC (Tokyo / Sydney)</div>
+                  </div>
+                  <span id="badge-asian" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
+                </div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+                  <span id="label-asian" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
+                  <span id="countdown-asian" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
+                </div>
+              </div>
+
+              <!-- London Open -->
+              <div class="session-card" id="session-london" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">London Open</div>
+                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">07:00 – 16:00 UTC (Core: 07:00 – 10:00)</div>
+                  </div>
+                  <span id="badge-london" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
+                </div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+                  <span id="label-london" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
+                  <span id="countdown-london" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
+                </div>
+              </div>
+
+              <!-- New York Open -->
+              <div class="session-card" id="session-ny" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">New York Open</div>
+                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">12:00 – 21:00 UTC (Core: 12:00 – 15:00)</div>
+                  </div>
+                  <span id="badge-ny" class="session-badge" style="font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">--</span>
+                </div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+                  <span id="label-ny" style="font-size: 0.78rem; color: var(--muted);">Next Window</span>
+                  <span id="countdown-ny" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;">--:--:--</span>
                 </div>
               </div>
             </div>
@@ -4686,24 +4789,50 @@
                 >
                   <i data-lucide="target"></i> Set Budget
                 </button>
+                <button
+                  type="button"
+                  class="view-dropdown-item"
+                  onclick="closeAllGenericMenus(); generateFinanceReport()"
+                >
+                  <i data-lucide="file-text"></i> Monthly Report
+                </button>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Mobile Segmented Tab Selector -->
+        <div class="finance-mobile-nav" id="finance-mobile-nav">
+          <button class="finance-nav-btn active" onclick="switchFinanceTab('all', this)">
+            <i data-lucide="layout-grid" style="width: 14px; height: 14px"></i>
+            <span>Overview</span>
+          </button>
+          <button class="finance-nav-btn" onclick="switchFinanceTab('budget', this)">
+            <i data-lucide="wallet" style="width: 14px; height: 14px"></i>
+            <span>Budget & Spend</span>
+          </button>
+          <button class="finance-nav-btn" onclick="switchFinanceTab('income', this)">
+            <i data-lucide="trending-up" style="width: 14px; height: 14px"></i>
+            <span>Passive Income</span>
+          </button>
+        </div>
+
         <div class="grid">
           <!-- Budget & Expense Dashboard -->
-          <div class="card col-12">
+          <div class="card col-12" id="finance-card-budget">
             <div
-              class="header"
+              class="header finance-header-flex"
               style="
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
               "
             >
-              <h2>Budget & Expenses</h2>
-              <button class="secondary" onclick="generateFinanceReport()">
+              <div>
+                <h2 style="margin: 0;">Budget & Expenses</h2>
+                <div style="font-size: 0.82rem; color: var(--muted); margin-top: 2px;">Monthly cash flow and category limits</div>
+              </div>
+              <button class="secondary" onclick="generateFinanceReport()" style="min-height: 40px;">
                 <i data-lucide="file-text"></i> Generate Monthly Report
               </button>
             </div>
@@ -4724,22 +4853,22 @@
               <span id="finance-budget-alert-text"></span>
             </div>
             <div class="finance-stats-grid">
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Total Monthly Spend</div>
-                <div class="stat-value" id="finance-total-spend">$0.00</div>
+                <div class="stat-value font-mono" id="finance-total-spend">$0.00</div>
               </div>
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Total Budget</div>
-                <div class="stat-value" id="finance-total-budget">$0.00</div>
+                <div class="stat-value font-mono" id="finance-total-budget">$0.00</div>
               </div>
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Budget Usage</div>
-                <div class="stat-value" id="finance-budget-usage">0%</div>
+                <div class="stat-value font-mono" id="finance-budget-usage">0%</div>
               </div>
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Remaining Budget</div>
                 <div
-                  class="stat-value"
+                  class="stat-value font-mono"
                   id="finance-remaining-budget"
                   style="color: var(--success)"
                 >
@@ -4748,20 +4877,15 @@
               </div>
             </div>
 
-            <div
-              class="grid"
-              style="
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-                margin-bottom: 24px;
-              "
-            >
+            <div class="finance-split-grid">
               <div>
                 <h3
                   style="
-                    font-size: 1rem;
+                    font-size: 0.95rem;
                     margin-bottom: 12px;
                     color: var(--muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
                   "
                 >
                   Category Breakdown
@@ -4776,94 +4900,100 @@
               <div>
                 <h3
                   style="
-                    font-size: 1rem;
+                    font-size: 0.95rem;
                     margin-bottom: 12px;
                     color: var(--muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
                   "
                 >
-                  Spending Trend
+                  Spending Trend (30 Days)
                 </h3>
-                <canvas
-                  id="financeSpendingChart"
-                  style="max-height: 250px"
-                ></canvas>
+                <div style="position: relative; height: 220px; width: 100%;">
+                  <canvas
+                    id="financeSpendingChart"
+                    style="max-height: 220px; width: 100%;"
+                  ></canvas>
+                </div>
               </div>
             </div>
 
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Note</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="finance-expenses-body">
-                  <!-- Injected -->
-                </tbody>
-              </table>
+            <div style="margin-top: 16px;">
+              <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;">
+                Recent Expenses
+              </h3>
+              <!-- Desktop Table -->
+              <div class="table-container desktop-only-table">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Note</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="finance-expenses-body">
+                    <!-- Injected -->
+                  </tbody>
+                </table>
+              </div>
+              <!-- Mobile Card List -->
+              <div id="finance-expenses-mobile-cards" class="mobile-only-cards">
+                <!-- Injected by renderFinance -->
+              </div>
             </div>
           </div>
 
           <!-- Dividend & Passive Income Dashboard -->
-          <div class="card col-12">
+          <div class="card col-12" id="finance-card-income">
             <div class="header">
-              <h2>Dividend & Passive Income</h2>
-            </div>
-            <div
-              class="grid"
-              style="
-                grid-template-columns: repeat(4, 1fr);
-                gap: 16px;
-                margin-bottom: 24px;
-              "
-            >
               <div>
-                <div class="stat-label">Total Annual Income (Proj)</div>
+                <h2 style="margin: 0;">Dividend & Passive Income</h2>
+                <div style="font-size: 0.82rem; color: var(--muted); margin-top: 2px;">Portfolio holdings and trailing annual yield</div>
+              </div>
+            </div>
+            <div class="finance-stats-grid">
+              <div class="finance-stat-card">
+                <div class="stat-label">Annual Income (Proj)</div>
                 <div
-                  class="stat-value"
+                  class="stat-value font-mono"
                   id="finance-annual-income"
                   style="color: var(--success)"
                 >
                   $0.00
                 </div>
               </div>
-              <div>
-                <div class="stat-label">Total Monthly Income (Avg)</div>
-                <div class="stat-value" id="finance-monthly-income">$0.00</div>
+              <div class="finance-stat-card">
+                <div class="stat-label">Monthly Income (Avg)</div>
+                <div class="stat-value font-mono" id="finance-monthly-income">$0.00</div>
               </div>
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Portfolio Yield</div>
-                <div class="stat-value" id="finance-portfolio-yield">0.00%</div>
+                <div class="stat-value font-mono" id="finance-portfolio-yield">0.00%</div>
               </div>
-              <div>
+              <div class="finance-stat-card">
                 <div class="stat-label">Total Invested</div>
-                <div class="stat-value" id="finance-total-invested">$0.00</div>
+                <div class="stat-value font-mono" id="finance-total-invested">$0.00</div>
               </div>
             </div>
 
-            <div
-              class="grid"
-              style="
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-                margin-bottom: 24px;
-              "
-            >
+            <div class="finance-split-grid">
               <div>
                 <h3
                   style="
-                    font-size: 1rem;
+                    font-size: 0.95rem;
                     margin-bottom: 12px;
                     color: var(--muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
                   "
                 >
                   Stock Holdings
                 </h3>
-                <div class="table-container">
+                <!-- Desktop Table -->
+                <div class="table-container desktop-only-table">
                   <table class="data-table">
                     <thead>
                       <tr>
@@ -4878,43 +5008,58 @@
                     </tbody>
                   </table>
                 </div>
+                <!-- Mobile Card List -->
+                <div id="finance-stocks-mobile-cards" class="mobile-only-cards">
+                  <!-- Injected by renderFinance -->
+                </div>
               </div>
               <div>
                 <h3
                   style="
-                    font-size: 1rem;
+                    font-size: 0.95rem;
                     margin-bottom: 12px;
                     color: var(--muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
                   "
                 >
-                  Income Trend
+                  Income Trend (12 Months)
                 </h3>
-                <canvas
-                  id="financeDividendChart"
-                  style="max-height: 250px"
-                ></canvas>
+                <div style="position: relative; height: 220px; width: 100%;">
+                  <canvas
+                    id="financeDividendChart"
+                    style="max-height: 220px; width: 100%;"
+                  ></canvas>
+                </div>
               </div>
             </div>
 
-            <h3
-              style="font-size: 1rem; margin-bottom: 12px; color: var(--muted)"
-            >
-              Recent Dividends
-            </h3>
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Symbol</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="finance-dividends-body">
-                  <!-- Injected -->
-                </tbody>
-              </table>
+            <div style="margin-top: 16px;">
+              <h3
+                style="font-size: 0.95rem; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;"
+              >
+                Recent Dividends
+              </h3>
+              <!-- Desktop Table -->
+              <div class="table-container desktop-only-table">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Symbol</th>
+                      <th>Amount</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="finance-dividends-body">
+                    <!-- Injected -->
+                  </tbody>
+                </table>
+              </div>
+              <!-- Mobile Card List -->
+              <div id="finance-dividends-mobile-cards" class="mobile-only-cards">
+                <!-- Injected by renderFinance -->
+              </div>
             </div>
           </div>
         </div>
@@ -6716,15 +6861,18 @@
                     />
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 8px">
                   <div class="input-wrapper">
                     <i data-lucide="message-circle"></i>
                     <input
                       type="text"
                       id="webhook-telegram-chat"
-                      placeholder="Chat ID (e.g. -100123...)"
+                      placeholder="Chat ID (numeric, e.g. 123456789 or -100...)"
                       onchange="window.saveNotificationSettings()"
                     />
+                  </div>
+                  <div style="font-size: 0.76rem; color: var(--muted); margin-top: 5px; line-height: 1.4;">
+                    ℹ️ <b>Quick Setup:</b> 1) Create bot via <span style="color:var(--primary)">@BotFather</span> & paste token above. 2) Message your bot and click <b>Start</b> (send <code>/start</code>). 3) Enter your numeric Chat ID (find it by messaging <span style="color:var(--primary)">@userinfobot</span>).
                   </div>
                 </div>
                 <div style="margin-bottom: 16px">
@@ -7031,10 +7179,17 @@
               </button>
               <button
                 class="secondary"
+                onclick="window.NotificationEngine.test('monthly')"
+                style="background: var(--bg)"
+              >
+                <i data-lucide="bar-chart-2"></i> Test Monthly
+              </button>
+              <button
+                class="secondary"
                 onclick="window.NotificationEngine.preview()"
                 style="background: var(--bg)"
               >
-                <i data-lucide="eye"></i> Preview in App
+                <i data-lucide="eye"></i> Preview Card
               </button>
             </div>
 
@@ -16421,6 +16576,18 @@ Keep the response cleanly formatted with lists or bold text.`;
 
         // Check if session debrief should be triggered
         checkSessionDebriefTrigger(newTrade);
+
+        // Dispatch real-time Telegram / Webhook alerts
+        try {
+          if (window.NotificationEngine && typeof window.NotificationEngine.dispatchTradeLogged === "function") {
+            window.NotificationEngine.dispatchTradeLogged(newTrade);
+          }
+          if (typeof window.evaluateRealTimeAlerts === "function") {
+            window.evaluateRealTimeAlerts(newTrade);
+          }
+        } catch (notifErr) {
+          console.warn("Failed to dispatch trade notification:", notifErr);
+        }
       };
 
       window.checkSessionDebriefTrigger = function (newTrade) {
