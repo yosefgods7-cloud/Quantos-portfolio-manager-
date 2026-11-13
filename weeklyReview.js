@@ -295,7 +295,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Section 5 of 7 — Trader Assessment</div>
                
                ${!isEditable && data.manual ? `
-                   <div style="display: grid; gap: 16px; background: rgba(255,255,255,0.02); padding: 24px; border-radius: 8px;">
+                   <div style="display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px;">
                        <div><strong style="color: var(--muted);">Overall Rating:</strong> ${"⭐".repeat(data.manual.rating || 0)}</div>
                        <div><strong style="color: var(--muted);">What went well:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.wentWell}</p></div>
                        <div><strong style="color: var(--muted);">What needs improvement:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.wentWrong}</p></div>
@@ -358,7 +358,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Section 6 of 7 — Next Week Intentions</div>
                
                ${!isEditable && data.manual ? `
-                   <div style="display: grid; gap: 16px; background: rgba(255,255,255,0.02); padding: 24px; border-radius: 8px;">
+                   <div style="display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px;">
                        <div><strong style="color: var(--muted);">Primary Focus:</strong> ${data.manual.nextFocus}</div>
                        <div><strong style="color: var(--muted);">Target R:</strong> +${data.manual.targetR}R</div>
                        <div><strong style="color: var(--muted);">Rule to Enforce:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.ruleEnforce}</p></div>
@@ -497,7 +497,7 @@ window.generateWeeklyReviewAI = async function(reviewData) {
     try {
         const text = await window.callServerGemini({
             prompt,
-            model: "gemini-3.8-flash",
+            model: window.Store?.settings?.geminiModel || "gemini-4-hydrogen",
             systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."
         });
         reviewData.aiSummary = (text || "").replace(/```html/g, '').replace(/```/g, '');

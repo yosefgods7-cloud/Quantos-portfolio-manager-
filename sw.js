@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quantos-v9';
+const CACHE_NAME = 'quantos-v11';
 const ASSETS = [
     './',
     './index.html',
@@ -31,7 +31,18 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
-    if (e.request.url.includes('generativelanguage.googleapis.com')) return;
+    const reqUrl = e.request.url;
+    if (
+        reqUrl.includes('/api/') ||
+        reqUrl.includes('generativelanguage.googleapis.com') ||
+        reqUrl.includes('swissquote.com') ||
+        reqUrl.includes('finance.yahoo.com') ||
+        reqUrl.includes('api.gold-api.com') ||
+        reqUrl.includes('api.binance.com') ||
+        reqUrl.includes('open.er-api.com')
+    ) {
+        return;
+    }
 
     const isHtml = e.request.headers.get('accept')?.includes('text/html') || e.request.url.endsWith('.html') || e.request.url.endsWith('/');
 

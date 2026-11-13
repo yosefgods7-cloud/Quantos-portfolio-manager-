@@ -27,6 +27,7 @@
   /* Extended Palette */
   --surface: #121215;
   --surface-hover: #1f1f23;
+  --ticker-bg: rgba(18, 18, 22, 0.95);
   --accent-secondary: #8b5cf6;
   --accent-tertiary: #06b6d4;
 
@@ -135,6 +136,7 @@
   /* Extended Palette */
   --surface: #f1f5f9;
   --surface-hover: #e2e8f0;
+  --ticker-bg: rgba(255, 255, 255, 0.94);
   --accent-secondary: #8b5cf6;
   --accent-tertiary: #06b6d4;
 

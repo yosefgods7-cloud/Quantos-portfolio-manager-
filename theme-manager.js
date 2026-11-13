@@ -36,7 +36,10 @@ class ThemeManager {
    */
   loadTheme() {
     const saved = localStorage.getItem('qe_selected_theme');
-    return saved || 'default';
+    if (saved) return saved;
+    const legacy = localStorage.getItem('qe_theme');
+    if (legacy === 'light') return 'light';
+    return 'default';
   }
 
   /**
@@ -44,6 +47,11 @@ class ThemeManager {
    */
   saveTheme(themeId) {
     localStorage.setItem('qe_selected_theme', themeId);
+    if (themeId === 'light' || themeId === 'arctic-light') {
+      localStorage.setItem('qe_theme', 'light');
+    } else if (themeId === 'default' || themeId === 'dark') {
+      localStorage.setItem('qe_theme', 'dark');
+    }
     this.currentTheme = themeId;
   }
 
@@ -53,8 +61,8 @@ class ThemeManager {
   applyTheme(themeId) {
     const htmlElement = document.documentElement;
     
-    if (themeId === 'default') {
-      htmlElement.removeAttribute('data-theme');
+    if (themeId === 'default' || themeId === 'dark') {
+      htmlElement.setAttribute('data-theme', 'dark');
     } else {
       htmlElement.setAttribute('data-theme', themeId);
     }
@@ -159,19 +167,14 @@ class ThemeManager {
     const themeText = document.getElementById('theme-text');
 
     if (themeIcon && themeText) {
-      const isDark = this.currentTheme === 'default' || 
-                     this.currentTheme === 'quantum-dark' || 
-                     this.currentTheme === 'obsidian' ||
-                     this.currentTheme === 'emerald' ||
-                     this.currentTheme === 'slate-pro' ||
-                     this.currentTheme === 'cyberpunk';
+      const isDark = this.currentTheme !== 'light' && this.currentTheme !== 'arctic-light';
 
       if (isDark) {
-        themeIcon.setAttribute('data-lucide', 'moon');
-        themeText.textContent = 'Dark Mode';
-      } else {
         themeIcon.setAttribute('data-lucide', 'sun');
         themeText.textContent = 'Light Mode';
+      } else {
+        themeIcon.setAttribute('data-lucide', 'moon');
+        themeText.textContent = 'Dark Mode';
       }
 
       // Re-render Lucide icons
