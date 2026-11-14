@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quantos-v18';
+const CACHE_NAME = 'quantos-v19';
 const ASSETS = [
     './',
     './index.html',
@@ -9,6 +9,33 @@ const ASSETS = [
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
+const ALLOWED_CDN_ORIGINS = new Set([
+    'https://unpkg.com',
+    'https://cdn.jsdelivr.net',
+    'https://cdnjs.cloudflare.com',
+    'https://cdn.sheetjs.com',
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com'
+]);
+
+function isCacheableRequest(request) {
+    try {
+        const parsed = new URL(request.url);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+        return parsed.origin === self.location.origin || ALLOWED_CDN_ORIGINS.has(parsed.origin);
+    } catch {
+        return false;
+    }
+}
+
+function isCacheableResponse(response) {
+    return Boolean(
+        response &&
+        response.ok &&
+        response.status === 200 &&
+        (response.type === 'basic' || response.type === 'cors')
+    );
+}
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();
@@ -31,6 +58,7 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
+    if (!isCacheableRequest(e.request)) return;
     const reqUrl = e.request.url;
     if (
         reqUrl.includes('/api/') ||
@@ -50,10 +78,12 @@ self.addEventListener('fetch', (e) => {
         // Network-first for HTML
         e.respondWith(
             fetch(e.request).then((response) => {
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(e.request, responseClone);
-                });
+                if (isCacheableResponse(response)) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(e.request, responseClone);
+                    });
+                }
                 return response;
             }).catch(() => {
                 return caches.match(e.request);
@@ -67,10 +97,12 @@ self.addEventListener('fetch', (e) => {
                     return cachedResponse;
                 }
                 return fetch(e.request).then((response) => {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(e.request, responseClone);
-                    });
+                    if (isCacheableResponse(response)) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(e.request, responseClone);
+                        });
+                    }
                     return response;
                 });
             })

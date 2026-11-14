@@ -3570,6 +3570,303 @@
           max-width: none;
         }
       }
+
+      /* Settings Section Unified Category Layout & Mobile Optimization */
+      .settings-cat-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .settings-cat-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .settings-cat-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--muted);
+        padding: 8px 13px;
+        border-radius: 8px;
+        font-size: 0.83rem;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+      }
+      .settings-cat-link:hover,
+      .settings-cat-link.active {
+        color: var(--text);
+        background: var(--surface);
+        border-color: var(--border);
+        opacity: 1;
+      }
+      .settings-cat-link svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+      .settings-stack {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 22px;
+        align-items: start;
+      }
+      .settings-cat-card {
+        scroll-margin-top: 20px;
+      }
+      .settings-cat-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding-bottom: 18px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .settings-cat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+      .settings-cat-icon.info {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: rgba(59, 130, 246, 0.25);
+        color: #60a5fa;
+      }
+      .settings-cat-icon.purple {
+        background: rgba(168, 85, 247, 0.12);
+        border-color: rgba(168, 85, 247, 0.25);
+        color: #c084fc;
+      }
+      .settings-cat-icon.amber {
+        background: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.25);
+        color: var(--warning);
+      }
+      .settings-cat-icon.danger {
+        background: rgba(244, 63, 94, 0.12);
+        border-color: rgba(244, 63, 94, 0.25);
+        color: var(--danger);
+      }
+      .settings-cat-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        line-height: 1.3;
+      }
+      .settings-cat-desc {
+        font-size: 0.86rem;
+        color: var(--muted);
+        margin: 4px 0 0 0;
+        line-height: 1.45;
+      }
+      .settings-subgrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .settings-panel {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .settings-panel-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .settings-panel-sub {
+        font-size: 0.83rem;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.48;
+      }
+      .settings-check-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .settings-check-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        font-size: 0.87rem;
+        color: var(--text);
+        cursor: pointer;
+        min-height: 42px;
+        user-select: none;
+      }
+      .settings-check-row input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+        min-height: 17px;
+        margin: 0;
+        flex-shrink: 0;
+        accent-color: var(--primary);
+      }
+      .settings-threshold-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        min-height: 44px;
+      }
+      .settings-threshold-row label {
+        font-size: 0.88rem;
+        color: var(--text);
+        margin: 0;
+      }
+      .settings-threshold-input {
+        width: 82px;
+        padding: 6px 8px;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-mono);
+        flex-shrink: 0;
+      }
+      .settings-btn-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .settings-action-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 18px;
+      }
+      .settings-action-bar.diag {
+        background: rgba(168, 85, 247, 0.05);
+      }
+      .settings-action-bar.manual {
+        background: rgba(59, 130, 246, 0.05);
+      }
+      .settings-action-grid {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .settings-auth-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .settings-status-pill {
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      @media (max-width: 960px) {
+        .settings-subgrid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      @media (max-width: 768px) {
+        #settings .header {
+          margin-bottom: 14px;
+        }
+        #settings .header h1 {
+          font-size: 1.45rem;
+        }
+        #settings .card.settings-cat-card {
+          padding: 18px 15px;
+          border-radius: 12px;
+        }
+        #settings .settings-panel {
+          padding: 15px;
+        }
+        #settings input:not([type="checkbox"]),
+        #settings select,
+        #settings button {
+          min-height: 44px;
+          font-size: 16px;
+        }
+        #settings .settings-cat-link {
+          min-height: 38px;
+          font-size: 0.82rem;
+          padding: 7px 12px;
+        }
+        .settings-check-grid,
+        .settings-auth-inputs {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .settings-action-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+        .settings-action-grid button {
+          width: 100%;
+          justify-content: center;
+          font-size: 0.84rem !important;
+          padding: 10px 10px;
+        }
+        .settings-btn-row button {
+          flex: 1 1 140px;
+          justify-content: center;
+        }
+        #settings .settings-backend-row {
+          flex-direction: column;
+        }
+        #settings .settings-backend-row button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+      @media (max-width: 420px) {
+        .settings-action-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
     </style>
   </head>
   <body>
@@ -3812,6 +4109,23 @@
               password.</span
             >
           </div>
+          <div
+            id="lock-security-status"
+            role="status"
+            aria-live="polite"
+            style="
+              display: none;
+              margin-top: 14px;
+              padding: 10px 12px;
+              border-radius: 8px;
+              font-size: 0.85rem;
+              line-height: 1.4;
+              background: rgba(244, 63, 94, 0.12);
+              border: 1px solid rgba(244, 63, 94, 0.35);
+              color: var(--danger);
+              text-align: center;
+            "
+          ></div>
           <button
             id="lock-btn"
             style="
@@ -3835,13 +4149,13 @@
           >
             <a
               href="#"
-              onclick="showRecovery()"
+              onclick="showRecovery(); return false;"
               style="color: var(--primary); text-decoration: none"
               >Forgot Main Password?</a
             >
             <a
               href="#"
-              onclick="resetSystem()"
+              onclick="resetSystem(); return false;"
               style="color: var(--danger); text-decoration: none"
               >Reset System</a
             >
@@ -3880,6 +4194,7 @@
             </div>
           </div>
           <button
+            id="recovery-btn"
             style="
               width: 100%;
               padding: 16px;
@@ -8980,1148 +9295,762 @@
         <div class="header">
           <div>
             <h1>System Settings</h1>
-            <p>Security and Data Management</p>
+            <p>Risk Controls, Alerts, Data &amp; Sync, AI &amp; Security</p>
           </div>
         </div>
-        <div class="grid">
-          <div class="card col-6">
-            <div class="stat-label">Risk Thresholds (VaR %)</div>
-            <p
-              style="
-                font-size: 0.9rem;
-                color: var(--muted);
-                margin-bottom: 20px;
-                line-height: 1.5;
-              "
-            >
-              Configure the portfolio-level risk levels. These percentages
-              determine the 'Safe', 'Moderate', and 'Critical' status
-              indicators.
-            </p>
-            <div class="form-group">
-              <label>Safe Threshold</label>
-              <div class="input-wrapper">
-                <i data-lucide="shield-check"></i>
-                <input
-                  type="number"
-                  id="threshold-safe"
-                  step="0.1"
-                  oninput="saveRiskThresholds()"
-                />
-                <span class="input-suffix">%</span>
-              </div>
-              <span class="helper-text"
-                >Risk below this is considered 'Safe'.</span
-              >
-            </div>
-            <div class="form-group">
-              <label>Moderate Threshold</label>
-              <div class="input-wrapper">
-                <i data-lucide="alert-triangle"></i>
-                <input
-                  type="number"
-                  id="threshold-med"
-                  step="0.1"
-                  oninput="saveRiskThresholds()"
-                />
-                <span class="input-suffix">%</span>
-              </div>
-              <span class="helper-text"
-                >Risk between Safe and this is 'Moderate'. Above this is
-                'Critical'.</span
-              >
-            </div>
 
-            <div class="stat-label" style="margin-top: 32px">
-              Daily Loss Lock System
-            </div>
-            <p
-              style="
-                font-size: 0.9rem;
-                color: var(--muted);
-                margin-bottom: 20px;
-                line-height: 1.5;
-              "
-            >
-              Set your maximum daily loss limit in R. Hitting this limit will
-              lock the journal and force a reflection exercise.
-            </p>
-            <div class="form-group">
-              <label>Daily Loss Limit (R)</label>
-              <div class="input-wrapper">
-                <i data-lucide="lock"></i>
-                <input
-                  type="number"
-                  id="setting-daily-loss"
-                  step="0.1"
-                  oninput="saveRiskThresholds()"
-                />
-                <span class="input-suffix">R</span>
+        <nav class="settings-cat-nav" aria-label="Settings Categories">
+          <button type="button" class="settings-cat-link active" onclick="document.querySelectorAll('#settings .settings-cat-link').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('settings-cat-trading').scrollIntoView({behavior:'smooth', block:'start'});">
+            <i data-lucide="shield-alert"></i> Trading &amp; Risk
+          </button>
+          <button type="button" class="settings-cat-link" onclick="document.querySelectorAll('#settings .settings-cat-link').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('settings-cat-notifications').scrollIntoView({behavior:'smooth', block:'start'});">
+            <i data-lucide="bell-ring"></i> Alerts &amp; Reports
+          </button>
+          <button type="button" class="settings-cat-link" onclick="document.querySelectorAll('#settings .settings-cat-link').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('settings-cat-data').scrollIntoView({behavior:'smooth', block:'start'});">
+            <i data-lucide="database"></i> Data &amp; Cloud Sync
+          </button>
+          <button type="button" class="settings-cat-link" onclick="document.querySelectorAll('#settings .settings-cat-link').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('settings-cat-ai').scrollIntoView({behavior:'smooth', block:'start'});">
+            <i data-lucide="sparkles"></i> AI &amp; Server
+          </button>
+          <button type="button" class="settings-cat-link" onclick="document.querySelectorAll('#settings .settings-cat-link').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('settings-cat-security').scrollIntoView({behavior:'smooth', block:'start'});">
+            <i data-lucide="lock"></i> Security
+          </button>
+        </nav>
+
+        <div class="settings-stack">
+          <!-- 1. CATEGORY: TRADING, RISK & JOURNAL -->
+          <div id="settings-cat-trading" class="card col-12 settings-cat-card">
+            <div class="settings-cat-header">
+              <div class="settings-cat-icon">
+                <i data-lucide="shield-alert"></i>
               </div>
-            </div>
-
-            <div class="stat-label" style="margin-top: 32px">
-              Prop Scaling AI Settings
-            </div>
-            <p
-              style="
-                font-size: 0.9rem;
-                color: var(--muted);
-                margin-bottom: 20px;
-                line-height: 1.5;
-              "
-            >
-              Define how much of each payout you want to reinvest into new prop
-              accounts.
-            </p>
-            <div class="form-group">
-              <label>Prop Reinvestment %</label>
-              <div class="input-wrapper">
-                <i data-lucide="percent"></i>
-                <input
-                  type="number"
-                  id="prop-reinvestment-pct"
-                  step="1"
-                  min="0"
-                  max="100"
-                  oninput="savePropReinvestmentPct()"
-                />
-                <span class="input-suffix">%</span>
-              </div>
-              <span class="helper-text"
-                >Percentage of your last payout to use for scaling analysis.
-                Default is 100%.</span
-              >
-            </div>
-          </div>
-
-          <div class="card col-6">
-            <div class="stat-label">Data Management: Import & Export</div>
-            <p
-              style="
-                font-size: 0.9rem;
-                color: var(--muted);
-                margin-bottom: 20px;
-                line-height: 1.5;
-              "
-            >
-              QuantEdge OS stores all data locally. Use the tools below to
-              import historical trades or export your journal for external
-              analysis.
-            </p>
-
-            <div style="display: flex; flex-direction: column; gap: 24px">
-              <!-- System Backups -->
               <div>
-                <div style="font-weight: 600; margin-bottom: 8px">
-                  System Backup
+                <h2 class="settings-cat-title">Trading, Risk &amp; Journal</h2>
+                <p class="settings-cat-desc">
+                  Portfolio VaR thresholds, daily loss lock rules, prop scaling allocation, and journal menu options.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-subgrid">
+              <!-- Risk Thresholds & Loss Lock -->
+              <div class="settings-panel">
+                <div class="settings-panel-title">
+                  <span>Risk Thresholds (VaR %) &amp; Loss Lock</span>
                 </div>
-                <div style="display: flex; gap: 12px">
-                  <button onclick="exportData()">
-                    <i data-lucide="download"></i> Export JSON
-                  </button>
-                  <button
-                    class="secondary"
-                    onclick="document.getElementById('import-file').click()"
-                  >
-                    <i data-lucide="upload"></i> Import JSON
-                  </button>
-                  <input
-                    type="file"
-                    id="import-file"
-                    style="display: none"
-                    accept=".json"
-                    onchange="importData(event)"
-                  />
+                <p class="settings-panel-sub">
+                  Define portfolio risk levels for Safe, Moderate, and Critical indicators, plus the daily R-loss circuit breaker.
+                </p>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Safe Threshold</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="shield-check"></i>
+                    <input
+                      type="number"
+                      id="threshold-safe"
+                      step="0.1"
+                      oninput="saveRiskThresholds()"
+                    />
+                    <span class="input-suffix">%</span>
+                  </div>
+                  <span class="helper-text">Risk below this is considered 'Safe'.</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label>Moderate Threshold</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="alert-triangle"></i>
+                    <input
+                      type="number"
+                      id="threshold-med"
+                      step="0.1"
+                      oninput="saveRiskThresholds()"
+                    />
+                    <span class="input-suffix">%</span>
+                  </div>
+                  <span class="helper-text">Risk between Safe and this is 'Moderate'. Above this is 'Critical'.</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; padding-top: 8px; border-top: 1px solid var(--border);">
+                  <label>Daily Loss Limit (R)</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="lock"></i>
+                    <input
+                      type="number"
+                      id="setting-daily-loss"
+                      step="0.1"
+                      oninput="saveRiskThresholds()"
+                    />
+                    <span class="input-suffix">R</span>
+                  </div>
+                  <span class="helper-text">Hitting this daily R-loss limit locks the journal and triggers a reflection exercise.</span>
                 </div>
               </div>
 
-              <!-- Pipeline -->
-              <div style="display: flex; gap: 16px">
-                <!-- Import -->
-                <div
-                  style="
-                    flex: 1;
-                    padding: 16px;
-                    border: 1px solid var(--border);
-                    border-radius: 8px;
-                    background: var(--surface);
-                  "
-                >
-                  <div style="font-weight: 600; margin-bottom: 8px">
-                    Import Trades
+              <!-- Prop Scaling & Journal Preferences -->
+              <div class="settings-panel" style="justify-content: space-between;">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <div class="settings-panel-title">
+                    <span>Prop Scaling &amp; Journal Preferences</span>
                   </div>
-                  <p
-                    style="
-                      font-size: 0.8rem;
-                      color: var(--muted);
-                      margin-bottom: 12px;
-                      line-height: 1.4;
-                    "
-                  >
-                    Import from MT4, MT5, cTrader, or custom CSV/Excel.
+                  <p class="settings-panel-sub">
+                    Configure payout reinvestment percentage for prop scaling analysis and customize Trade Journal dropdown menus.
                   </p>
-                  <!-- Old element kept hidden to strictly follow the prompt -->
-                  <input
-                    type="file"
-                    id="import-csv"
-                    style="display: none"
-                    accept=".csv,.xlsx,.xls,.txt"
-                    onchange="window.CSVImportEngine.handleFileSelect(event)"
-                  />
-                  <button
-                    class="secondary"
-                    style="width: 100%; justify-content: center"
-                    onclick="document.getElementById('import-csv').click()"
-                  >
-                    <i data-lucide="file-input"></i> Open Import Tool
-                  </button>
+
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label>Prop Reinvestment %</label>
+                    <div class="input-wrapper">
+                      <i data-lucide="percent"></i>
+                      <input
+                        type="number"
+                        id="prop-reinvestment-pct"
+                        step="1"
+                        min="0"
+                        max="100"
+                        oninput="savePropReinvestmentPct()"
+                      />
+                      <span class="input-suffix">%</span>
+                    </div>
+                    <span class="helper-text">Percentage of your last payout to use for scaling analysis. Default is 100%.</span>
+                  </div>
                 </div>
 
-                <!-- Export -->
-                <div
-                  style="
-                    flex: 1;
-                    padding: 16px;
-                    border: 1px solid var(--border);
-                    border-radius: 8px;
-                    background: var(--surface);
-                  "
-                >
-                  <div style="font-weight: 600; margin-bottom: 8px">
-                    Export Trades
+                <div style="padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+                  <div style="font-weight: 600; font-size: 0.92rem; color: var(--text);">
+                    Journal Menu Options
                   </div>
-                  <p
-                    style="
-                      font-size: 0.8rem;
-                      color: var(--muted);
-                      margin-bottom: 12px;
-                      line-height: 1.4;
-                    "
-                  >
-                    Export filtered trades to CSV, Excel, or formatted PDF.
+                  <p class="settings-panel-sub">
+                    Configure trading pairs, setup types, and confluences available in the Trade Journal menus.
                   </p>
-                  <button
-                    class="secondary"
-                    style="width: 100%; justify-content: center"
-                    onclick="window.CSVExportEngine.openExportModal()"
-                  >
-                    <i data-lucide="file-output"></i> Open Export Tool
+                  <button class="secondary" style="width: 100%; justify-content: center;" onclick="openModal('journal-settings')">
+                    <i data-lucide="settings"></i> Manage Journal Options
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="card col-12">
-            <div class="stat-label">Notification & Alert Engine</div>
-            <p
-              style="
-                font-size: 0.9rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.5;
-              "
-            >
-              Turn Telegram into a full daily reporting and real-time alert
-              system. Reports send while Quant OS Edge is open. For background
-              delivery, keep the app open in a browser tab.
-            </p>
 
-            <div
-              style="
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 32px;
-                margin-bottom: 32px;
-              "
-            >
-              <!-- Telegram Config -->
-              <div
-                style="
-                  background: var(--bg);
-                  padding: 20px;
-                  border-radius: 8px;
-                  border: 1px solid var(--border);
-                "
-              >
-                <h3
-                  style="
-                    font-size: 1rem;
-                    margin: 0 0 16px 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    color: #0088cc;
-                  "
-                >
-                  <span style="display: flex; align-items: center; gap: 8px"
-                    ><i data-lucide="send"></i> Telegram</span
-                  >
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                      font-weight: normal;
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="telegram-enabled"
-                      onchange="window.saveNotificationSettings()"
-                    />
-                    Enable
-                  </label>
-                </h3>
-                <div class="form-group" style="margin-bottom: 8px">
-                  <div class="input-wrapper">
-                    <i data-lucide="key"></i>
-                    <input
-                      type="text"
-                      id="webhook-telegram-token"
-                      placeholder="Bot Token (e.g. 123456:ABC-DEF)"
-                      onchange="window.saveNotificationSettings()"
-                    />
-                  </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 8px">
-                  <div class="input-wrapper">
-                    <i data-lucide="message-circle"></i>
-                    <input
-                      type="text"
-                      id="webhook-telegram-chat"
-                      placeholder="Chat ID (numeric, e.g. 123456789 or -100...)"
-                      onchange="window.saveNotificationSettings()"
-                    />
-                  </div>
-                  <div style="font-size: 0.76rem; color: var(--muted); margin-top: 5px; line-height: 1.4;">
-                    ℹ️ <b>Quick Setup:</b> 1) Create bot via <span style="color:var(--primary)">@BotFather</span> & paste token above. 2) Message your bot and click <b>Start</b> (send <code>/start</code>). 3) Enter your numeric Chat ID (find it by messaging <span style="color:var(--primary)">@userinfobot</span>).
-                  </div>
-                </div>
-                <div style="margin-bottom: 16px">
-                  <label
-                    style="
-                      font-size: 0.85rem;
-                      font-weight: 600;
-                      color: var(--muted);
-                      display: block;
-                      margin-bottom: 8px;
-                    "
-                    >Enable for:</label
-                  >
-                  <div
-                    style="
-                      display: grid;
-                      grid-template-columns: 1fr 1fr;
-                      gap: 8px;
-                    "
-                  >
-                    <label
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        font-size: 0.9rem;
-                        color: var(--text);
-                      "
-                    >
-                      <input type="checkbox" id="telegram-rt-alerts" checked />
-                      Real-time Alerts
-                    </label>
-                    <label
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        font-size: 0.9rem;
-                        color: var(--text);
-                      "
-                    >
-                      <input type="checkbox" id="telegram-daily-rep" checked />
-                      Daily Report
-                    </label>
-                    <label
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        font-size: 0.9rem;
-                        color: var(--text);
-                      "
-                    >
-                      <input type="checkbox" id="telegram-weekly-rep" checked />
-                      Weekly Digest
-                    </label>
-                    <label
-                      style="
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        font-size: 0.9rem;
-                        color: var(--text);
-                      "
-                    >
-                      <input type="checkbox" id="telegram-monthly-rep" />
-                      Monthly Summary
-                    </label>
-                  </div>
-                </div>
-                <button
-                  class="secondary"
-                  style="width: 100%; justify-content: center; margin-top: 8px"
-                  onclick="window.saveNotificationSettings()"
-                >
-                  <i data-lucide="save"></i> Save Telegram Settings
-                </button>
+          <!-- 2. CATEGORY: NOTIFICATIONS & AUTOMATED REPORTS -->
+          <div id="settings-cat-notifications" class="card col-12 settings-cat-card">
+            <div class="settings-cat-header">
+              <div class="settings-cat-icon info">
+                <i data-lucide="bell-ring"></i>
+              </div>
+              <div>
+                <h2 class="settings-cat-title">Notifications &amp; Automated Reports</h2>
+                <p class="settings-cat-desc">
+                  Telegram bot integration, morning weekly-goal check-ins, real-time alert thresholds, and diagnostic reporting.
+                </p>
               </div>
             </div>
 
-            <!-- Settings grids -->
-            <div
-              style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 24px;
-                margin-bottom: 24px;
-              "
-            >
-              <!-- Morning Weekly Goals Planning Reminder -->
-              <div
-                style="
-                  background: var(--bg);
-                  padding: 20px;
-                  border-radius: 8px;
-                  border: 1px solid var(--border);
-                "
-              >
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px;">
-                  <h4
-                    style="
-                      margin: 0;
-                      font-size: 0.9rem;
-                      color: var(--muted);
-                      text-transform: uppercase;
-                    "
-                  >
-                    Morning Weekly Goals Reminder
-                  </h4>
-                  <span id="notif-morning-browser-status" style="font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono);"></span>
+            <!-- Telegram Integration Panel -->
+            <div class="settings-panel" style="margin-bottom: 18px;">
+              <div class="settings-panel-title" style="color: #0088cc; text-transform: none; font-size: 1rem;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="send"></i> Telegram Bot Reporting
+                </span>
+                <label class="settings-check-row" style="min-height: 36px; padding: 4px 12px; font-weight: 500; font-size: 0.85rem;">
+                  <input
+                    type="checkbox"
+                    id="telegram-enabled"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                  Enable
+                </label>
+              </div>
+
+              <div class="settings-subgrid">
+                <div>
+                  <div class="form-group" style="margin-bottom: 10px;">
+                    <div class="input-wrapper">
+                      <i data-lucide="key"></i>
+                      <input
+                        type="text"
+                        id="webhook-telegram-token"
+                        placeholder="Bot Token (e.g. 123456:ABC-DEF)"
+                        onchange="window.saveNotificationSettings()"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <div class="input-wrapper">
+                      <i data-lucide="message-circle"></i>
+                      <input
+                        type="text"
+                        id="webhook-telegram-chat"
+                        placeholder="Chat ID (numeric, e.g. 123456789 or -100...)"
+                        onchange="window.saveNotificationSettings()"
+                      />
+                    </div>
+                    <div style="font-size: 0.76rem; color: var(--muted); margin-top: 6px; line-height: 1.45;">
+                      ℹ️ <b>Quick Setup:</b> 1) Create bot via <span style="color:var(--primary)">@BotFather</span> &amp; paste token. 2) Message your bot and send <code>/start</code>. 3) Enter your numeric Chat ID via <span style="color:var(--primary)">@userinfobot</span>.
+                    </div>
+                  </div>
                 </div>
-                <p style="font-size: 0.82rem; color: var(--muted); margin: 0 0 14px 0; line-height: 1.45;">
-                  Reminds you once per morning when you first open the Dashboard so you can review weekly goals before starting daily planning.
+
+                <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 8px;">
+                      Enable Telegram Delivery For:
+                    </label>
+                    <div class="settings-check-grid">
+                      <label class="settings-check-row">
+                        <input type="checkbox" id="telegram-rt-alerts" onchange="window.saveNotificationSettings()" checked />
+                        <span>Real-time Alerts</span>
+                      </label>
+                      <label class="settings-check-row">
+                        <input type="checkbox" id="telegram-daily-rep" onchange="window.saveNotificationSettings()" checked />
+                        <span>Daily Report</span>
+                      </label>
+                      <label class="settings-check-row">
+                        <input type="checkbox" id="telegram-weekly-rep" onchange="window.saveNotificationSettings()" checked />
+                        <span>Weekly Digest</span>
+                      </label>
+                      <label class="settings-check-row">
+                        <input type="checkbox" id="telegram-monthly-rep" onchange="window.saveNotificationSettings()" />
+                        <span>Monthly Summary</span>
+                      </label>
+                    </div>
+                  </div>
+                  <button
+                    class="secondary"
+                    style="width: 100%; justify-content: center;"
+                    onclick="window.saveNotificationSettings()"
+                  >
+                    <i data-lucide="save"></i> Save Telegram Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Morning Reminder & Alert Thresholds Grid -->
+            <div class="settings-subgrid">
+              <!-- Morning Weekly Goals Planning Reminder -->
+              <div class="settings-panel">
+                <div class="settings-panel-title">
+                  <span>Morning Weekly Goals Reminder</span>
+                  <span id="notif-morning-browser-status" style="font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono); text-transform: none;"></span>
+                </div>
+                <p class="settings-panel-sub">
+                  Reminds you once per morning when you first open the Dashboard so you can review weekly goals before daily planning.
                 </p>
-                <div style="display: flex; flex-direction: column; gap: 14px">
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-morning-enabled"
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-morning-enabled"
+                    onchange="window.saveNotificationSettings()"
+                    checked
+                  />
+                  <span>Enable morning first-open reminder</span>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;">Morning Starts</label>
+                    <select
+                      id="notif-morning-start"
                       onchange="window.saveNotificationSettings()"
-                      checked
-                    />
-                    Enable morning first-open reminder
-                  </label>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div>
-                      <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;">Morning Starts</label>
-                      <select
-                        id="notif-morning-start"
-                        onchange="window.saveNotificationSettings()"
-                        style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
-                      >
-                        <option value="0">00:00</option>
-                        <option value="4">04:00</option>
-                        <option value="5" selected>05:00</option>
-                        <option value="6">06:00</option>
-                        <option value="7">07:00</option>
-                        <option value="8">08:00</option>
-                        <option value="9">09:00</option>
-                        <option value="10">10:00</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;">Morning Ends</label>
-                      <select
-                        id="notif-morning-end"
-                        onchange="window.saveNotificationSettings()"
-                        style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
-                      >
-                        <option value="10">10:00</option>
-                        <option value="11">11:00</option>
-                        <option value="12" selected>12:00</option>
-                        <option value="13">13:00</option>
-                        <option value="14">14:00</option>
-                        <option value="15">15:00</option>
-                      </select>
-                    </div>
-                  </div>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-morning-browser"
-                      onchange="window.saveNotificationSettings()"
-                      checked
-                    />
-                    Desktop / PWA browser notification
-                  </label>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-morning-telegram"
-                      onchange="window.saveNotificationSettings()"
-                    />
-                    Also send morning summary to Telegram
-                  </label>
-                  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px;">
-                    <button
-                      type="button"
-                      class="secondary"
-                      onclick="previewMorningWeeklyGoalsReminder()"
+                      style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
                     >
-                      <i data-lucide="sunrise"></i> Preview Morning Reminder
-                    </button>
-                    <button
-                      type="button"
-                      class="secondary"
-                      id="btn-enable-browser-notif"
-                      onclick="requestMorningNotificationPermission()"
-                    >
-                      <i data-lucide="bell-ring"></i> Enable Browser Alerts
-                    </button>
+                      <option value="0">00:00</option>
+                      <option value="4">04:00</option>
+                      <option value="5" selected>05:00</option>
+                      <option value="6">06:00</option>
+                      <option value="7">07:00</option>
+                      <option value="8">08:00</option>
+                      <option value="9">09:00</option>
+                      <option value="10">10:00</option>
+                    </select>
                   </div>
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;">Morning Ends</label>
+                    <select
+                      id="notif-morning-end"
+                      onchange="window.saveNotificationSettings()"
+                      style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
+                    >
+                      <option value="10">10:00</option>
+                      <option value="11">11:00</option>
+                      <option value="12" selected>12:00</option>
+                      <option value="13">13:00</option>
+                      <option value="14">14:00</option>
+                      <option value="15">15:00</option>
+                    </select>
+                  </div>
+                </div>
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-morning-browser"
+                    onchange="window.saveNotificationSettings()"
+                    checked
+                  />
+                  <span>Desktop / PWA browser notification</span>
+                </label>
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-morning-telegram"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                  <span>Also send morning summary to Telegram</span>
+                </label>
+                <div class="settings-btn-row" style="margin-top: auto;">
+                  <button
+                    type="button"
+                    class="secondary"
+                    onclick="previewMorningWeeklyGoalsReminder()"
+                  >
+                    <i data-lucide="sunrise"></i> Preview Morning Reminder
+                  </button>
+                  <button
+                    type="button"
+                    class="secondary"
+                    id="btn-enable-browser-notif"
+                    onclick="requestMorningNotificationPermission()"
+                  >
+                    <i data-lucide="bell-ring"></i> Enable Browser Alerts
+                  </button>
                 </div>
               </div>
 
               <!-- Alert Thresholds -->
-              <div
-                style="
-                  background: var(--bg);
-                  padding: 20px;
-                  border-radius: 8px;
-                  border: 1px solid var(--border);
-                "
-              >
-                <h4
-                  style="
-                    margin: 0 0 16px 0;
-                    font-size: 0.9rem;
-                    color: var(--muted);
-                    text-transform: uppercase;
-                  "
-                >
-                  Alert Thresholds
-                </h4>
-                <div style="display: flex; flex-direction: column; gap: 16px">
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                    "
-                  >
-                    <label style="font-size: 0.9rem; color: var(--text)"
-                      >Daily loss warning (% of limit)</label
-                    >
-                    <input
-                      type="number"
-                      id="notif-loss-thresh"
-                      value="50"
-                      min="10"
-                      max="90"
-                      style="
-                        width: 80px;
-                        padding: 4px 8px;
-                        text-align: center;
-                        border-radius: 4px;
-                        border: 1px solid var(--border);
-                        background: var(--surface);
-                        color: var(--text);
-                      "
-                      onchange="window.saveNotificationSettings()"
-                    />
-                  </div>
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                    "
-                  >
-                    <label style="font-size: 0.9rem; color: var(--text)"
-                      >Drawdown warning (% of max DD)</label
-                    >
-                    <input
-                      type="number"
-                      id="notif-dd-thresh"
-                      value="70"
-                      min="10"
-                      max="90"
-                      style="
-                        width: 80px;
-                        padding: 4px 8px;
-                        text-align: center;
-                        border-radius: 4px;
-                        border: 1px solid var(--border);
-                        background: var(--surface);
-                        color: var(--text);
-                      "
-                      onchange="window.saveNotificationSettings()"
-                    />
-                  </div>
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                    "
-                  >
-                    <label style="font-size: 0.9rem; color: var(--text)"
-                      >Consecutive loss alert (trades)</label
-                    >
-                    <input
-                      type="number"
-                      id="notif-streak-thresh"
-                      value="3"
-                      min="2"
-                      max="10"
-                      style="
-                        width: 80px;
-                        padding: 4px 8px;
-                        text-align: center;
-                        border-radius: 4px;
-                        border: 1px solid var(--border);
-                        background: var(--surface);
-                        color: var(--text);
-                      "
-                      onchange="window.saveNotificationSettings()"
-                    />
-                  </div>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-eq-high"
-                      onchange="window.saveNotificationSettings()"
-                      checked
-                    />
-                    Notify on new equity high
-                  </label>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-psych-escalation"
-                      onchange="window.saveNotificationSettings()"
-                      checked
-                    />
-                    Notify when psych engine escalates
-                  </label>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 8px;
-                      font-size: 0.9rem;
-                      color: var(--text);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="notif-trade-logged"
-                      onchange="window.saveNotificationSettings()"
-                    />
-                    Notify every time a trade is logged
-                  </label>
+              <div class="settings-panel">
+                <div class="settings-panel-title">
+                  <span>Real-Time Alert Thresholds</span>
                 </div>
+                <p class="settings-panel-sub">
+                  Configure triggers for drawdown warnings, consecutive loss alerts, equity highs, and psychology escalations.
+                </p>
+                <div class="settings-threshold-row">
+                  <label for="notif-loss-thresh">Daily loss warning (% of limit)</label>
+                  <input
+                    type="number"
+                    id="notif-loss-thresh"
+                    class="settings-threshold-input"
+                    value="50"
+                    min="10"
+                    max="90"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                </div>
+                <div class="settings-threshold-row">
+                  <label for="notif-dd-thresh">Drawdown warning (% of max DD)</label>
+                  <input
+                    type="number"
+                    id="notif-dd-thresh"
+                    class="settings-threshold-input"
+                    value="70"
+                    min="10"
+                    max="90"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                </div>
+                <div class="settings-threshold-row">
+                  <label for="notif-streak-thresh">Consecutive loss alert (trades)</label>
+                  <input
+                    type="number"
+                    id="notif-streak-thresh"
+                    class="settings-threshold-input"
+                    value="3"
+                    min="2"
+                    max="10"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                </div>
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-eq-high"
+                    onchange="window.saveNotificationSettings()"
+                    checked
+                  />
+                  <span>Notify on new equity high</span>
+                </label>
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-psych-escalation"
+                    onchange="window.saveNotificationSettings()"
+                    checked
+                  />
+                  <span>Notify when psych engine escalates</span>
+                </label>
+                <label class="settings-check-row">
+                  <input
+                    type="checkbox"
+                    id="notif-trade-logged"
+                    onchange="window.saveNotificationSettings()"
+                  />
+                  <span>Notify every time a trade is logged</span>
+                </label>
               </div>
             </div>
 
             <!-- Testing Actions -->
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-                align-items: center;
-                padding: 20px;
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                background: rgba(168, 85, 247, 0.05);
-              "
-            >
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 4px;
-                  margin-right: auto;
-                "
-              >
-                <strong style="font-size: 0.95rem; color: var(--text)"
-                  >Testing & Diagnostic</strong
-                >
-                <span
-                  id="notif-test-status"
-                  style="
-                    font-size: 0.85rem;
-                    color: var(--muted);
-                    min-height: 18px;
-                  "
-                  >Run a test to ensure webhooks are properly configured.</span
-                >
+            <div class="settings-action-bar diag">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <strong style="font-size: 0.95rem; color: var(--text);">Testing &amp; Diagnostic</strong>
+                <span id="notif-test-status" style="font-size: 0.85rem; color: var(--muted); min-height: 18px;">
+                  Run a test to ensure webhooks and browser alerts are properly configured.
+                </span>
               </div>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.test('alert')"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="bell"></i> Test Alert
-              </button>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.test('daily')"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="file-text"></i> Test Daily
-              </button>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.test('weekly')"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="calendar"></i> Test Weekly
-              </button>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.test('monthly')"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="bar-chart-2"></i> Test Monthly
-              </button>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.test('morning')"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="sunrise"></i> Test Morning
-              </button>
-              <button
-                class="secondary"
-                onclick="window.NotificationEngine.preview()"
-                style="background: var(--bg)"
-              >
-                <i data-lucide="eye"></i> Preview Card
-              </button>
+              <div class="settings-action-grid">
+                <button class="secondary" onclick="window.NotificationEngine.test('alert')" style="background: var(--bg);">
+                  <i data-lucide="bell"></i> Test Alert
+                </button>
+                <button class="secondary" onclick="window.NotificationEngine.test('daily')" style="background: var(--bg);">
+                  <i data-lucide="file-text"></i> Test Daily
+                </button>
+                <button class="secondary" onclick="window.NotificationEngine.test('weekly')" style="background: var(--bg);">
+                  <i data-lucide="calendar"></i> Test Weekly
+                </button>
+                <button class="secondary" onclick="window.NotificationEngine.test('monthly')" style="background: var(--bg);">
+                  <i data-lucide="bar-chart-2"></i> Test Monthly
+                </button>
+                <button class="secondary" onclick="window.NotificationEngine.test('morning')" style="background: var(--bg);">
+                  <i data-lucide="sunrise"></i> Test Morning
+                </button>
+                <button class="secondary" onclick="window.NotificationEngine.preview()" style="background: var(--bg);">
+                  <i data-lucide="eye"></i> Preview Card
+                </button>
+              </div>
             </div>
 
             <!-- Manual Reports -->
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-                align-items: center;
-                padding: 20px;
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                background: rgba(59, 130, 246, 0.05);
-                margin-top: 16px;
-              "
-            >
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 4px;
-                  margin-right: auto;
-                "
-              >
-                <strong style="font-size: 0.95rem; color: var(--text)"
-                  >Manual Reports Generation</strong
-                >
-                <span style="font-size: 0.85rem; color: var(--muted)"
-                  >Force dispatch a report independent of any schedule
-                  rules.</span
-                >
+            <div class="settings-action-bar manual">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <strong style="font-size: 0.95rem; color: var(--text);">Manual Reports Generation</strong>
+                <span style="font-size: 0.85rem; color: var(--muted);">
+                  Force dispatch a report immediately independent of schedule rules.
+                </span>
               </div>
-              <button
-                class="primary"
-                onclick="window.NotificationEngine.manualReport('daily')"
-              >
-                <i data-lucide="file-text"></i> Get Daily Report
-              </button>
-              <button
-                class="primary"
-                onclick="window.NotificationEngine.manualReport('weekly')"
-              >
-                <i data-lucide="calendar"></i> Get Weekly Report
-              </button>
-              <button
-                class="primary"
-                onclick="window.NotificationEngine.manualReport('monthly')"
-              >
-                <i data-lucide="bar-chart-2"></i> Get Monthly Report
-              </button>
-            </div>
-          </div>
-          <div class="card col-6">
-            <div class="stat-label">Data Backup</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.6;
-              "
-            >
-              Export your entire portfolio state to a JSON file for backup or
-              migration. All accounts, transactions, and settings will be
-              included.
-            </p>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap">
-              <button onclick="exportData()">
-                <i data-lucide="download"></i> Export JSON
-              </button>
-              <button
-                class="secondary"
-                onclick="document.getElementById('import-file-settings').click()"
-              >
-                <i data-lucide="upload"></i> Import JSON
-              </button>
-              <input
-                type="file"
-                id="import-file-settings"
-                style="display: none"
-                onchange="importData(event)"
-              />
-            </div>
-          </div>
-          <div class="card col-6">
-            <div class="stat-label">Journal Preferences</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.6;
-              "
-            >
-              Configure the trading pairs, setup types, and confluences
-              available in the Trade Journal menus.
-            </p>
-            <button class="secondary" onclick="openModal('journal-settings')">
-              <i data-lucide="settings"></i> Manage Journal Options
-            </button>
-          </div>
-          <div class="card col-6">
-            <div class="stat-label">Security</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.6;
-              "
-            >
-              Reset your access password. This will update the hash stored in
-              your browser. You will be logged out immediately.
-            </p>
-            <button class="secondary" onclick="resetPassword()">
-              <i data-lucide="lock"></i> Reset Password
-            </button>
-          </div>
-          <div class="card col-6">
-            <div class="stat-label">AI Model Preferences</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 20px;
-                line-height: 1.6;
-              "
-            >
-              Select the free-tier Gemini model used for AI Insights, Session
-              Debriefs, Weekly Reviews, and Economic Calendar analysis.
-            </p>
-            <div class="form-group">
-              <label for="setting-gemini-model">Active Free-Tier Model</label>
-              <div class="input-wrapper">
-                <i data-lucide="sparkles"></i>
-                <select
-                  id="setting-gemini-model"
-                  onchange="saveGeminiModelPreference()"
-                >
-                  <option value="gemini-4-hydrogen">
-                    Gemini 4 Hydrogen (Free Tier · Balanced Insights)
-                  </option>
-                  <option value="gemini-3.1-flash-lite">
-                    Gemini 3.1 Flash Lite (Free Tier · Fast Responses)
-                  </option>
-                </select>
-              </div>
-              <span class="helper-text"
-                >Restricted to supported free-tier models; paid-only models are
-                automatically excluded.</span
-              >
-            </div>
-            <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
-              <label for="setting-backend-url">Backend Server URL (For GitHub Pages / Static PWA)</label>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <div class="input-wrapper" style="flex: 1; min-width: 220px;">
-                  <i data-lucide="server"></i>
-                  <input
-                    type="url"
-                    id="setting-backend-url"
-                    placeholder="https://your-backend.onrender.com (blank = same origin)"
-                    onchange="saveBackendUrl()"
-                  />
-                </div>
-                <button
-                  type="button"
-                  class="secondary"
-                  onclick="testBackendConnection()"
-                  style="white-space: nowrap;"
-                >
-                  <i data-lucide="activity"></i> Test Backend
+              <div class="settings-action-grid">
+                <button class="primary" onclick="window.NotificationEngine.manualReport('daily')">
+                  <i data-lucide="file-text"></i> Get Daily Report
+                </button>
+                <button class="primary" onclick="window.NotificationEngine.manualReport('weekly')">
+                  <i data-lucide="calendar"></i> Get Weekly Report
+                </button>
+                <button class="primary" onclick="window.NotificationEngine.manualReport('monthly')">
+                  <i data-lucide="bar-chart-2"></i> Get Monthly Report
                 </button>
               </div>
-              <span class="helper-text" id="setting-backend-status"
-                >Leave blank when running on the full-stack server. When hosted on GitHub Pages, enter your deployed server.ts URL.</span
-              >
-            </div>
-          </div>
-          <div class="card col-12" style="margin-top: 24px">
-            <div class="stat-label">Google Drive Sync</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.6;
-              "
-            >
-              Export and import your entire QuantEdge workspace into your personal Google Drive account.
-              This allows you to backup data completely to your own cloud storage and sync between devices.
-            </p>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-              <button class="primary" onclick="handleGDriveSync()">
-                <i data-lucide="refresh-cw"></i> Sync with Google Drive
-              </button>
-              <button class="danger" onclick="handleGDriveDelete()" style="background-color: transparent; border: 1px solid var(--danger); color: var(--danger);">
-                <i data-lucide="trash-2"></i> Delete Cloud Data
-              </button>
             </div>
           </div>
 
-          <div class="card col-12" style="margin-top: 24px">
-            <div class="stat-label">Cloud Sync Setup (Firebase)</div>
-            <p
-              style="
-                font-size: 0.95rem;
-                color: var(--muted);
-                margin-bottom: 24px;
-                line-height: 1.6;
-              "
-            >
-              Connect your own Firebase project to enable secure multi-device
-              sync. Each user will only have access to their own data.
-            </p>
-
-            <div
-              id="firebase-status"
-              style="
-                margin-bottom: 20px;
-                padding: 12px;
-                border-radius: 8px;
-                background: var(--surface);
-                border: 1px solid var(--border);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-              "
-            >
-              <div
-                id="firebase-status-indicator"
-                style="
-                  width: 10px;
-                  height: 10px;
-                  border-radius: 50%;
-                  background: var(--danger);
-                "
-              ></div>
-              <span id="firebase-status-text" style="font-weight: 600"
-                >Offline / Not Configured</span
-              >
+          <!-- 3. CATEGORY: DATA MANAGEMENT & CLOUD SYNC -->
+          <div id="settings-cat-data" class="card col-12 settings-cat-card">
+            <div class="settings-cat-header">
+              <div class="settings-cat-icon purple">
+                <i data-lucide="database"></i>
+              </div>
+              <div>
+                <h2 class="settings-cat-title">Data Management &amp; Cloud Sync</h2>
+                <p class="settings-cat-desc">
+                  Full JSON workspace backups, broker trade CSV/Excel pipelines, Google Drive storage, and Firebase multi-device sync.
+                </p>
+              </div>
             </div>
 
-            <div
-              style="display: none; grid-template-columns: 1fr 1fr; gap: 16px"
-            >
-              <div class="form-group">
-                <label>API Key</label>
-                <div class="input-wrapper">
-                  <input type="password" id="fb-apiKey" placeholder="AIzaSy..." style="width: 100%; padding-right: 48px;" />
-                  <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('fb-apiKey', this)">
-                    <i data-lucide="eye"></i>
+            <div class="settings-subgrid">
+              <!-- Local Backups & Trade Pipeline -->
+              <div class="settings-panel">
+                <div class="settings-panel-title">
+                  <span>Local Backup &amp; Trade Import / Export</span>
+                </div>
+                <p class="settings-panel-sub">
+                  Export or restore your complete QuantEdge portfolio state as JSON, or import/export trades from MT4, MT5, cTrader, CSV, Excel, or PDF.
+                </p>
+
+                <div style="padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);">
+                  <div style="font-weight: 600; font-size: 0.92rem; margin-bottom: 6px;">System Backup (Full JSON)</div>
+                  <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 12px 0; line-height: 1.4;">
+                    Includes all accounts, trades, plans, transactions, and settings.
+                  </p>
+                  <div class="settings-btn-row">
+                    <button onclick="exportData()">
+                      <i data-lucide="download"></i> Export JSON
+                    </button>
+                    <button
+                      class="secondary"
+                      onclick="document.getElementById('import-file').click()"
+                    >
+                      <i data-lucide="upload"></i> Import JSON
+                    </button>
+                    <input
+                      type="file"
+                      id="import-file"
+                      style="display: none"
+                      accept=".json"
+                      onchange="importData(event)"
+                    />
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                  <div style="padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                      <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">Import Trades</div>
+                      <p style="font-size: 0.78rem; color: var(--muted); margin: 0 0 12px 0; line-height: 1.4;">
+                        MT4, MT5, cTrader, or custom CSV/Excel.
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      id="import-csv"
+                      style="display: none"
+                      accept=".csv,.xlsx,.xls,.txt"
+                      onchange="window.CSVImportEngine.handleFileSelect(event)"
+                    />
+                    <button
+                      class="secondary"
+                      style="width: 100%; justify-content: center;"
+                      onclick="document.getElementById('import-csv').click()"
+                    >
+                      <i data-lucide="file-input"></i> Open Import Tool
+                    </button>
+                  </div>
+
+                  <div style="padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                      <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">Export Trades</div>
+                      <p style="font-size: 0.78rem; color: var(--muted); margin: 0 0 12px 0; line-height: 1.4;">
+                        Filtered trades to CSV, Excel, or PDF.
+                      </p>
+                    </div>
+                    <button
+                      class="secondary"
+                      style="width: 100%; justify-content: center;"
+                      onclick="window.CSVExportEngine.openExportModal()"
+                    >
+                      <i data-lucide="file-output"></i> Open Export Tool
+                    </button>
                   </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label>Auth Domain</label>
-                <input
-                  type="text"
-                  id="fb-authDomain"
-                  placeholder="your-app.firebaseapp.com"
-                />
-              </div>
-              <div class="form-group">
-                <label>Project ID</label>
-                <input type="text" id="fb-projectId" placeholder="your-app" />
-              </div>
-              <div class="form-group">
-                <label>Storage Bucket</label>
-                <input
-                  type="text"
-                  id="fb-storageBucket"
-                  placeholder="your-app.appspot.com"
-                />
-              </div>
-              <div class="form-group">
-                <label>Messaging Sender ID</label>
-                <input
-                  type="text"
-                  id="fb-messagingSenderId"
-                  placeholder="123456789"
-                />
-              </div>
-              <div class="form-group">
-                <label>App ID</label>
-                <input
-                  type="text"
-                  id="fb-appId"
-                  placeholder="1:123456789:web:abc"
-                />
-              </div>
-            </div>
 
-            <div style="display: none; gap: 12px; margin-top: 24px">
-              <button onclick="saveFirebaseConfig()">
-                <i data-lucide="save"></i> Save & Connect
-              </button>
-              <button class="secondary" onclick="clearFirebaseConfig()">
-                <i data-lucide="trash-2"></i> Clear Config
-              </button>
-            </div>
+              <!-- Cloud Sync: Google Drive & Firebase -->
+              <div class="settings-panel">
+                <div class="settings-panel-title">
+                  <span>Cloud Storage &amp; Multi-Device Sync</span>
+                </div>
 
-            <div
-              id="auth-section"
-              style="
-                margin-top: 32px;
-                display: none;
-                border-top: 1px solid var(--border);
-                padding-top: 24px;
-              "
-            >
-              <div class="stat-label">Authentication</div>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--muted);
-                  margin-bottom: 20px;
-                "
-              >
-                Login to sync your data across devices.
-              </p>
+                <!-- Google Drive Sync -->
+                <div style="padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);">
+                  <div style="font-weight: 600; font-size: 0.92rem; margin-bottom: 6px;">Google Drive Sync</div>
+                  <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 12px 0; line-height: 1.45;">
+                    Backup and sync your QuantEdge workspace directly to your personal Google Drive storage.
+                  </p>
+                  <div class="settings-btn-row">
+                    <button class="primary" onclick="handleGDriveSync()">
+                      <i data-lucide="refresh-cw"></i> Sync with Google Drive
+                    </button>
+                    <button class="danger" onclick="handleGDriveDelete()" style="background-color: transparent; border: 1px solid var(--danger); color: var(--danger);">
+                      <i data-lucide="trash-2"></i> Delete Cloud Data
+                    </button>
+                  </div>
+                </div>
 
-              <div id="auth-logged-out">
-                <div style="display: flex; gap: 12px; margin-bottom: 16px">
-                  <input
-                    type="email"
-                    id="auth-email"
-                    placeholder="Email"
-                    style="flex: 1"
-                  />
-                  <div class="input-wrapper" style="flex: 1;">
-                    <input
-                      type="password"
-                      id="auth-password"
-                      placeholder="Password"
-                      style="width: 100%; padding-right: 48px"
-                    />
-                    <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('auth-password', this)">
-                      <i data-lucide="eye"></i>
+                <!-- Firebase Cloud Sync -->
+                <div style="padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);">
+                  <div style="font-weight: 600; font-size: 0.92rem; margin-bottom: 6px;">Firebase Cloud Sync</div>
+                  <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 12px 0; line-height: 1.45;">
+                    Real-time multi-device sync isolated per authenticated account.
+                  </p>
+
+                  <div id="firebase-status" class="settings-status-pill">
+                    <div
+                      id="firebase-status-indicator"
+                      style="width: 10px; height: 10px; border-radius: 50%; background: var(--danger); flex-shrink: 0;"
+                    ></div>
+                    <span id="firebase-status-text" style="font-weight: 600; font-size: 0.9rem;">Offline / Not Configured</span>
+                  </div>
+
+                  <!-- Preserved hidden Firebase config fields -->
+                  <div style="display: none; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                      <label>API Key</label>
+                      <div class="input-wrapper">
+                        <input type="password" id="fb-apiKey" placeholder="AIzaSy..." style="width: 100%; padding-right: 48px;" />
+                        <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('fb-apiKey', this)">
+                          <i data-lucide="eye"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Auth Domain</label>
+                      <input type="text" id="fb-authDomain" placeholder="your-app.firebaseapp.com" />
+                    </div>
+                    <div class="form-group">
+                      <label>Project ID</label>
+                      <input type="text" id="fb-projectId" placeholder="your-app" />
+                    </div>
+                    <div class="form-group">
+                      <label>Storage Bucket</label>
+                      <input type="text" id="fb-storageBucket" placeholder="your-app.appspot.com" />
+                    </div>
+                    <div class="form-group">
+                      <label>Messaging Sender ID</label>
+                      <input type="text" id="fb-messagingSenderId" placeholder="123456789" />
+                    </div>
+                    <div class="form-group">
+                      <label>App ID</label>
+                      <input type="text" id="fb-appId" placeholder="1:123456789:web:abc" />
+                    </div>
+                  </div>
+                  <div style="display: none; gap: 12px; margin-top: 24px;">
+                    <button onclick="saveFirebaseConfig()"><i data-lucide="save"></i> Save &amp; Connect</button>
+                    <button class="secondary" onclick="clearFirebaseConfig()"><i data-lucide="trash-2"></i> Clear Config</button>
+                  </div>
+
+                  <div
+                    id="auth-section"
+                    style="margin-top: 16px; display: none; border-top: 1px solid var(--border); padding-top: 16px;"
+                  >
+                    <div style="font-weight: 600; font-size: 0.88rem; margin-bottom: 4px;">Account Authentication</div>
+                    <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 12px 0;">
+                      Sign in to sync your data across devices.
+                    </p>
+
+                    <div id="auth-logged-out">
+                      <div class="settings-auth-inputs">
+                        <input
+                          type="email"
+                          id="auth-email"
+                          placeholder="Email"
+                        />
+                        <div class="input-wrapper">
+                          <input
+                            type="password"
+                            id="auth-password"
+                            placeholder="Password"
+                            style="width: 100%; padding-right: 48px;"
+                          />
+                          <div class="toggle-visibility" tabindex="0" onclick="toggleSecretVisibility('auth-password', this)">
+                            <i data-lucide="eye"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="settings-btn-row">
+                        <button onclick="handleLogin()">Login</button>
+                        <button class="secondary" onclick="handleSignup()">Sign Up</button>
+                        <button class="secondary" onclick="handleAnonLogin()">Anonymous Login</button>
+                      </div>
+                    </div>
+
+                    <div id="auth-logged-in" style="display: none;">
+                      <p style="margin: 0 0 12px 0; font-size: 0.9rem;">
+                        Logged in as: <strong id="auth-user-email"></strong>
+                      </p>
+                      <div class="settings-btn-row">
+                        <button class="secondary" onclick="handleLogout()">Logout</button>
+                        <button class="secondary" onclick="forceSyncLocalToCloud()">Push Local Data to Cloud</button>
+                        <button class="secondary" onclick="forcePullFromCloud()">Pull Data from Cloud</button>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div style="display: flex; gap: 12px">
-                  <button onclick="handleLogin()">Login</button>
-                  <button class="secondary" onclick="handleSignup()">
-                    Sign Up
-                  </button>
-                  <button class="secondary" onclick="handleAnonLogin()">
-                    Anonymous Login
-                  </button>
-                </div>
-              </div>
-
-              <div id="auth-logged-in" style="display: none">
-                <p style="margin-bottom: 16px">
-                  Logged in as: <strong id="auth-user-email"></strong>
-                </p>
-                <div style="display: flex; gap: 12px">
-                  <button class="secondary" onclick="handleLogout()">
-                    Logout
-                  </button>
-                  <button class="secondary" onclick="forceSyncLocalToCloud()">
-                    Push Local Data to Cloud
-                  </button>
-                  <button class="secondary" onclick="forcePullFromCloud()">
-                    Pull Data from Cloud
-                  </button>
-                </div>
               </div>
             </div>
           </div>
 
+          <!-- 4. CATEGORY: AI ENGINE & SERVER CONNECTION -->
+          <div id="settings-cat-ai" class="card col-6 settings-cat-card">
+            <div class="settings-cat-header">
+              <div class="settings-cat-icon amber">
+                <i data-lucide="sparkles"></i>
+              </div>
+              <div>
+                <h2 class="settings-cat-title">AI Engine &amp; Server Connection</h2>
+                <p class="settings-cat-desc">
+                  Free-tier Gemini model selection and backend API server URL for static PWA deployments.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-panel">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="setting-gemini-model">Active Free-Tier Model</label>
+                <div class="input-wrapper">
+                  <i data-lucide="sparkles"></i>
+                  <select
+                    id="setting-gemini-model"
+                    onchange="saveGeminiModelPreference()"
+                  >
+                    <option value="gemini-4-hydrogen">
+                      Gemini 4 Hydrogen (Free Tier · Balanced Insights)
+                    </option>
+                    <option value="gemini-3.1-flash-lite">
+                      Gemini 3.1 Flash Lite (Free Tier · Fast Responses)
+                    </option>
+                  </select>
+                </div>
+                <span class="helper-text">
+                  Used for AI Insights, Session Debriefs, Weekly Reviews, and Economic Calendar analysis. Paid-only models are excluded.
+                </span>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0; padding-top: 12px; border-top: 1px solid var(--border);">
+                <label for="setting-backend-url">Backend Server URL (GitHub Pages / Static PWA)</label>
+                <div class="settings-backend-row" style="display: flex; gap: 8px;">
+                  <div class="input-wrapper" style="flex: 1; min-width: 0;">
+                    <i data-lucide="server"></i>
+                    <input
+                      type="url"
+                      id="setting-backend-url"
+                      placeholder="https://your-backend.onrender.com (blank = same origin)"
+                      onchange="saveBackendUrl()"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="secondary"
+                    onclick="testBackendConnection()"
+                    style="white-space: nowrap;"
+                  >
+                    <i data-lucide="activity"></i> Test Backend
+                  </button>
+                </div>
+                <span class="helper-text" id="setting-backend-status">
+                  Leave blank when running on the full-stack server. When hosted on GitHub Pages, enter your deployed server.ts URL.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. CATEGORY: SECURITY PROTOCOL -->
+          <div id="settings-cat-security" class="card col-6 settings-cat-card">
+            <div class="settings-cat-header">
+              <div class="settings-cat-icon danger">
+                <i data-lucide="shield"></i>
+              </div>
+              <div>
+                <h2 class="settings-cat-title">Security Protocol</h2>
+                <p class="settings-cat-desc">
+                  Session lock, password recovery controls, and local cryptographic protection.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-panel">
+              <div class="settings-panel-title">
+                <span>Access &amp; Cryptographic Protection</span>
+              </div>
+              <p class="settings-panel-sub">
+                Protected by salted PBKDF2-SHA256 (150,000 iterations) with brute-force cooldown lockout. Lock your session immediately or reset your access password.
+              </p>
+              <div class="settings-btn-row" style="margin-top: 4px;">
+                <button class="secondary" onclick="lockSystemNow()">
+                  <i data-lucide="shield"></i> Lock System Now
+                </button>
+                <button class="secondary" onclick="resetPassword()">
+                  <i data-lucide="lock"></i> Reset Password
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -13149,6 +13078,87 @@
     </div>
 
     <script>
+      window.escapeHtml = function (str) {
+        return String(str ?? "").replace(/[&<>"']/g, (ch) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[ch]));
+      };
+
+      window.sanitizeUrl = function (rawUrl, allowDataImage = false) {
+        const cleaned = String(rawUrl || "").trim();
+        if (!cleaned) return "";
+        if (allowDataImage && /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/i.test(cleaned)) {
+          return cleaned;
+        }
+        try {
+          const parsed = new URL(cleaned, window.location.origin);
+          if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+            return parsed.href;
+          }
+          return "";
+        } catch {
+          return "";
+        }
+      };
+
+      window.sanitizeHtml = function (dirtyHtml) {
+        const raw = String(dirtyHtml ?? "");
+        if (!raw) return "";
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(raw, "text/html");
+          const BLOCKED_TAGS = new Set([
+            "script", "iframe", "object", "embed", "form", "input",
+            "button", "textarea", "select", "option", "style", "link",
+            "meta", "base", "svg", "math", "noscript", "template"
+          ]);
+          const walk = (node) => {
+            const children = Array.from(node.childNodes);
+            for (const child of children) {
+              if (child.nodeType !== Node.ELEMENT_NODE) continue;
+              const tag = child.tagName.toLowerCase();
+              if (BLOCKED_TAGS.has(tag)) {
+                child.remove();
+                continue;
+              }
+              const attrs = Array.from(child.attributes);
+              for (const attr of attrs) {
+                const name = attr.name.toLowerCase();
+                const val = attr.value || "";
+                if (name.startsWith("on") || name === "srcdoc" || name === "formaction") {
+                  child.removeAttribute(attr.name);
+                  continue;
+                }
+                if (name === "style" && /(expression|javascript:|vbscript:|url\s*\()/i.test(val)) {
+                  child.removeAttribute(attr.name);
+                  continue;
+                }
+                if (name === "href" || name === "src" || name === "action" || name === "xlink:href") {
+                  const safe = window.sanitizeUrl(val, tag === "img");
+                  if (!safe) {
+                    child.removeAttribute(attr.name);
+                  } else {
+                    child.setAttribute(attr.name, safe);
+                  }
+                }
+              }
+              if (tag === "a" && child.getAttribute("target") === "_blank") {
+                child.setAttribute("rel", "noopener noreferrer");
+              }
+              walk(child);
+            }
+          };
+          walk(doc.body);
+          return doc.body.innerHTML;
+        } catch {
+          return window.escapeHtml(raw);
+        }
+      };
+
       window.isStaticHostName = function (hostname) {
         const host = String(hostname || "").toLowerCase();
         return (
@@ -13161,21 +13171,24 @@
       window.normalizeBackendBaseUrl = function (rawUrl) {
         let cleaned = String(rawUrl || "").trim();
         if (!cleaned) return "";
+        if (/^(javascript|data|vbscript|file):/i.test(cleaned)) {
+          return "";
+        }
         if (!/^https?:\/\//i.test(cleaned)) {
           cleaned = `https://${cleaned}`;
         }
         try {
           const parsed = new URL(cleaned);
+          if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+            return "";
+          }
           let cleanPath = parsed.pathname
             .replace(/\/index\.html$/i, "")
             .replace(/\/api(\/.*)?$/i, "")
             .replace(/\/+$/, "");
           return `${parsed.origin}${cleanPath}`;
         } catch {
-          return cleaned
-            .replace(/\/index\.html$/i, "")
-            .replace(/\/api(\/.*)?$/i, "")
-            .replace(/\/+$/, "");
+          return "";
         }
       };
 
@@ -13504,11 +13517,11 @@
             systemInstruction:
               "You are an expert quantitative trading analyst and risk manager. Provide concise, actionable, and data-driven insights. Format your response using HTML (e.g., <strong>, <ul>, <li>) for readability, but do not wrap it in a markdown code block. Keep it brief and highly relevant to the provided data.",
           });
-          outputEl.innerHTML = text;
+          outputEl.innerHTML = window.sanitizeHtml(text);
         } catch (error) {
           console.error("AI Analysis Error:", error);
           outputEl.innerHTML = `<div style="color: var(--danger); display: flex; flex-direction: column; gap: 8px;">
-            <span>Failed to generate insight: ${error.message}</span>
+            <span>Failed to generate insight: ${window.escapeHtml(error?.message || "Unknown error")}</span>
           </div>`;
         } finally {
           if (btnEl) {
@@ -13627,9 +13640,9 @@
           .map(
             (t) => `
                 <div class="heatmap-cell" style="flex-direction: row; justify-content: space-between; width: 100%; padding: 8px 12px;">
-                    <span style="font-weight:700;">${t.pair}</span>
-                    <span style="color: ${t.side === "BUY" ? "var(--success)" : "var(--danger)"}; font-weight:700;">${t.side} ${t.size}</span>
-                    <button class="secondary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="removeActiveTrade('active', '${t.id}')">Remove</button>
+                    <span style="font-weight:700;">${window.escapeHtml(t.pair)}</span>
+                    <span style="color: ${t.side === "BUY" ? "var(--success)" : "var(--danger)"}; font-weight:700;">${window.escapeHtml(t.side)} ${window.escapeHtml(t.size)}</span>
+                    <button class="secondary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="removeActiveTrade('active', '${window.escapeHtml(t.id)}')">Remove</button>
                 </div>
             `,
           )
@@ -13640,9 +13653,9 @@
           .map(
             (t) => `
                 <div class="heatmap-cell" style="flex-direction: row; justify-content: space-between; width: 100%; padding: 8px 12px; border-style: dashed;">
-                    <span style="font-weight:700;">${t.pair}</span>
-                    <span style="color: ${t.side === "BUY" ? "var(--success)" : "var(--danger)"}; font-weight:700;">${t.side} ${t.size}</span>
-                    <button class="secondary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="removeActiveTrade('planned', '${t.id}')">Remove</button>
+                    <span style="font-weight:700;">${window.escapeHtml(t.pair)}</span>
+                    <span style="color: ${t.side === "BUY" ? "var(--success)" : "var(--danger)"}; font-weight:700;">${window.escapeHtml(t.side)} ${window.escapeHtml(t.size)}</span>
+                    <button class="secondary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="removeActiveTrade('planned', '${window.escapeHtml(t.id)}')">Remove</button>
                 </div>
             `,
           )
@@ -13653,7 +13666,7 @@
           ...new Set(Store.trades.map((t) => t.asset)),
         ].sort();
         const pairOptions = journalPairs
-          .map((p) => `<option value="${p}">${p}</option>`)
+          .map((p) => `<option value="${window.escapeHtml(p)}">${window.escapeHtml(p)}</option>`)
           .join("");
         document.getElementById("active-pair-list").innerHTML = pairOptions;
         document.getElementById("planned-pair-list").innerHTML = pairOptions;
@@ -13676,7 +13689,7 @@
                 : 0;
             return `
                     <tr>
-                        <td style="font-weight:700;">${c}</td>
+                        <td style="font-weight:700;">${window.escapeHtml(c)}</td>
                         <td style="color: ${val >= 0 ? "var(--success)" : "var(--danger)"}; font-family: var(--font-mono); font-weight:700;">
                             ${val >= 0 ? "+" : ""}${val.toFixed(2)}
                         </td>
@@ -13700,13 +13713,14 @@
               ? (Math.abs(exposures[c]) / totalAbsExposure) * 100
               : 0;
           maxPct = Math.max(maxPct, pct);
+          const safeCurrency = window.escapeHtml(c);
           if (pct > 70)
             warnings.push(
-              `<div style="color: var(--danger); margin-bottom: 8px;"><i data-lucide="alert-triangle" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>CRITICAL:</strong> ${c} exposure is ${pct.toFixed(1)}%. High risk of liquidation on ${c} volatility.</div>`,
+              `<div style="color: var(--danger); margin-bottom: 8px;"><i data-lucide="alert-triangle" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>CRITICAL:</strong> ${safeCurrency} exposure is ${pct.toFixed(1)}%. High risk of liquidation on ${safeCurrency} volatility.</div>`,
             );
           else if (pct > 50)
             warnings.push(
-              `<div style="color: var(--warning); margin-bottom: 8px;"><i data-lucide="alert-circle" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>WARNING:</strong> ${c} exposure is ${pct.toFixed(1)}%. High concentration detected.</div>`,
+              `<div style="color: var(--warning); margin-bottom: 8px;"><i data-lucide="alert-circle" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>WARNING:</strong> ${safeCurrency} exposure is ${pct.toFixed(1)}%. High concentration detected.</div>`,
             );
         });
 
@@ -13739,7 +13753,7 @@
           Math.abs(usdExposure) > totalAbsExposure * 0.4
         ) {
           warnings.push(
-            `<div style="color: var(--warning); margin-bottom: 8px;"><i data-lucide="layers" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>Correlated Exposure:</strong> Multiple USD-dependent positions detected (${usdDependent.map((t) => t.pair).join(", ")}).</div>`,
+            `<div style="color: var(--warning); margin-bottom: 8px;"><i data-lucide="layers" style="width:16px;height:16px;display:inline;margin-right:4px;"></i> <strong>Correlated Exposure:</strong> Multiple USD-dependent positions detected (${usdDependent.map((t) => window.escapeHtml(t.pair)).join(", ")}).</div>`,
           );
         }
 
@@ -13825,6 +13839,7 @@
 
       window.showToast = function (message, type = "info") {
         const container = document.getElementById("toast-container");
+        if (!container) return;
         const toast = document.createElement("div");
         const colors = {
           info: "var(--primary)",
@@ -13832,10 +13847,17 @@
           danger: "var(--danger)",
           success: "var(--success)",
         };
-        toast.style.cssText = `background: var(--surface); border-left: 4px solid ${colors[type]}; padding: 16px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); color: var(--text); font-size: 0.9rem; animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 12px;`;
-        toast.innerHTML = `<i data-lucide="alert-circle" style="color: ${colors[type]}"></i> <span>${message}</span>`;
+        const accent = colors[type] || colors.info;
+        toast.style.cssText = `background: var(--surface); border-left: 4px solid ${accent}; padding: 16px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); color: var(--text); font-size: 0.9rem; animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 12px;`;
+        const icon = document.createElement("i");
+        icon.setAttribute("data-lucide", "alert-circle");
+        icon.style.color = accent;
+        const span = document.createElement("span");
+        span.textContent = String(message ?? "");
+        toast.appendChild(icon);
+        toast.appendChild(span);
         container.appendChild(toast);
-        lucide.createIcons({ root: toast });
+        if (window.lucide) lucide.createIcons({ root: toast });
         setTimeout(() => {
           toast.style.opacity = "0";
           toast.style.transition = "opacity 0.3s ease";
@@ -14023,24 +14045,196 @@ Keep the response cleanly formatted with lists or bold text.`;
         callGemini(prompt, "alloc-insight-output", "btn-alloc-insight");
       };
 
-      async function hashPassword(password) {
-        if (!crypto || !crypto.subtle) {
-          console.warn(
-            "crypto.subtle is not available. Using insecure fallback hash.",
-          );
-          let hash = 0;
-          for (let i = 0; i < password.length; i++) {
-            const char = password.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash;
-          }
-          return hash.toString(16);
+      const PBKDF2_ITERATIONS = 150000;
+      const MIN_PASSWORD_LENGTH = 6;
+      const AUTH_LOCKOUT_KEY = "qe_auth_lockout";
+      let authLockoutTimer = null;
+
+      function bytesToHex(bytes) {
+        return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      }
+
+      function hexToBytes(hex) {
+        const clean = String(hex || "").trim();
+        if (!/^[0-9a-f]+$/i.test(clean) || clean.length % 2 !== 0) return null;
+        const out = new Uint8Array(clean.length / 2);
+        for (let i = 0; i < out.length; i++) {
+          out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
         }
+        return out;
+      }
+
+      function constantTimeEqual(a, b) {
+        const strA = String(a || "");
+        const strB = String(b || "");
+        const maxLen = Math.max(strA.length, strB.length);
+        let diff = strA.length ^ strB.length;
+        for (let i = 0; i < maxLen; i++) {
+          const cA = i < strA.length ? strA.charCodeAt(i) : 0;
+          const cB = i < strB.length ? strB.charCodeAt(i) : 0;
+          diff |= cA ^ cB;
+        }
+        return diff === 0;
+      }
+
+      async function derivePbkdf2Hash(password, saltHex, iterations = PBKDF2_ITERATIONS) {
+        if (!window.crypto || !window.crypto.subtle) {
+          throw new Error("WebCrypto API (HTTPS / secure context) is required for password security.");
+        }
+        const saltBytes = hexToBytes(saltHex);
+        if (!saltBytes) throw new Error("Invalid salt format.");
         const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        const keyMaterial = await window.crypto.subtle.importKey(
+          "raw",
+          encoder.encode(String(password)),
+          "PBKDF2",
+          false,
+          ["deriveBits"],
+        );
+        const derivedBits = await window.crypto.subtle.deriveBits(
+          {
+            name: "PBKDF2",
+            salt: saltBytes,
+            iterations,
+            hash: "SHA-256",
+          },
+          keyMaterial,
+          256,
+        );
+        return `v2$${saltHex}$${iterations}$${bytesToHex(new Uint8Array(derivedBits))}`;
+      }
+
+      async function hashPassword(password) {
+        if (!window.crypto || !window.crypto.subtle || !window.crypto.getRandomValues) {
+          throw new Error("Secure WebCrypto API is unavailable in this browser context.");
+        }
+        const salt = new Uint8Array(16);
+        window.crypto.getRandomValues(salt);
+        return derivePbkdf2Hash(password, bytesToHex(salt), PBKDF2_ITERATIONS);
+      }
+
+      async function legacySha256Hex(password) {
+        const encoder = new TextEncoder();
+        const hashBuffer = await window.crypto.subtle.digest("SHA-256", encoder.encode(String(password)));
+        return bytesToHex(new Uint8Array(hashBuffer));
+      }
+
+      async function verifyPassword(password, storedHash) {
+        const candidate = String(storedHash || "");
+        if (!candidate) return { valid: false, needsUpgrade: false };
+        if (candidate.startsWith("v2$")) {
+          const parts = candidate.split("$");
+          if (parts.length !== 4) return { valid: false, needsUpgrade: false };
+          const [, saltHex, iterRaw] = parts;
+          const iterations = parseInt(iterRaw, 10);
+          if (!Number.isFinite(iterations) || iterations < 10000) {
+            return { valid: false, needsUpgrade: false };
+          }
+          const derived = await derivePbkdf2Hash(password, saltHex, iterations);
+          return {
+            valid: constantTimeEqual(derived, candidate),
+            needsUpgrade: iterations < PBKDF2_ITERATIONS,
+          };
+        }
+        // Seamless one-time verification for legacy unsalted SHA-256 hashes (64 hex chars)
+        if (/^[0-9a-f]{64}$/i.test(candidate) && window.crypto?.subtle) {
+          const legacyHex = await legacySha256Hex(password);
+          return {
+            valid: constantTimeEqual(legacyHex.toLowerCase(), candidate.toLowerCase()),
+            needsUpgrade: true,
+          };
+        }
+        return { valid: false, needsUpgrade: false };
+      }
+
+      function getAuthLockoutState() {
+        try {
+          const raw = localStorage.getItem(AUTH_LOCKOUT_KEY);
+          if (!raw) return { failures: 0, lockedUntil: 0 };
+          const parsed = JSON.parse(raw);
+          return {
+            failures: Number(parsed?.failures) || 0,
+            lockedUntil: Number(parsed?.lockedUntil) || 0,
+          };
+        } catch {
+          return { failures: 0, lockedUntil: 0 };
+        }
+      }
+
+      function setLockStatusBanner(message, isError = true) {
+        const el = document.getElementById("lock-security-status");
+        if (!el) return;
+        if (!message) {
+          el.style.display = "none";
+          el.textContent = "";
+          return;
+        }
+        el.style.display = "block";
+        el.style.color = isError ? "var(--danger)" : "var(--success)";
+        el.style.background = isError ? "rgba(244, 63, 94, 0.12)" : "rgba(16, 185, 129, 0.12)";
+        el.style.borderColor = isError ? "rgba(244, 63, 94, 0.35)" : "rgba(16, 185, 129, 0.35)";
+        el.textContent = message;
+      }
+
+      function updateLockoutCountdownUI() {
+        if (authLockoutTimer) {
+          clearInterval(authLockoutTimer);
+          authLockoutTimer = null;
+        }
+        const render = () => {
+          const state = getAuthLockoutState();
+          const remainingMs = state.lockedUntil - Date.now();
+          const lockBtn = document.getElementById("lock-btn");
+          const recBtn = document.getElementById("recovery-btn");
+          if (remainingMs > 0) {
+            const secs = Math.ceil(remainingMs / 1000);
+            setLockStatusBanner(`Too many failed attempts. Try again in ${secs}s.`, true);
+            if (lockBtn) lockBtn.disabled = true;
+            if (recBtn) recBtn.disabled = true;
+            return true;
+          }
+          if (lockBtn) lockBtn.disabled = false;
+          if (recBtn) recBtn.disabled = false;
+          if (state.failures > 0 && state.lockedUntil > 0) {
+            setLockStatusBanner("", true);
+          }
+          return false;
+        };
+        if (render()) {
+          authLockoutTimer = setInterval(() => {
+            if (!render()) {
+              clearInterval(authLockoutTimer);
+              authLockoutTimer = null;
+            }
+          }, 500);
+        }
+      }
+
+      function recordFailedAuthAttempt() {
+        const state = getAuthLockoutState();
+        const failures = state.failures + 1;
+        let lockedUntil = 0;
+        if (failures >= 5) {
+          const step = Math.min(4, failures - 5);
+          const cooldownMs = 30000 * Math.pow(2, step); // 30s, 60s, 120s, 240s, 480s
+          lockedUntil = Date.now() + cooldownMs;
+        }
+        localStorage.setItem(AUTH_LOCKOUT_KEY, JSON.stringify({ failures, lockedUntil }));
+        updateLockoutCountdownUI();
+        return { failures, lockedUntil };
+      }
+
+      function clearAuthLockout() {
+        localStorage.removeItem(AUTH_LOCKOUT_KEY);
+        if (authLockoutTimer) {
+          clearInterval(authLockoutTimer);
+          authLockoutTimer = null;
+        }
+        const lockBtn = document.getElementById("lock-btn");
+        const recBtn = document.getElementById("recovery-btn");
+        if (lockBtn) lockBtn.disabled = false;
+        if (recBtn) recBtn.disabled = false;
+        setLockStatusBanner("", true);
       }
 
       window.exportToPDF = function () {
@@ -14224,8 +14418,8 @@ Keep the response cleanly formatted with lists or bold text.`;
 
         document.getElementById("red-zone-insight").innerHTML = `
                 <i data-lucide="alert-circle" style="width:14px; vertical-align: middle;"></i>
-                High risk detected on <strong>${worstDay}s</strong> around <strong>${worstHour}:00 UTC</strong>. 
-                Trading <strong>${worstAsset}</strong> during these times has historically led to significant drawdown.
+                High risk detected on <strong>${window.escapeHtml(worstDay)}s</strong> around <strong>${window.escapeHtml(worstHour)}:00 UTC</strong>. 
+                Trading <strong>${window.escapeHtml(worstAsset)}</strong> during these times has historically led to significant drawdown.
             `;
         lucide.createIcons({
           root: document.getElementById("red-zone-insight"),
@@ -14348,11 +14542,11 @@ Keep the response cleanly formatted with lists or bold text.`;
         }
 
         let html = "<table><thead><tr><th>Strategy</th>";
-        assets.forEach((a) => (html += `<th>${a}</th>`));
+        assets.forEach((a) => (html += `<th>${window.escapeHtml(a)}</th>`));
         html += "</tr></thead><tbody>";
 
         strategies.forEach((s) => {
-          html += `<tr><td><strong>${s}</strong></td>`;
+          html += `<tr><td><strong>${window.escapeHtml(s)}</strong></td>`;
           assets.forEach((a) => {
             const count = trades.filter(
               (t) => t.setupType === s && t.asset === a,
@@ -14372,7 +14566,12 @@ Keep the response cleanly formatted with lists or bold text.`;
       };
 
       window.handleAuth = async function () {
-        console.log("handleAuth triggered");
+        const lockout = getAuthLockoutState();
+        if (lockout.lockedUntil > Date.now()) {
+          updateLockoutCountdownUI();
+          return;
+        }
+
         const passwordInput = document.getElementById("lock-password");
         const secondaryInput = document.getElementById(
           "lock-secondary-password",
@@ -14381,45 +14580,76 @@ Keep the response cleanly formatted with lists or bold text.`;
         const secondaryPassword = secondaryInput.value;
 
         if (!password) {
-          console.log("No password entered");
+          setLockStatusBanner("Please enter your password.", true);
           return;
         }
 
         try {
           const storedHash = localStorage.getItem("qe_password_hash");
-          console.log("Stored hash exists:", !!storedHash);
-          const inputHash = await hashPassword(password);
-          console.log("Input hash generated");
 
           if (!storedHash) {
-            console.log("First time setup");
-            // First time setup
-            if (!secondaryPassword) {
-              alert(
-                "Please provide a secondary password for account recovery.",
+            // First time setup: enforce minimum length & distinct recovery password
+            if (password.length < MIN_PASSWORD_LENGTH) {
+              setLockStatusBanner(
+                `Main password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+                true,
               );
               return;
             }
+            if (!secondaryPassword || secondaryPassword.length < MIN_PASSWORD_LENGTH) {
+              setLockStatusBanner(
+                `Secondary recovery password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+                true,
+              );
+              return;
+            }
+            if (password === secondaryPassword) {
+              setLockStatusBanner(
+                "Secondary recovery password must be different from your main password.",
+                true,
+              );
+              return;
+            }
+            const mainHash = await hashPassword(password);
             const secondaryHash = await hashPassword(secondaryPassword);
-            localStorage.setItem("qe_password_hash", inputHash);
+            localStorage.setItem("qe_password_hash", mainHash);
             localStorage.setItem("qe_secondary_password_hash", secondaryHash);
+            clearAuthLockout();
             sessionStorage.setItem("qe_authenticated", "true");
-            console.log("Calling unlockApp() for first time setup");
-            unlockApp();
-          } else if (storedHash === inputHash) {
-            console.log("Password match");
-            sessionStorage.setItem("qe_authenticated", "true");
-            console.log("Calling unlockApp() for successful login");
-            unlockApp();
-          } else {
-            console.log("Invalid password");
-            alert("Invalid password. Access denied.");
             passwordInput.value = "";
+            secondaryInput.value = "";
+            unlockApp();
+            if (typeof startLiveSimulation === "function") startLiveSimulation();
+            return;
+          }
+
+          const check = await verifyPassword(password, storedHash);
+          if (check.valid) {
+            if (check.needsUpgrade) {
+              const upgradedHash = await hashPassword(password);
+              localStorage.setItem("qe_password_hash", upgradedHash);
+            }
+            clearAuthLockout();
+            sessionStorage.setItem("qe_authenticated", "true");
+            passwordInput.value = "";
+            unlockApp();
+            if (typeof startLiveSimulation === "function") startLiveSimulation();
+          } else {
+            const failState = recordFailedAuthAttempt();
+            passwordInput.value = "";
+            if (failState.lockedUntil <= Date.now()) {
+              const remaining = Math.max(0, 5 - failState.failures);
+              setLockStatusBanner(
+                `Invalid password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before cooldown.`,
+                true,
+              );
+            }
           }
         } catch (error) {
           console.error("Error in handleAuth:", error);
-          alert(
-            "An error occurred during authentication. Check console for details.",
+          setLockStatusBanner(
+            error?.message || "An error occurred during authentication.",
+            true,
           );
         }
       };
@@ -14457,6 +14687,8 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("lock-title").innerText = "Password Recovery";
         document.getElementById("lock-desc").innerText =
           "Use your secondary password to reset your main password.";
+        setLockStatusBanner("", true);
+        updateLockoutCountdownUI();
       };
 
       window.hideRecovery = function () {
@@ -14465,9 +14697,17 @@ Keep the response cleanly formatted with lists or bold text.`;
         document.getElementById("lock-title").innerText = "Secure Access";
         document.getElementById("lock-desc").innerText =
           "Please enter your password to unlock the system.";
+        setLockStatusBanner("", true);
+        updateLockoutCountdownUI();
       };
 
       window.handleRecovery = async function () {
+        const lockout = getAuthLockoutState();
+        if (lockout.lockedUntil > Date.now()) {
+          updateLockoutCountdownUI();
+          return;
+        }
+
         const recoveryInput = document.getElementById("recovery-password");
         const recoveryPassword = recoveryInput.value;
         if (!recoveryPassword) return;
@@ -14476,21 +14716,30 @@ Keep the response cleanly formatted with lists or bold text.`;
           "qe_secondary_password_hash",
         );
         if (!storedSecondaryHash) {
-          alert("No secondary password was set for this account.");
+          setLockStatusBanner("No secondary password was set for this account.", true);
           return;
         }
 
-        const inputHash = await hashPassword(recoveryPassword);
-        if (storedSecondaryHash === inputHash) {
-          // Reset main password
-          localStorage.removeItem("qe_password_hash");
-          alert(
-            "Secondary password verified. You can now set a new main password.",
-          );
-          location.reload();
-        } else {
-          alert("Invalid secondary password.");
-          recoveryInput.value = "";
+        try {
+          const check = await verifyPassword(recoveryPassword, storedSecondaryHash);
+          if (check.valid) {
+            clearAuthLockout();
+            localStorage.removeItem("qe_password_hash");
+            sessionStorage.removeItem("qe_authenticated");
+            recoveryInput.value = "";
+            alert(
+              "Secondary password verified. You can now set a new main password.",
+            );
+            location.reload();
+          } else {
+            const failState = recordFailedAuthAttempt();
+            recoveryInput.value = "";
+            if (failState.lockedUntil <= Date.now()) {
+              setLockStatusBanner("Invalid secondary password.", true);
+            }
+          }
+        } catch (error) {
+          setLockStatusBanner(error?.message || "Recovery verification failed.", true);
         }
       };
 
@@ -14512,12 +14761,28 @@ Keep the response cleanly formatted with lists or bold text.`;
         }
       }
 
+      window.lockSystemNow = function () {
+        sessionStorage.removeItem("qe_authenticated");
+        const passEl = document.getElementById("lock-password");
+        const secEl = document.getElementById("lock-secondary-password");
+        const recEl = document.getElementById("recovery-password");
+        if (passEl) passEl.value = "";
+        if (secEl) secEl.value = "";
+        if (recEl) recEl.value = "";
+        document.getElementById("app-sidebar").style.display = "none";
+        document.getElementById("main-content").style.display = "none";
+        document.getElementById("lock-screen").style.display = "flex";
+        window.hideRecovery();
+        if (passEl) passEl.focus();
+      };
+
       window.resetPassword = function () {
         customConfirm(
-          "Are you sure you want to reset your password? You will be logged out.",
+          "Are you sure you want to reset your password? You will be logged out immediately to set a new password.",
           () => {
             localStorage.removeItem("qe_password_hash");
             sessionStorage.removeItem("qe_authenticated");
+            clearAuthLockout();
             location.reload();
           },
           "Reset Password",
@@ -14658,8 +14923,9 @@ Keep the response cleanly formatted with lists or bold text.`;
             model: window.getSelectedFreeGeminiModel(),
           });
 
-          // Simple markdown-like formatter
-          const formattedText = text
+          // Escape HTML before lightweight markdown formatting, then run sanitizer
+          const safeMarkdownSource = window.escapeHtml(text || "");
+          const formattedText = safeMarkdownSource
             .replace(/^### (.*$)/gm, "<h3>$1</h3>")
             .replace(/^## (.*$)/gm, "<h2>$1</h2>")
             .replace(/^# (.*$)/gm, "<h1>$1</h1>")
@@ -14669,13 +14935,13 @@ Keep the response cleanly formatted with lists or bold text.`;
             .replace(/\n\* /g, "<br>• ")
             .replace(/\n- /g, "<br>• ");
 
-          responseDiv.innerHTML = formattedText;
+          responseDiv.innerHTML = window.sanitizeHtml(formattedText);
         } catch (error) {
           console.error("AI Analysis Error:", error);
           responseDiv.innerHTML = `
                     <div style="color: var(--danger); text-align: center; margin-top: 50px;">
                         <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 16px;"></i>
-                        <p style="margin-bottom: 8px;">Failed to generate analysis: ${error.message}</p>
+                        <p style="margin-bottom: 8px;">Failed to generate analysis: ${window.escapeHtml(error?.message || "Unknown error")}</p>
                     </div>
                 `;
           if (window.lucide) window.lucide.createIcons();
@@ -14877,21 +15143,49 @@ Keep the response cleanly formatted with lists or bold text.`;
         }, 500); // Wait for charts to render
       };
 
+      const ALLOWED_IMPORT_KEYS = new Set([
+        "accounts", "transactions", "debriefs", "weeklyReviews",
+        "allocations", "wishlist", "investments", "payouts",
+        "milestones", "trades", "dailyGoals", "weeklyGoals",
+        "activeTrades", "plannedTrades", "backtests", "planner",
+        "snapshots", "scalingMilestones", "expenses", "budgets",
+        "stocks", "dividends", "locks", "journalConfig", "settings"
+      ]);
+
       window.importData = function (event) {
         const file = event.target.files[0];
         if (!file) return;
+        if (file.size > 20 * 1024 * 1024) {
+          alert("Backup file exceeds 20MB limit.");
+          return;
+        }
 
         const reader = new FileReader();
         reader.onload = function (e) {
           try {
             const data = JSON.parse(e.target.result);
-            if (!data.settings) {
+            if (!data || typeof data !== "object" || Array.isArray(data) || !data.settings || typeof data.settings !== "object") {
               throw new Error("Invalid backup format");
             }
 
-            for (const key in data) {
-              if (key !== "version" && typeof Store[key] !== "function") {
-                Store[key] = data[key];
+            for (const key of Object.keys(data)) {
+              if (
+                key === "__proto__" ||
+                key === "constructor" ||
+                key === "prototype" ||
+                !ALLOWED_IMPORT_KEYS.has(key) ||
+                typeof Store[key] === "function"
+              ) {
+                continue;
+              }
+              const val = data[key];
+              const current = Store[key];
+              if (Array.isArray(current)) {
+                if (Array.isArray(val)) Store[key] = val;
+              } else if (current !== null && typeof current === "object") {
+                if (val && typeof val === "object" && !Array.isArray(val)) {
+                  Store[key] = val;
+                }
               }
             }
 
@@ -21028,24 +21322,26 @@ Keep the response cleanly formatted with lists or bold text.`;
         const content = document.getElementById("view-trade-content");
         if (!content) return;
 
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
         let screenshotHtml = "";
         if (trade.screenshot) {
-          const urls = trade.screenshot
+          const urls = String(trade.screenshot)
             .split(" | ")
-            .map((s) => s.trim())
-            .filter((s) => s);
+            .map((s) => window.sanitizeUrl ? window.sanitizeUrl(s.trim(), true) : s.trim())
+            .filter(Boolean);
           if (urls.length > 0) {
             screenshotHtml = `
                 <div style="margin-top: 16px;">
                   <h3 style="font-size: 1rem; margin-bottom: 8px;">Screenshots</h3>
                   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
                   ${urls
-                    .map(
-                      (url) => `
-                    <a href="${url}" target="_blank" style="display: block;">
-                      <img src="${url}" alt="Screenshot" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);" />
-                    </a>`,
-                    )
+                    .map((url) => {
+                      const safeUrl = esc(url);
+                      return `
+                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: block;">
+                      <img src="${safeUrl}" alt="Screenshot" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);" />
+                    </a>`;
+                    })
                     .join("")}
                   </div>
                 </div>
@@ -21057,50 +21353,50 @@ Keep the response cleanly formatted with lists or bold text.`;
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Asset</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.asset}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.asset)}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Date</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.date}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.date)}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Session</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.session || "-"}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.session || "-")}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Type</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem; color: ${trade.tradeType === "Buy" ? "var(--success)" : "var(--danger)"}">${trade.tradeType || "-"}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem; color: ${trade.tradeType === "Buy" ? "var(--success)" : "var(--danger)"}">${esc(trade.tradeType || "-")}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Entry Price</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.entryPrice || "-"}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.entryPrice || "-")}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Exit Price</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.tpPrice || "-"}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.tpPrice || "-")}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Result</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${trade.resultType || "-"}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">${esc(trade.resultType || "-")}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">P&L</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem; color: ${trade.pnlAmount >= 0 ? "var(--success)" : "var(--danger)"}">${trade.pnlAmount >= 0 ? "+" : ""}$${(trade.pnlAmount || 0).toFixed(2)}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem; color: ${trade.pnlAmount >= 0 ? "var(--success)" : "var(--danger)"}">${trade.pnlAmount >= 0 ? "+" : ""}$${(Number(trade.pnlAmount) || 0).toFixed(2)}</p>
             </div>
             <div>
               <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Commission</p>
-              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">$${(trade.commission || 0).toFixed(2)}</p>
+              <p style="margin: 4px 0 0 0; font-weight: 600; font-size: 1.1rem;">$${(Number(trade.commission) || 0).toFixed(2)}</p>
             </div>
           </div>
           
           <div style="margin-top: 16px;">
             <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Setup Type</p>
-            <p style="margin: 4px 0 0 0; font-weight: 600;">${trade.setupType || "-"}</p>
+            <p style="margin: 4px 0 0 0; font-weight: 600;">${esc(trade.setupType || "-")}</p>
           </div>
           
           <div style="margin-top: 16px;">
             <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">Notes</p>
-            <p style="margin: 4px 0 0 0; background: var(--background); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">${trade.postNotes || "No notes."}</p>
+            <p style="margin: 4px 0 0 0; background: var(--background); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">${esc(trade.postNotes || "No notes.")}</p>
           </div>
           
           ${screenshotHtml}
@@ -21224,6 +21520,8 @@ Keep the response cleanly formatted with lists or bold text.`;
           return assetMatch && sessionMatch;
         });
 
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
+
         // 1. Desktop Table Rendering
         renderTable("trades-table-body", filteredTrades, (t) => {
           let resultColor = "var(--muted)";
@@ -21237,33 +21535,35 @@ Keep the response cleanly formatted with lists or bold text.`;
           if (t.pnlAmount > 0) pnlColor = "var(--success)";
           else if (t.pnlAmount < 0) pnlColor = "var(--danger)";
 
+          const safeId = esc(t.id);
+
           return `
                 <tr>
-                    <td>${t.date} ${t.entryTime || ""}</td>
-                    <td style="font-weight: 600;">${t.asset}</td>
-                    <td>${t.session || "-"}</td>
-                    <td><span class="risk-badge" style="background: ${t.tradeType === "Buy" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)"}; color: ${t.tradeType === "Buy" ? "var(--success)" : "var(--danger)"}">${t.tradeType || "-"}</span></td>
-                    <td>${t.setupType || "-"}</td>
-                    <td><span class="risk-badge" style="background: var(--surface); border: 1px solid var(--border);">${t.tradeGrade || "-"}</span></td>
+                    <td>${esc(t.date)} ${esc(t.entryTime || "")}</td>
+                    <td style="font-weight: 600;">${esc(t.asset)}</td>
+                    <td>${esc(t.session || "-")}</td>
+                    <td><span class="risk-badge" style="background: ${t.tradeType === "Buy" ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)"}; color: ${t.tradeType === "Buy" ? "var(--success)" : "var(--danger)"}">${esc(t.tradeType || "-")}</span></td>
+                    <td>${esc(t.setupType || "-")}</td>
+                    <td><span class="risk-badge" style="background: var(--surface); border: 1px solid var(--border);">${esc(t.tradeGrade || "-")}</span></td>
                     <td>
-                      <span style="color: ${resultColor}; font-weight: 600;">${t.resultType || "-"}</span>
+                      <span style="color: ${resultColor}; font-weight: 600;">${esc(t.resultType || "-")}</span>
                       ${t.partials && t.partials.length > 0 ? `<div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">${t.partials.length} Partials</div>` : ""}
                     </td>
-                    <td class="font-mono" style="color: ${t.r >= 0 ? "var(--success)" : "var(--danger)"}">${t.r > 0 ? "+" : ""}${(t.r || 0).toFixed(2)}R</td>
-                    <td class="font-mono" style="color: ${pnlColor}">${t.pnlAmount > 0 ? "+" : ""}$${(t.pnlAmount || 0).toFixed(2)}</td>
-                    <td>${t.qualityScore || "-"}/10</td>
+                    <td class="font-mono" style="color: ${t.r >= 0 ? "var(--success)" : "var(--danger)"}">${t.r > 0 ? "+" : ""}${(Number(t.r) || 0).toFixed(2)}R</td>
+                    <td class="font-mono" style="color: ${pnlColor}">${t.pnlAmount > 0 ? "+" : ""}$${(Number(t.pnlAmount) || 0).toFixed(2)}</td>
+                    <td>${esc(t.qualityScore || "-")}/10</td>
                     <td>
                         <div style="display: flex; gap: 4px;">
-                            <button class="icon-btn" onclick="viewTrade('${t.id}')" title="View Trade Details">
+                            <button class="icon-btn" onclick="viewTrade('${safeId}')" title="View Trade Details">
                                 <i data-lucide="eye" style="color: var(--warning); width: 16px; height: 16px;"></i>
                             </button>
-                            <button class="icon-btn" onclick="editTrade('${t.id}')" title="Edit Trade">
+                            <button class="icon-btn" onclick="editTrade('${safeId}')" title="Edit Trade">
                                 <i data-lucide="edit-2" style="color: var(--primary); width: 16px; height: 16px;"></i>
                             </button>
-                            <button class="icon-btn" onclick="duplicateTrade('${t.id}')" title="Duplicate Trade">
+                            <button class="icon-btn" onclick="duplicateTrade('${safeId}')" title="Duplicate Trade">
                                 <i data-lucide="copy" style="color: var(--text); width: 16px; height: 16px;"></i>
                             </button>
-                            <button class="icon-btn" onclick="deleteTrade('${t.id}')" title="Delete Trade">
+                            <button class="icon-btn" onclick="deleteTrade('${safeId}')" title="Delete Trade">
                                 <i data-lucide="trash-2" style="color: var(--danger); width: 16px; height: 16px;"></i>
                             </button>
                         </div>
@@ -21307,71 +21607,75 @@ Keep the response cleanly formatted with lists or bold text.`;
                     : "rgba(244, 63, 94, 0.15)";
                 const typeColor =
                   t.tradeType === "Buy" ? "var(--success)" : "var(--danger)";
+                const safeId = esc(t.id);
+                const tagsText = Array.isArray(t.tags)
+                  ? t.tags.map((tag) => esc(tag)).join(", ")
+                  : esc(t.tags);
 
                 return `
-                  <div class="tj-mobile-card" id="tj-card-${t.id}">
+                  <div class="tj-mobile-card" id="tj-card-${safeId}">
                     <div class="tj-card-top">
                       <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="tj-card-asset">${t.asset}</span>
-                        <span class="risk-badge" style="background: ${typeBg}; color: ${typeColor}; font-weight: 700;">${t.tradeType || "-"}</span>
-                        <span class="risk-badge" style="background: ${resultBg}; color: ${resultColor}; font-weight: 600;">${t.resultType || "-"}</span>
+                        <span class="tj-card-asset">${esc(t.asset)}</span>
+                        <span class="risk-badge" style="background: ${typeBg}; color: ${typeColor}; font-weight: 700;">${esc(t.tradeType || "-")}</span>
+                        <span class="risk-badge" style="background: ${resultBg}; color: ${resultColor}; font-weight: 600;">${esc(t.resultType || "-")}</span>
                       </div>
-                      <div class="tj-card-date">${t.date} ${t.entryTime || ""}</div>
+                      <div class="tj-card-date">${esc(t.date)} ${esc(t.entryTime || "")}</div>
                     </div>
 
                     <div class="tj-card-metrics">
                       <div class="tj-metric-item">
                         <span class="tj-metric-label">Actual Return</span>
                         <span class="tj-metric-val font-mono" style="color: ${t.r >= 0 ? "var(--success)" : "var(--danger)"};">
-                          ${t.r > 0 ? "+" : ""}${(t.r || 0).toFixed(2)}R
+                          ${t.r > 0 ? "+" : ""}${(Number(t.r) || 0).toFixed(2)}R
                         </span>
                       </div>
                       <div class="tj-metric-item">
                         <span class="tj-metric-label">Net P&L</span>
                         <span class="tj-metric-val font-mono" style="color: ${pnlColor};">
-                          ${t.pnlAmount > 0 ? "+" : ""}$${(t.pnlAmount || 0).toFixed(2)}
+                          ${t.pnlAmount > 0 ? "+" : ""}$${(Number(t.pnlAmount) || 0).toFixed(2)}
                         </span>
                       </div>
                       <div class="tj-metric-item">
                         <span class="tj-metric-label">Setup / Grade</span>
                         <span class="tj-metric-val" style="font-size: 0.82rem; font-weight: 500;">
-                          ${t.setupType || "-"} <span style="opacity: 0.5;">·</span> ${t.tradeGrade || "-"}
+                          ${esc(t.setupType || "-")} <span style="opacity: 0.5;">·</span> ${esc(t.tradeGrade || "-")}
                         </span>
                       </div>
                     </div>
 
-                    <div id="tj-card-details-${t.id}" class="tj-card-details" style="display: none;">
+                    <div id="tj-card-details-${safeId}" class="tj-card-details" style="display: none;">
                       <div class="tj-details-grid">
-                        <div><span class="text-muted">Session:</span> ${t.session || "-"}</div>
-                        <div><span class="text-muted">Planned R:</span> ${(t.plannedR || 0).toFixed(2)}R</div>
-                        <div><span class="text-muted">Duration:</span> ${t.duration || "-"}</div>
-                        <div><span class="text-muted">Quality:</span> ${t.qualityScore ? t.qualityScore + "/10" : "-"}</div>
-                        <div><span class="text-muted">News:</span> ${t.newsEvent || "None"}</div>
-                        <div><span class="text-muted">Fees/Slip:</span> $${(t.fees || 0).toFixed(2)}</div>
-                        ${t.mistake && t.mistake !== "None" ? `<div style="grid-column: span 2; color: var(--danger);"><span class="text-muted">Mistake:</span> ${t.mistake}</div>` : ""}
-                        ${t.preEmotion ? `<div><span class="text-muted">Pre-Emotion:</span> ${t.preEmotion}</div>` : ""}
-                        ${t.postEmotion ? `<div><span class="text-muted">Post-Emotion:</span> ${t.postEmotion}</div>` : ""}
-                        ${t.tags && (Array.isArray(t.tags) ? t.tags.length : t.tags) ? `<div style="grid-column: span 2;"><span class="text-muted">Tags:</span> ${Array.isArray(t.tags) ? t.tags.join(", ") : t.tags}</div>` : ""}
-                        ${t.notes ? `<div style="grid-column: span 2; font-style: italic; background: var(--bg); padding: 8px; border-radius: 6px;"><span class="text-muted">Notes:</span> ${t.notes}</div>` : ""}
+                        <div><span class="text-muted">Session:</span> ${esc(t.session || "-")}</div>
+                        <div><span class="text-muted">Planned R:</span> ${(Number(t.plannedR) || 0).toFixed(2)}R</div>
+                        <div><span class="text-muted">Duration:</span> ${esc(t.duration || "-")}</div>
+                        <div><span class="text-muted">Quality:</span> ${t.qualityScore ? esc(t.qualityScore) + "/10" : "-"}</div>
+                        <div><span class="text-muted">News:</span> ${esc(t.newsEvent || "None")}</div>
+                        <div><span class="text-muted">Fees/Slip:</span> $${(Number(t.fees) || 0).toFixed(2)}</div>
+                        ${t.mistake && t.mistake !== "None" ? `<div style="grid-column: span 2; color: var(--danger);"><span class="text-muted">Mistake:</span> ${esc(t.mistake)}</div>` : ""}
+                        ${t.preEmotion ? `<div><span class="text-muted">Pre-Emotion:</span> ${esc(t.preEmotion)}</div>` : ""}
+                        ${t.postEmotion ? `<div><span class="text-muted">Post-Emotion:</span> ${esc(t.postEmotion)}</div>` : ""}
+                        ${t.tags && (Array.isArray(t.tags) ? t.tags.length : t.tags) ? `<div style="grid-column: span 2;"><span class="text-muted">Tags:</span> ${tagsText}</div>` : ""}
+                        ${t.notes ? `<div style="grid-column: span 2; font-style: italic; background: var(--bg); padding: 8px; border-radius: 6px;"><span class="text-muted">Notes:</span> ${esc(t.notes)}</div>` : ""}
                       </div>
                     </div>
 
                     <div class="tj-card-footer">
-                      <button type="button" class="tj-expand-btn" onclick="toggleTradeCardDetails('${t.id}')" aria-label="Toggle details">
-                        <span id="tj-expand-text-${t.id}">Details</span>
-                        <i data-lucide="chevron-down" id="tj-expand-icon-${t.id}" style="width: 16px; height: 16px; transition: transform 0.2s;"></i>
+                      <button type="button" class="tj-expand-btn" onclick="toggleTradeCardDetails('${safeId}')" aria-label="Toggle details">
+                        <span id="tj-expand-text-${safeId}">Details</span>
+                        <i data-lucide="chevron-down" id="tj-expand-icon-${safeId}" style="width: 16px; height: 16px; transition: transform 0.2s;"></i>
                       </button>
                       <div class="tj-actions-group">
-                        <button class="icon-btn tj-action-touch" onclick="viewTrade('${t.id}')" title="View Trade Details" aria-label="View">
+                        <button class="icon-btn tj-action-touch" onclick="viewTrade('${safeId}')" title="View Trade Details" aria-label="View">
                           <i data-lucide="eye" style="color: var(--warning); width: 17px; height: 17px;"></i>
                         </button>
-                        <button class="icon-btn tj-action-touch" onclick="editTrade('${t.id}')" title="Edit Trade" aria-label="Edit">
+                        <button class="icon-btn tj-action-touch" onclick="editTrade('${safeId}')" title="Edit Trade" aria-label="Edit">
                           <i data-lucide="edit-2" style="color: var(--primary); width: 17px; height: 17px;"></i>
                         </button>
-                        <button class="icon-btn tj-action-touch" onclick="duplicateTrade('${t.id}')" title="Duplicate Trade" aria-label="Duplicate">
+                        <button class="icon-btn tj-action-touch" onclick="duplicateTrade('${safeId}')" title="Duplicate Trade" aria-label="Duplicate">
                           <i data-lucide="copy" style="color: var(--text); width: 17px; height: 17px;"></i>
                         </button>
-                        <button class="icon-btn tj-action-touch" onclick="deleteTrade('${t.id}')" title="Delete Trade" aria-label="Delete">
+                        <button class="icon-btn tj-action-touch" onclick="deleteTrade('${safeId}')" title="Delete Trade" aria-label="Delete">
                           <i data-lucide="trash-2" style="color: var(--danger); width: 17px; height: 17px;"></i>
                         </button>
                       </div>
@@ -26273,9 +26577,13 @@ Keep the response cleanly formatted with lists or bold text.`;
               "block";
             document.getElementById("forgot-password-link").style.display =
               "none";
-          } else if (isAuthenticated) {
+          } else if (isAuthenticated === "true") {
             unlockApp();
             startLiveSimulation();
+          } else {
+            if (typeof window.updateLockoutCountdownUI === "function") {
+              window.updateLockoutCountdownUI();
+            }
           }
 
           // Handle Enter key on password input
@@ -26299,15 +26607,31 @@ Keep the response cleanly formatted with lists or bold text.`;
           updateAllocPreview();
           runSimulation();
 
-          // Sync tabs
+          // Sync tabs safely (never hydrate/render before session authentication)
           window.addEventListener("storage", (e) => {
-            if (e.key && e.key.startsWith("qe_")) {
-              Object.keys(Store).forEach((key) => {
-                if (key !== "save" && typeof Store[key] !== "function") {
-                  Store[key] = getLocal(key, Store[key]);
-                }
-              });
-              renderAll();
+            if (e.key === "qe_auth_lockout") {
+              if (typeof window.updateLockoutCountdownUI === "function") {
+                window.updateLockoutCountdownUI();
+              }
+              return;
+            }
+            if (
+              e.key &&
+              e.key.startsWith("qe_") &&
+              sessionStorage.getItem("qe_authenticated") === "true" &&
+              ![
+                "qe_password_hash",
+                "qe_secondary_password_hash",
+                "qe_eco_calendar",
+                "qe_eco_limits",
+                "qe_daily_checklist_open",
+              ].includes(e.key)
+            ) {
+              if (typeof window.reloadAppState === "function") {
+                window.reloadAppState();
+              } else {
+                renderAll();
+              }
             }
           });
         } catch (error) {
@@ -27362,21 +27686,22 @@ Keep the response cleanly formatted with lists or bold text.`;
           return;
         }
 
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
         tbody.innerHTML = Store.debriefs
           .map(
             (d) => `
     <tr>
-      <td style="padding: 12px 8px;">${d.date}</td>
-      <td style="padding: 12px 8px;">${d.sessionLabel}</td>
-      <td style="padding: 12px 8px;">${d.totalTrades}</td>
+      <td style="padding: 12px 8px;">${esc(d.date)}</td>
+      <td style="padding: 12px 8px;">${esc(d.sessionLabel)}</td>
+      <td style="padding: 12px 8px;">${Number(d.totalTrades) || 0}</td>
       <td style="padding: 12px 8px;">
-        ${d.totalTrades > 0 ? (d.stats.winRate * 100).toFixed(1) + "%" : "-"}
+        ${d.totalTrades > 0 ? ((Number(d.stats?.winRate) || 0) * 100).toFixed(1) + "%" : "-"}
       </td>
-      <td style="padding: 12px 8px; color: ${d.stats.totalPnl >= 0 ? "var(--success)" : "var(--danger)"}">
-        $${d.stats.totalPnl.toFixed(2)}
+      <td style="padding: 12px 8px; color: ${(Number(d.stats?.totalPnl) || 0) >= 0 ? "var(--success)" : "var(--danger)"}">
+        $${(Number(d.stats?.totalPnl) || 0).toFixed(2)}
       </td>
       <td style="padding: 12px 8px; text-align: right;">
-        <button class="secondary" onclick="openSessionDebriefModal('${d.date}')" style="padding: 4px 8px; font-size: 0.8rem;">View</button>
+        <button class="secondary" onclick="openSessionDebriefModal('${esc(d.date)}')" style="padding: 4px 8px; font-size: 0.8rem;">View</button>
       </td>
     </tr>
   `,
@@ -27586,10 +27911,13 @@ Keep the response cleanly formatted with lists or bold text.`;
           return;
         }
 
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
+        const sanitize = window.sanitizeHtml || ((s) => esc(s));
+
         let violationsHtml = "";
         if (debrief.execution.ruleViolations.length > 0) {
           violationsHtml = `<ul style="margin-top:8px; padding-left: 20px; color: var(--danger)">
-        ${debrief.execution.ruleViolations.map((v) => `<li><b>${v.pair}</b>: ${v.reason}</li>`).join("")}
+        ${debrief.execution.ruleViolations.map((v) => `<li><b>${esc(v.pair)}</b>: ${esc(v.reason || "Rule deviation")}</li>`).join("")}
       </ul>`;
         } else {
           violationsHtml = `<p style="color: var(--success); margin-top:8px;">No rule violations today. Perfect discipline.</p>`;
@@ -27601,11 +27929,11 @@ Keep the response cleanly formatted with lists or bold text.`;
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div style="background:var(--bg); padding:16px; border-radius:8px;">
           <p style="margin:0; font-size:0.85rem; color:var(--muted)">Target Bias vs Actual Bias</p>
-          <div style="font-size:1.1rem; font-weight:600;">${debrief.plan.bias || "-"} vs (Derived from trades)</div>
+          <div style="font-size:1.1rem; font-weight:600;">${esc(debrief.plan.bias || "-")} vs (Derived from trades)</div>
         </div>
         <div style="background:var(--bg); padding:16px; border-radius:8px;">
           <p style="margin:0; font-size:0.85rem; color:var(--muted)">Notes</p>
-          <div style="font-size:0.95rem;">${debrief.plan.notes || "-"}</div>
+          <div style="font-size:0.95rem;">${esc(debrief.plan.notes || "-")}</div>
         </div>
       </div>`;
         }
@@ -27615,41 +27943,45 @@ Keep the response cleanly formatted with lists or bold text.`;
             (t, idx) => `
     <div style="margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-        <strong>Trade #${idx + 1} — ${t.pair}</strong>
-        <span style="background:var(--surface); padding:2px 8px; border-radius:12px; font-size:0.8rem;">Grade: ${t.grade}</span>
+        <strong>Trade #${idx + 1} — ${esc(t.pair)}</strong>
+        <span style="background:var(--surface); padding:2px 8px; border-radius:12px; font-size:0.8rem;">Grade: ${esc(t.grade)}</span>
       </div>
       <div style="display:flex; gap: 16px; font-size: 0.85rem; color: var(--muted); margin-bottom:8px;">
-        <span>Pre: <b style="color:var(--text)">${t.pre}</b></span>
-        <span>During: <b style="color:var(--text)">${t.during}</b></span>
+        <span>Pre: <b style="color:var(--text)">${esc(t.pre)}</b></span>
+        <span>During: <b style="color:var(--text)">${esc(t.during)}</b></span>
       </div>
-      ${t.ref && t.ref !== "-" ? `<div style="padding:8px 12px; background:var(--bg); border-left:3px solid var(--primary); border-radius:4px; font-style:italic; font-size:0.9rem;">"${t.ref}"</div>` : ""}
+      ${t.ref && t.ref !== "-" ? `<div style="padding:8px 12px; background:var(--bg); border-left:3px solid var(--primary); border-radius:4px; font-style:italic; font-size:0.9rem;">"${esc(t.ref)}"</div>` : ""}
     </div>
   `,
           )
           .join("");
+
+        const safeAiSummary = debrief.aiSummary
+          ? sanitize(debrief.aiSummary)
+          : `<span style="color:var(--muted)"><i data-lucide="loader-2" class="spin"></i> Generating analysis...</span>`;
 
         container.innerHTML = `
     <!-- Section 1 -->
     <div style="display:flex; flex-wrap:wrap; gap:16px; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
       <div style="flex:1">
          <div style="font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Date</div>
-         <div style="font-weight:600; font-size:1.1rem;">${debrief.date}</div>
+         <div style="font-weight:600; font-size:1.1rem;">${esc(debrief.date)}</div>
       </div>
       <div style="flex:1">
          <div style="font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Session Profile</div>
-         <div style="font-weight:600; font-size:1.1rem;">${debrief.sessionLabel}</div>
+         <div style="font-weight:600; font-size:1.1rem;">${esc(debrief.sessionLabel)}</div>
       </div>
       <div style="flex:1">
          <div style="font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Accounts Traded</div>
-         <div style="font-weight:600; font-size:1.1rem;">${debrief.accountsTraded.join(", ")}</div>
+         <div style="font-weight:600; font-size:1.1rem;">${esc(debrief.accountsTraded.join(", "))}</div>
       </div>
       <div style="flex:1">
          <div style="font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Trades</div>
-         <div style="font-weight:600; font-size:1.1rem;">${debrief.totalTrades}</div>
+         <div style="font-weight:600; font-size:1.1rem;">${Number(debrief.totalTrades) || 0}</div>
       </div>
       <div style="flex:1">
          <div style="font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Duration</div>
-         <div style="font-weight:600; font-size:1.1rem;">${debrief.durationStr}</div>
+         <div style="font-weight:600; font-size:1.1rem;">${esc(debrief.durationStr)}</div>
       </div>
     </div>
 
@@ -27659,24 +27991,24 @@ Keep the response cleanly formatted with lists or bold text.`;
        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;">
          <div style="padding:16px; background:var(--bg); border-radius:8px; text-align:center;">
            <div style="font-size:0.85rem; color:var(--muted); margin-bottom:4px;">Win Rate</div>
-           <div style="font-size:1.2rem; font-weight:600;">${(debrief.stats.winRate * 100).toFixed(1)}%</div>
+           <div style="font-size:1.2rem; font-weight:600;">${((Number(debrief.stats.winRate) || 0) * 100).toFixed(1)}%</div>
          </div>
          <div style="padding:16px; background:var(--bg); border-radius:8px; text-align:center;">
            <div style="font-size:0.85rem; color:var(--muted); margin-bottom:4px;">Total R</div>
-           <div style="font-size:1.2rem; font-weight:600; color:${debrief.stats.totalR >= 0 ? "var(--success)" : "var(--danger)"}">${debrief.stats.totalR.toFixed(2)}R</div>
+           <div style="font-size:1.2rem; font-weight:600; color:${debrief.stats.totalR >= 0 ? "var(--success)" : "var(--danger)"}">${(Number(debrief.stats.totalR) || 0).toFixed(2)}R</div>
          </div>
          <div style="padding:16px; background:var(--bg); border-radius:8px; text-align:center;">
            <div style="font-size:0.85rem; color:var(--muted); margin-bottom:4px;">Net P&L ($)</div>
-           <div style="font-size:1.2rem; font-weight:600; color:${debrief.stats.totalPnl >= 0 ? "var(--success)" : "var(--danger)"}">$${debrief.stats.totalPnl.toFixed(2)}</div>
+           <div style="font-size:1.2rem; font-weight:600; color:${debrief.stats.totalPnl >= 0 ? "var(--success)" : "var(--danger)"}">$${(Number(debrief.stats.totalPnl) || 0).toFixed(2)}</div>
          </div>
          <div style="padding:16px; background:var(--bg); border-radius:8px; text-align:center;">
            <div style="font-size:0.85rem; color:var(--muted); margin-bottom:4px;">Avg R per Trade</div>
-           <div style="font-size:1.2rem; font-weight:600;">${(debrief.stats.totalR / debrief.totalTrades).toFixed(2)}R</div>
+           <div style="font-size:1.2rem; font-weight:600;">${(debrief.totalTrades > 0 ? (Number(debrief.stats.totalR) || 0) / debrief.totalTrades : 0).toFixed(2)}R</div>
          </div>
        </div>
        <div style="display:flex; justify-content:space-between; margin-top:16px; font-size:0.9rem; padding: 0 8px;">
-         <span><b>Best Trade:</b> ${debrief.stats.bestTrade}</span>
-         <span><b>Worst Trade:</b> ${debrief.stats.worstTrade}</span>
+         <span><b>Best Trade:</b> ${esc(debrief.stats.bestTrade)}</span>
+         <span><b>Worst Trade:</b> ${esc(debrief.stats.worstTrade)}</span>
        </div>
     </div>
 
@@ -27693,15 +28025,15 @@ Keep the response cleanly formatted with lists or bold text.`;
          <div style="flex:1;">
            <div style="margin-bottom:16px;">
              <span style="color:var(--muted); font-size:0.85rem; display:block;">Avg Quality Score</span>
-             <span style="font-size:1.2rem; font-weight:600;">${debrief.execution.avgQual} / 10</span>
+             <span style="font-size:1.2rem; font-weight:600;">${esc(debrief.execution.avgQual)} / 10</span>
            </div>
            <div style="margin-bottom:16px;">
              <span style="color:var(--muted); font-size:0.85rem; display:block;">Rule Adherence</span>
-             <span style="font-size:1.2rem; font-weight:600; color:${debrief.execution.rulePct >= 80 ? "var(--success)" : "var(--danger)"}">${debrief.execution.rulePct}%</span>
+             <span style="font-size:1.2rem; font-weight:600; color:${debrief.execution.rulePct >= 80 ? "var(--success)" : "var(--danger)"}">${Number(debrief.execution.rulePct) || 0}%</span>
            </div>
            <div>
              <span style="color:var(--muted); font-size:0.85rem; display:block;">Top Confluences</span>
-             <span style="font-size:0.95rem; font-weight:500;">${debrief.execution.rankedConfluences.join(", ") || "None recorded"}</span>
+             <span style="font-size:0.95rem; font-weight:500;">${esc(debrief.execution.rankedConfluences.join(", ") || "None recorded")}</span>
            </div>
          </div>
          <div style="flex:2; background:var(--bg); border:1px solid var(--border); padding:16px; border-radius:8px;">
@@ -27717,15 +28049,15 @@ Keep the response cleanly formatted with lists or bold text.`;
        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom: 24px;">
          <div style="background:var(--bg); padding:12px; border-radius:6px; text-align:center;">
            <div style="font-size:0.8rem; color:var(--muted);">Consistency Score</div>
-           <div style="font-size:1.1rem; font-weight:600;">${debrief.psych.emoConsistency}%</div>
+           <div style="font-size:1.1rem; font-weight:600;">${Number(debrief.psych.emoConsistency) || 0}%</div>
          </div>
          <div style="background:var(--bg); padding:12px; border-radius:6px; text-align:center;">
            <div style="font-size:0.8rem; color:var(--muted);">Dominant Emotion</div>
-           <div style="font-size:1.1rem; font-weight:600;">${debrief.psych.dominantEmo}</div>
+           <div style="font-size:1.1rem; font-weight:600;">${esc(debrief.psych.dominantEmo)}</div>
          </div>
          <div style="background:var(--bg); padding:12px; border-radius:6px; text-align:center;">
            <div style="font-size:0.8rem; color:var(--muted);">Risk Engine State</div>
-           <div style="font-size:1.1rem; font-weight:600;">${debrief.psych.psychEngine.state}</div>
+           <div style="font-size:1.1rem; font-weight:600;">${esc(debrief.psych.psychEngine.state)}</div>
          </div>
        </div>
        <div style="max-height: 280px; overflow-y:auto; padding-right:8px; border: 1px solid var(--border); padding: 16px; border-radius: 8px;">
@@ -27737,9 +28069,9 @@ Keep the response cleanly formatted with lists or bold text.`;
     <div>
        <h3 style="font-size: 0.95rem; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;">AI Analyst Summary</h3>
        <div id="debrief-ai-canvas" style="background:var(--bg); border: 1px solid var(--border); padding: 24px; border-radius: 8px; font-size:0.95rem; line-height: 1.6;">
-         ${debrief.aiSummary ? debrief.aiSummary : `<span style="color:var(--muted)"><i data-lucide="loader-2" class="spin"></i> Generating analysis...</span>`}
+         ${safeAiSummary}
        </div>
-       ${debrief.aiSummary ? `<button class="secondary" style="margin-top:12px; font-size:0.8rem;" onclick="generateDebriefAI(Store.debriefs.find(d=>d.date==='${debrief.date}'), true)">Regenerate AI Analysis</button>` : ""}
+       ${debrief.aiSummary ? `<button class="secondary" style="margin-top:12px; font-size:0.8rem;" onclick="generateDebriefAI(Store.debriefs.find(d=>d.date==='${esc(debrief.date)}'), true)">Regenerate AI Analysis</button>` : ""}
     </div>
   `;
         lucide.createIcons();
@@ -27782,16 +28114,20 @@ Keep the response cleanly formatted with lists or bold text.`;
               "You are an elite trading performance psychologist and quant coach. Be direct, objective, and deeply insightful.",
           });
 
-          debrief.aiSummary = text || "No insights generated.";
-          container.innerHTML = debrief.aiSummary;
+          const sanitizedSummary = window.sanitizeHtml
+            ? window.sanitizeHtml(text || "No insights generated.")
+            : window.escapeHtml(text || "No insights generated.");
+          debrief.aiSummary = sanitizedSummary;
+          container.innerHTML = sanitizedSummary;
           Store.save();
 
           // Rerender so regenerate button shows up
           renderSessionDebriefModal(debrief);
         } catch (error) {
           console.error("AI Error:", error);
+          const safeErr = window.escapeHtml ? window.escapeHtml(error.message || "Unknown error") : String(error.message || "Unknown error");
           container.innerHTML = `<div style="color: var(--danger); padding: 12px 0;">
-            <p style="margin: 0 0 8px 0;">AI Generation failed: ${error.message}</p>
+            <p style="margin: 0 0 8px 0;">AI Generation failed: ${safeErr}</p>
             <button class="secondary" style="font-size: 0.8rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px;" onclick="window.generateAIDebriefSummary()">
               <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Retry
             </button>
@@ -27888,28 +28224,32 @@ Keep the response cleanly formatted with lists or bold text.`;
           return;
         }
 
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
+        const refreshedTime = fetchDate ? new Date(fetchDate).toLocaleTimeString() : "Unknown";
         let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.8rem; color: var(--muted);">
-                <span>Last Refreshed: ${fetchDate ? new Date(fetchDate).toLocaleTimeString() : "Unknown"}</span>
+                <span>Last Refreshed: ${esc(refreshedTime)}</span>
               </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">`;
 
         highImpactItems.forEach((ev) => {
           let impactColor = "var(--border)";
           let impactBg = "transparent";
-          if (ev.impact.toLowerCase().includes("high")) {
+          const impactStr = String(ev.impact || "");
+          if (impactStr.toLowerCase().includes("high")) {
             impactColor = "var(--danger)";
             impactBg = "rgba(244, 63, 94, 0.1)";
-          } else if (ev.impact.toLowerCase().includes("medium")) {
+          } else if (impactStr.toLowerCase().includes("medium")) {
             impactColor = "var(--warning)";
             impactBg = "rgba(245, 158, 11, 0.1)";
-          } else if (ev.impact.toLowerCase().includes("low")) {
+          } else if (impactStr.toLowerCase().includes("low")) {
             impactColor = "var(--success)";
             impactBg = "rgba(16, 185, 129, 0.1)";
           }
 
+          const currencyStr = String(ev.currency || "");
           const isMatch =
             filter === "ALL" ||
-            ev.currency.toUpperCase() === filter.toUpperCase();
+            currencyStr.toUpperCase() === filter.toUpperCase();
 
           // Dim non-matching items to highlight the selected pair
           const opacity = isMatch ? "1" : "0.4";
@@ -27927,19 +28267,19 @@ Keep the response cleanly formatted with lists or bold text.`;
         <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; padding-left: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <div style="background: var(--bg); border-radius: 4px; border: 1px solid var(--border); padding: 4px 6px; font-size: 0.8rem; font-weight: 700; color: var(--text);">
-              ${ev.currency}
+              ${esc(currencyStr)}
             </div>
             <div style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="clock" style="width: 12px; height: 12px;"></i> ${ev.time}
+              <i data-lucide="clock" style="width: 12px; height: 12px;"></i> ${esc(ev.time)}
             </div>
           </div>
           <div style="font-weight: 500; font-size: 1rem; line-height: 1.3; color: var(--text);">
-            ${ev.event}
+            ${esc(ev.event)}
           </div>
         </div>
         <div style="display: flex;">
           <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; border: 1px solid ${impactColor}; color: ${impactColor}; background: ${impactBg}; font-weight: 600; letter-spacing: 0.5px;">
-            ${ev.impact.toUpperCase()}
+            ${esc(impactStr.toUpperCase())}
           </span>
         </div>
       </div>
@@ -27955,7 +28295,7 @@ Keep the response cleanly formatted with lists or bold text.`;
                      <div style="display: flex; flex-direction: column; gap: 12px;">`;
           headlines.forEach((hl) => {
             html += `<div style="background: var(--surface); border-left: 3px solid var(--primary); padding: 12px 16px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.95rem; line-height: 1.4; color: var(--text);">
-                       ${hl}
+                       ${esc(hl)}
                      </div>`;
           });
           html += `</div></div>`;
@@ -27972,9 +28312,21 @@ Keep the response cleanly formatted with lists or bold text.`;
         const container = document.getElementById("eco-calendar-content");
         if (!container) return;
         const btn = document.getElementById("btn-refresh-eco");
+        const esc = window.escapeHtml || ((s) => String(s ?? ""));
         // Rate Limiting (Under free tier cap: 5 per day)
-        const limitsStr = localStorage.getItem("qe_eco_limits");
-        let limits = limitsStr ? JSON.parse(limitsStr) : { date: "", count: 0 };
+        let limits = { date: "", count: 0 };
+        try {
+          const limitsStr = localStorage.getItem("qe_eco_limits");
+          if (limitsStr) {
+            const parsedLimits = JSON.parse(limitsStr);
+            if (parsedLimits && typeof parsedLimits === "object") {
+              limits = {
+                date: String(parsedLimits.date || ""),
+                count: Number(parsedLimits.count) || 0,
+              };
+            }
+          }
+        } catch (e) {}
         const todayString = new Date().toISOString().split("T")[0];
 
         if (limits.date !== todayString) {
@@ -28025,8 +28377,8 @@ Format your output EXACTLY as this JSON object:
             "qe_eco_calendar",
             JSON.stringify({
               fetchDate: new Date().toISOString(),
-              items: parsed.events || [],
-              headlines: parsed.headlines || [],
+              items: Array.isArray(parsed.events) ? parsed.events : [],
+              headlines: Array.isArray(parsed.headlines) ? parsed.headlines : [],
             }),
           );
 
@@ -28037,6 +28389,7 @@ Format your output EXACTLY as this JSON object:
           renderEconomicCalendar();
         } catch (error) {
           console.error("API Error:", error);
+          const safeErr = esc(error.message || "Live AI refresh failed.");
           const cachedStr = localStorage.getItem("qe_eco_calendar");
           if (cachedStr) {
             try {
@@ -28051,7 +28404,7 @@ Format your output EXACTLY as this JSON object:
                 const noticeHtml = `<div style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.85rem; color: var(--warning); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-                    <span>Could not refresh live events (${error.message}). Displaying cached calendar.</span>
+                    <span>Could not refresh live events (${safeErr}). Displaying cached calendar.</span>
                   </div>
                 </div>`;
                 container.insertAdjacentHTML('afterbegin', noticeHtml);
@@ -28083,7 +28436,7 @@ Format your output EXACTLY as this JSON object:
           const noticeHtml = `<div style="background: rgba(244, 63, 94, 0.1); border: 1px solid var(--danger); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.85rem; color: var(--danger); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="alert-circle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-              <span>${error.message || "Live AI refresh failed. Displaying standard high-impact forex risk windows."}</span>
+              <span>${esc(error.message || "Live AI refresh failed. Displaying standard high-impact forex risk windows.")}</span>
             </div>
             <button class="secondary" style="font-size: 0.8rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px; border-color: var(--danger); color: var(--danger); cursor: pointer;" onclick="window.fetchEconomicCalendar()">
               <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Retry

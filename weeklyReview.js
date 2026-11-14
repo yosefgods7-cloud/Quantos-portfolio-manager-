@@ -1,3 +1,19 @@
+function escHtml(v) {
+  if (typeof window.escapeHtml === "function") return window.escapeHtml(v);
+  return String(v ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[m]));
+}
+
+function sanitizeReviewHtml(html) {
+  if (typeof window.sanitizeHtml === "function") return window.sanitizeHtml(html);
+  return escHtml(html);
+}
+
 function getLocalWeekBoundaries(d = new Date()) {
   const date = new Date(d);
   date.setHours(0, 0, 0, 0);
@@ -93,20 +109,22 @@ window.renderWeeklyReviewHistory = function() {
     tbody.innerHTML = Store.weeklyReviews.map(review => {
         let rMultiple = (review.totalR || 0).toFixed(2);
         let winRate = (review.winRate || 0).toFixed(1);
-        let stars = "⭐".repeat(review.manual?.rating || 0) + "☆".repeat(5 - (review.manual?.rating || 0));
+        let ratingNum = Math.max(0, Math.min(5, parseInt(review.manual?.rating, 10) || 0));
+        let stars = "⭐".repeat(ratingNum) + "☆".repeat(5 - ratingNum);
         let rrColor = rMultiple >= 0 ? 'var(--success)' : 'var(--danger)';
+        const safeKey = escHtml(review.key);
         
         return `
             <tr style="border-bottom: 1px solid var(--border);">
                 <td style="padding: 12px 16px; font-weight: 500;">
-                    Week ${review.weekNum} <span style="font-size:0.8rem; color:var(--muted); margin-left:8px;">${review.key}</span>
+                    Week ${escHtml(review.weekNum)} <span style="font-size:0.8rem; color:var(--muted); margin-left:8px;">${safeKey}</span>
                 </td>
                 <td style="padding: 12px 16px; font-size: 1.1rem; color: var(--warning);">${stars}</td>
                 <td style="padding: 12px 16px; color: ${rrColor}; font-weight: 600;">${rMultiple >= 0 ? '+' : ''}${rMultiple}R</td>
                 <td style="padding: 12px 16px;">${winRate}%</td>
-                <td style="padding: 12px 16px; color: var(--muted);">${review.manual?.nextFocus || "-"}</td>
+                <td style="padding: 12px 16px; color: var(--muted);">${escHtml(review.manual?.nextFocus || "-")}</td>
                 <td style="padding: 12px 0; text-align: right;">
-                    <button class="secondary" onclick="openWeeklyReviewModal('${review.key}')" style="padding: 4px 12px; font-size: 0.8rem;">View</button>
+                    <button class="secondary" onclick="openWeeklyReviewModal('${safeKey}')" style="padding: 4px 12px; font-size: 0.8rem;">View</button>
                 </td>
             </tr>
         `;
@@ -153,9 +171,9 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
         <div style="display: flex; flex-direction: column; gap: 32px;">
             <div style="background: var(--bg); padding: 24px; border-radius: 8px; border: 1px solid var(--border);">
                 <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Section 1 of 7 — Overview</div>
-                <h3 style="margin: 0 0 16px 0;">Week ${data.weekNum} — ${data.startDate} to ${data.endDate}</h3>
+                <h3 style="margin: 0 0 16px 0;">Week ${escHtml(data.weekNum)} — ${escHtml(data.startDate)} to ${escHtml(data.endDate)}</h3>
                 <div style="display: flex; gap: 24px; color: var(--text);">
-                    <div><strong>Trading Days:</strong> ${data.daysWithTrades}</div>
+                    <div><strong>Trading Days:</strong> ${escHtml(data.daysWithTrades)}</div>
                     <div><strong>Accounts Traded:</strong> ${data.accountSet.length > 0 ? data.accountSet.length : "None"}</div>
                     <div>
                         <strong>Sessions:</strong> 
@@ -197,19 +215,19 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                     <tbody>
                         ${data.tableRows.map(r => `
                             <tr style="border-bottom: 1px solid var(--border);">
-                                <td style="padding: 12px;">${r.day}</td>
-                                <td style="padding: 12px;">${r.trades}</td>
-                                <td style="padding: 12px;">${r.wl}</td>
-                                <td style="padding: 12px; color: ${r.r >= 0 ? 'var(--success)' : 'var(--danger)'};">${r.r >= 0 ? '+' : ''}${r.r}R</td>
+                                <td style="padding: 12px;">${escHtml(r.day)}</td>
+                                <td style="padding: 12px;">${escHtml(r.trades)}</td>
+                                <td style="padding: 12px;">${escHtml(r.wl)}</td>
+                                <td style="padding: 12px; color: ${r.r >= 0 ? 'var(--success)' : 'var(--danger)'};">${r.r >= 0 ? '+' : ''}${escHtml(r.r)}R</td>
                             </tr>
                         `).join("")}
                     </tbody>
                 </table>
                 
                 <div style="display: flex; gap: 24px; font-size: 0.9rem;">
-                   <div><strong style="color: var(--muted);">Best Trade:</strong> ${data.bestTrade ? `${data.bestTrade.pair} (${data.bestTrade.grade}) / +${parseFloat(data.bestTrade.r).toFixed(2)}R` : '-'}</div>
-                   <div><strong style="color: var(--muted);">Worst Trade:</strong> ${data.worstTrade ? `${data.worstTrade.pair} (${data.worstTrade.grade}) / ${parseFloat(data.worstTrade.r).toFixed(2)}R` : '-'}</div>
-                   <div><strong style="color: var(--muted);">Top Pair:</strong> ${data.mostTradedPair}</div>
+                   <div><strong style="color: var(--muted);">Best Trade:</strong> ${data.bestTrade ? `${escHtml(data.bestTrade.pair)} (${escHtml(data.bestTrade.grade)}) / +${parseFloat(data.bestTrade.r).toFixed(2)}R` : '-'}</div>
+                   <div><strong style="color: var(--muted);">Worst Trade:</strong> ${data.worstTrade ? `${escHtml(data.worstTrade.pair)} (${escHtml(data.worstTrade.grade)}) / ${parseFloat(data.worstTrade.r).toFixed(2)}R` : '-'}</div>
+                   <div><strong style="color: var(--muted);">Top Pair:</strong> ${escHtml(data.mostTradedPair)}</div>
                 </div>
             </div>
             
@@ -238,7 +256,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                    </div>
                    <div style="flex: 1; min-width: 200px;">
                        <div class="stat-label">Top Confluences Used</div>
-                       <div class="stat-value" style="font-size: 1rem; white-space: normal;">${data.topConfluences.length > 0 ? data.topConfluences.join(" • ") : "-"}</div>
+                       <div class="stat-value" style="font-size: 1rem; white-space: normal;">${data.topConfluences.length > 0 ? data.topConfluences.map(escHtml).join(" • ") : "-"}</div>
                    </div>
                </div>
                
@@ -256,7 +274,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                <div style="margin-top: 24px;">
                    <div class="stat-label" style="margin-bottom: 8px;">Rule Violations</div>
                    <ul style="margin: 0; padding-left: 20px; color: var(--text); font-size: 0.9rem;">
-                       ${data.ruleViolations.map(v => `<li style="margin-bottom: 4px;"><strong>${v.pair}</strong> (${v.date}): <em>${v.reason}</em></li>`).join("")}
+                       ${data.ruleViolations.map(v => `<li style="margin-bottom: 4px;"><strong>${escHtml(v.pair)}</strong> (${escHtml(v.date)}): <em>${escHtml(v.reason)}</em></li>`).join("")}
                    </ul>
                </div>` : `<div style="margin-top: 24px; color: var(--success); font-size: 0.9rem;">No rule violations logged this week!</div>`}
             </div>
@@ -270,11 +288,11 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                    </div>
                    <div style="flex: 1; min-width: 200px;">
                        <div class="stat-label">Dominant Pre-Trade</div>
-                       <div class="stat-value" style="font-size: 1.5rem;">${data.domPre}</div>
+                       <div class="stat-value" style="font-size: 1.5rem;">${escHtml(data.domPre)}</div>
                    </div>
                    <div style="flex: 1; min-width: 200px;">
                        <div class="stat-label">Dominant During-Trade</div>
-                       <div class="stat-value" style="font-size: 1.5rem;">${data.domDuring}</div>
+                       <div class="stat-value" style="font-size: 1.5rem;">${escHtml(data.domDuring)}</div>
                    </div>
                </div>
                
@@ -283,8 +301,8 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                    <div style="display: flex; gap: 8px;">
                       ${data.emotionTimeline.map(e => `
                           <div style="background: var(--surface); padding: 8px 16px; border-radius: 4px; text-align: center; border-bottom: 2px solid ${getEmotionColor(e.emotion)};">
-                              <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">${e.day}</div>
-                              <div style="font-size: 0.85rem; font-weight: 500;">${e.emotion}</div>
+                              <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">${escHtml(e.day)}</div>
+                              <div style="font-size: 0.85rem; font-weight: 500;">${escHtml(e.emotion)}</div>
                           </div>
                       `).join("")}
                    </div>
@@ -296,12 +314,12 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                
                ${!isEditable && data.manual ? `
                    <div style="display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px;">
-                       <div><strong style="color: var(--muted);">Overall Rating:</strong> ${"⭐".repeat(data.manual.rating || 0)}</div>
-                       <div><strong style="color: var(--muted);">What went well:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.wentWell}</p></div>
-                       <div><strong style="color: var(--muted);">What needs improvement:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.wentWrong}</p></div>
-                       <div><strong style="color: var(--muted);">Followed plan:</strong> ${data.manual.followedPlan}</div>
-                       <div><strong style="color: var(--muted);">Mental State:</strong> ${data.manual.mentalState}</div>
-                       <div><strong style="color: var(--muted);">Key Lesson:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.keyLesson}</p></div>
+                       <div><strong style="color: var(--muted);">Overall Rating:</strong> ${"⭐".repeat(Math.max(0, Math.min(5, parseInt(data.manual.rating, 10) || 0)))}</div>
+                       <div><strong style="color: var(--muted);">What went well:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${escHtml(data.manual.wentWell)}</p></div>
+                       <div><strong style="color: var(--muted);">What needs improvement:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${escHtml(data.manual.wentWrong)}</p></div>
+                       <div><strong style="color: var(--muted);">Followed plan:</strong> ${escHtml(data.manual.followedPlan)}</div>
+                       <div><strong style="color: var(--muted);">Mental State:</strong> ${escHtml(data.manual.mentalState)}</div>
+                       <div><strong style="color: var(--muted);">Key Lesson:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${escHtml(data.manual.keyLesson)}</p></div>
                    </div>
                ` : `
                    <div class="form-group" style="margin-bottom: 24px;">
@@ -317,12 +335,12 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                    
                    <div class="form-group" style="margin-bottom: 24px;">
                        <label>2. What went well this week? <span style="color: var(--danger);">●</span></label>
-                       <textarea id="wr-went-well" rows="3" placeholder="Be specific — which setups, decisions, or habits worked?" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${data.manual?.wentWell || ""}</textarea>
+                       <textarea id="wr-went-well" rows="3" placeholder="Be specific — which setups, decisions, or habits worked?" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${escHtml(data.manual?.wentWell || "")}</textarea>
                    </div>
                    
                    <div class="form-group" style="margin-bottom: 24px;">
                        <label>3. What went wrong or needs improvement? <span style="color: var(--danger);">●</span></label>
-                       <textarea id="wr-went-wrong" rows="3" placeholder="Be honest — what mistakes, habits, or patterns cost you?" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${data.manual?.wentWrong || ""}</textarea>
+                       <textarea id="wr-went-wrong" rows="3" placeholder="Be honest — what mistakes, habits, or patterns cost you?" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${escHtml(data.manual?.wentWrong || "")}</textarea>
                    </div>
                    
                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
@@ -349,7 +367,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                    
                    <div class="form-group" style="margin-bottom: 24px;">
                        <label>6. Key lesson learned this week <span style="color: var(--danger);">●</span></label>
-                       <textarea id="wr-lesson" rows="2" placeholder="One thing you will carry into next week" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${data.manual?.keyLesson || ""}</textarea>
+                       <textarea id="wr-lesson" rows="2" placeholder="One thing you will carry into next week" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${escHtml(data.manual?.keyLesson || "")}</textarea>
                    </div>
                `}
             </div>
@@ -359,9 +377,9 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                
                ${!isEditable && data.manual ? `
                    <div style="display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px;">
-                       <div><strong style="color: var(--muted);">Primary Focus:</strong> ${data.manual.nextFocus}</div>
-                       <div><strong style="color: var(--muted);">Target R:</strong> +${data.manual.targetR}R</div>
-                       <div><strong style="color: var(--muted);">Rule to Enforce:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${data.manual.ruleEnforce}</p></div>
+                       <div><strong style="color: var(--muted);">Primary Focus:</strong> ${escHtml(data.manual.nextFocus)}</div>
+                       <div><strong style="color: var(--muted);">Target R:</strong> +${escHtml(data.manual.targetR)}R</div>
+                       <div><strong style="color: var(--muted);">Rule to Enforce:</strong><p style="margin: 4px 0 0 0; line-height: 1.5;">${escHtml(data.manual.ruleEnforce)}</p></div>
                    </div>
                ` : `
                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
@@ -377,13 +395,13 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
                        </div>
                        <div class="form-group">
                            <label>2. Weekly R Target</label>
-                           <input type="number" id="wr-target-r" step="0.1" value="${data.manual?.targetR || "5.0"}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);" />
+                           <input type="number" id="wr-target-r" step="0.1" value="${escHtml(data.manual?.targetR || "5.0")}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);" />
                        </div>
                    </div>
                    
                    <div class="form-group" style="margin-bottom: 24px;">
                        <label>3. One rule to enforce strictly <span style="color: var(--danger);">●</span></label>
-                       <textarea id="wr-rule" rows="2" placeholder="e.g. No trading after 2 consecutive losses" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${data.manual?.ruleEnforce || ""}</textarea>
+                       <textarea id="wr-rule" rows="2" placeholder="e.g. No trading after 2 consecutive losses" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">${escHtml(data.manual?.ruleEnforce || "")}</textarea>
                    </div>
                `}
             </div>
@@ -391,7 +409,7 @@ window.renderWeeklyReviewModal = async function(data, isHistorical, isEditable) 
             <div style="background: rgba(168, 85, 247, 0.05); padding: 24px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);">
                <div style="font-size: 0.85rem; color: #a855f7; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Section 7 of 7 — AI Weekly Report</div>
                <div id="wr-ai-container" style="color: var(--text); line-height: 1.6; font-size: 0.95rem;">
-                   ${data.aiSummary ? data.aiSummary : `<span style="color: var(--muted); font-style: italic;">Submit your review to generate the AI report</span>`}
+                   ${data.aiSummary ? sanitizeReviewHtml(data.aiSummary) : `<span style="color: var(--muted); font-style: italic;">Submit your review to generate the AI report</span>`}
                </div>
             </div>
 
@@ -500,10 +518,11 @@ window.generateWeeklyReviewAI = async function(reviewData) {
             model: window.Store?.settings?.geminiModel || "gemini-4-hydrogen",
             systemInstruction: "You are an elite trading performance psychologist. Be direct, objective, and deeply insightful. Use clear HTML formatting."
         });
-        reviewData.aiSummary = (text || "").replace(/```html/g, '').replace(/```/g, '');
+        const cleaned = (text || "").replace(/```html/g, '').replace(/```/g, '');
+        reviewData.aiSummary = sanitizeReviewHtml(cleaned);
     } catch (e) {
         console.error("AI Error:", e);
-        reviewData.aiSummary = `<span style="color:var(--danger)">AI generation failed. Please try again later or skip AI analysis. Error: ${e.message}</span>`;
+        reviewData.aiSummary = `<span style="color:var(--danger)">AI generation failed. Please try again later or skip AI analysis. Error: ${escHtml(e.message)}</span>`;
     }
 };
 

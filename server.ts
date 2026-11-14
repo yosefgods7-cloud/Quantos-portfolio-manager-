@@ -12,7 +12,63 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
-app.use(express.json({ limit: '10mb' }));
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// Security headers (compatible with AI Studio preview iframe)
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
+  next();
+});
+
+app.use(express.json({ limit: '2mb' }));
+
+// Reject malformed JSON cleanly without leaking stack traces
+app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON request body.' });
+  }
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request payload too large.' });
+  }
+  next(err);
+});
+
+// Simple in-memory per-IP sliding-window rate limiter
+function createRateLimiter(maxRequests: number, windowMs: number) {
+  const buckets = new Map<string, number[]>();
+  const cleanupTimer = setInterval(() => {
+    const cutoff = Date.now() - windowMs;
+    for (const [ip, timestamps] of buckets.entries()) {
+      const fresh = timestamps.filter((t) => t > cutoff);
+      if (fresh.length === 0) buckets.delete(ip);
+      else buckets.set(ip, fresh);
+    }
+  }, Math.max(windowMs, 60_000));
+  cleanupTimer.unref?.();
+
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+    const now = Date.now();
+    const cutoff = now - windowMs;
+    const recent = (buckets.get(ip) || []).filter((t) => t > cutoff);
+    if (recent.length >= maxRequests) {
+      res.setHeader('Retry-After', String(Math.ceil(windowMs / 1000)));
+      return res.status(429).json({
+        error: 'Too many requests. Please wait a moment before retrying.',
+        code: 'RATE_LIMITED',
+      });
+    }
+    recent.push(now);
+    buckets.set(ip, recent);
+    next();
+  };
+}
+
+const geminiRateLimiter = createRateLimiter(25, 60_000);
+const telegramRateLimiter = createRateLimiter(15, 60_000);
 
 // CORS middleware for /api/* so static PWAs (e.g., GitHub Pages *.github.io) can call this backend
 const configuredCorsOrigins = (process.env.CORS_ORIGINS || '')
@@ -20,13 +76,26 @@ const configuredCorsOrigins = (process.env.CORS_ORIGINS || '')
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
+if (process.env.NODE_ENV === 'production' && configuredCorsOrigins.length === 0) {
+  console.warn('SECURITY WARNING: CORS_ORIGINS is empty in production. Set CORS_ORIGINS to restrict cross-origin /api/* access.');
+}
+
 app.use('/api', (req, res, next) => {
   const rawOrigin = typeof req.headers.origin === 'string' ? req.headers.origin.replace(/\/+$/, '') : '';
-  if (configuredCorsOrigins.length === 0 || configuredCorsOrigins.includes('*')) {
+  const allowAll = configuredCorsOrigins.length === 0 || configuredCorsOrigins.includes('*');
+
+  if (allowAll) {
     res.setHeader('Access-Control-Allow-Origin', rawOrigin || '*');
   } else if (rawOrigin && configuredCorsOrigins.includes(rawOrigin)) {
     res.setHeader('Access-Control-Allow-Origin', rawOrigin);
+  } else if (rawOrigin) {
+    // Block disallowed browser cross-origin calls (including simple POSTs without preflight)
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(403);
+    }
+    return res.status(403).json({ error: 'Origin not allowed by CORS policy.' });
   }
+
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, Pragma');
@@ -170,27 +239,66 @@ function formatGeminiError(err: any): { status: number; message: string; code?: 
   };
 }
 
+const ALLOWED_RESPONSE_MIME_TYPES = new Set(['text/plain', 'application/json']);
+
+function validateGeminiRequestBody(body: any): {
+  error?: string;
+  inputContents?: any;
+  config?: Record<string, any>;
+} {
+  const { prompt, contents, systemInstruction, responseMimeType, responseSchema, thinkingConfig } = body || {};
+  const inputContents = contents !== undefined ? contents : prompt;
+  if (
+    !inputContents ||
+    (typeof inputContents !== 'string' && typeof inputContents !== 'object')
+  ) {
+    return { error: 'Prompt or contents is required and must be a string or structured content.' };
+  }
+  const serializedLen =
+    typeof inputContents === 'string' ? inputContents.length : JSON.stringify(inputContents).length;
+  if (serializedLen === 0 || serializedLen > 250_000) {
+    return { error: 'Prompt or contents length is out of allowed bounds (1–250,000 chars).' };
+  }
+
+  const config: Record<string, any> = {};
+  if (systemInstruction !== undefined) {
+    if (typeof systemInstruction !== 'string' || systemInstruction.length > 12_000) {
+      return { error: 'systemInstruction must be a string under 12,000 characters.' };
+    }
+    if (systemInstruction) config.systemInstruction = systemInstruction;
+  }
+  if (responseMimeType !== undefined) {
+    if (typeof responseMimeType !== 'string' || !ALLOWED_RESPONSE_MIME_TYPES.has(responseMimeType)) {
+      return { error: 'Unsupported responseMimeType.' };
+    }
+    config.responseMimeType = responseMimeType;
+  }
+  if (responseSchema !== undefined && typeof responseSchema === 'object' && responseSchema !== null) {
+    config.responseSchema = responseSchema;
+  }
+  if (thinkingConfig !== undefined && typeof thinkingConfig === 'object' && thinkingConfig !== null) {
+    config.thinkingConfig = thinkingConfig;
+  }
+
+  return { inputContents, config };
+}
+
 // Endpoint: Generate Content
-app.post('/api/gemini/generate', async (req, res) => {
+app.post('/api/gemini/generate', geminiRateLimiter, async (req, res) => {
   try {
-    const { prompt, contents, systemInstruction, model, responseMimeType, responseSchema, thinkingConfig } = req.body || {};
-    const inputContents = contents || prompt;
-    if (!inputContents) {
-      return res.status(400).json({ error: 'Prompt or contents is required' });
+    const validated = validateGeminiRequestBody(req.body);
+    if (validated.error) {
+      return res.status(400).json({ error: validated.error });
     }
 
     const aiClient = getAiClient();
-    const selectedModel = resolveGeminiModel(model);
-    const config: Record<string, any> = {};
-    if (systemInstruction) config.systemInstruction = systemInstruction;
-    if (responseMimeType) config.responseMimeType = responseMimeType;
-    if (responseSchema) config.responseSchema = responseSchema;
-    if (thinkingConfig) config.thinkingConfig = thinkingConfig;
+    const selectedModel = resolveGeminiModel(req.body?.model);
+    const config = validated.config || {};
 
     const response = await withRetry(() =>
       aiClient.models.generateContent({
         model: selectedModel,
-        contents: inputContents,
+        contents: validated.inputContents,
         config: Object.keys(config).length > 0 ? config : undefined,
       }),
     );
@@ -204,12 +312,11 @@ app.post('/api/gemini/generate', async (req, res) => {
 });
 
 // Endpoint: Streaming Generate Content (Server-Sent Events)
-app.post('/api/gemini/generate-stream', async (req, res) => {
+app.post('/api/gemini/generate-stream', geminiRateLimiter, async (req, res) => {
   try {
-    const { prompt, contents, systemInstruction, model, responseMimeType, thinkingConfig } = req.body || {};
-    const inputContents = contents || prompt;
-    if (!inputContents) {
-      return res.status(400).json({ error: 'Prompt or contents is required' });
+    const validated = validateGeminiRequestBody(req.body);
+    if (validated.error) {
+      return res.status(400).json({ error: validated.error });
     }
 
     const aiClient = getAiClient();
@@ -219,16 +326,13 @@ app.post('/api/gemini/generate-stream', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders?.();
 
-    const selectedModel = resolveGeminiModel(model);
-    const config: Record<string, any> = {};
-    if (systemInstruction) config.systemInstruction = systemInstruction;
-    if (responseMimeType) config.responseMimeType = responseMimeType;
-    if (thinkingConfig) config.thinkingConfig = thinkingConfig;
+    const selectedModel = resolveGeminiModel(req.body?.model);
+    const config = validated.config || {};
 
     const streamResponse = await withRetry(() =>
       aiClient.models.generateContentStream({
         model: selectedModel,
-        contents: inputContents,
+        contents: validated.inputContents,
         config: Object.keys(config).length > 0 ? config : undefined,
       }),
     );
@@ -519,11 +623,30 @@ app.get('/api/market/ticker', async (_req, res) => {
   }
 });
 
-// Telegram Alert Relay Endpoint (Bypasses Browser CORS & provides detailed error diagnostics)
-app.post('/api/telegram/send', async (req, res) => {
+const TELEGRAM_TOKEN_RE = /^\d{5,15}:[A-Za-z0-9_-]{20,100}$/;
+const TELEGRAM_CHAT_ID_RE = /^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$/;
+const ALLOWED_TELEGRAM_PARSE_MODES = new Set(['HTML', 'Markdown', 'MarkdownV2', '']);
+
+async function postTelegramApi(telegramUrl: string, payload: Record<string, any>, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const { token, chatId, text, parse_mode = 'HTML' } = req.body;
-    if (!token || !chatId || !text) {
+    return await fetch(telegramUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Telegram Alert Relay Endpoint (Bypasses Browser CORS & provides detailed error diagnostics)
+app.post('/api/telegram/send', telegramRateLimiter, async (req, res) => {
+  try {
+    const { token, chatId, text, parse_mode = 'HTML' } = req.body || {};
+    if (!token || !chatId || typeof text !== 'string' || !text.trim()) {
       return res.status(400).json({ ok: false, error: 'Bot Token, Chat ID, and message text are required.' });
     }
 
@@ -531,19 +654,39 @@ app.post('/api/telegram/send', async (req, res) => {
     if (cleanToken.toLowerCase().startsWith('bot')) {
       cleanToken = cleanToken.substring(3);
     }
+    if (!TELEGRAM_TOKEN_RE.test(cleanToken)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Invalid Bot Token format. Expected @BotFather format (e.g. 123456789:ABC-DEF...).',
+      });
+    }
+
     const cleanChatId = String(chatId).trim();
+    if (!TELEGRAM_CHAT_ID_RE.test(cleanChatId)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Invalid Chat ID format.',
+      });
+    }
+
+    if (text.length > 4096) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Telegram message exceeds 4,096 character limit.',
+      });
+    }
+
+    const cleanParseMode = typeof parse_mode === 'string' && ALLOWED_TELEGRAM_PARSE_MODES.has(parse_mode)
+      ? parse_mode
+      : 'HTML';
 
     const telegramUrl = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
 
     // Attempt 1: with parse_mode
-    let response = await fetch(telegramUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: cleanChatId,
-        text: text,
-        parse_mode: parse_mode,
-      }),
+    let response = await postTelegramApi(telegramUrl, {
+      chat_id: cleanChatId,
+      text,
+      ...(cleanParseMode ? { parse_mode: cleanParseMode } : {}),
     });
 
     let data: any = await response.json().catch(() => ({}));
@@ -551,18 +694,14 @@ app.post('/api/telegram/send', async (req, res) => {
     // If failed due to HTML parse error, try standard blockquote or plain text
     if (!response.ok && data?.description && (data.description.includes("can't parse entities") || data.description.includes('Character') || data.description.includes('tag'))) {
       console.warn('Telegram HTML parse warning, attempting fallback:', data.description);
-      
+
       // Step A: if contains expandable blockquote, try standard blockquote first
       if (text.includes('<blockquote expandable>')) {
         const standardHtml = text.replace(/<blockquote expandable>/g, '<blockquote>');
-        response = await fetch(telegramUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: cleanChatId,
-            text: standardHtml,
-            parse_mode: parse_mode,
-          }),
+        response = await postTelegramApi(telegramUrl, {
+          chat_id: cleanChatId,
+          text: standardHtml,
+          ...(cleanParseMode ? { parse_mode: cleanParseMode } : {}),
         });
         data = await response.json().catch(() => ({}));
       }
@@ -570,13 +709,9 @@ app.post('/api/telegram/send', async (req, res) => {
       // Step B: if still failing, retry cleanly as plain text
       if (!response.ok && data?.description && (data.description.includes("can't parse entities") || data.description.includes('Character') || data.description.includes('tag'))) {
         const plainText = text.replace(/<[^>]*>/g, '');
-        response = await fetch(telegramUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: cleanChatId,
-            text: plainText,
-          }),
+        response = await postTelegramApi(telegramUrl, {
+          chat_id: cleanChatId,
+          text: plainText,
         });
         data = await response.json().catch(() => ({}));
       }
@@ -601,8 +736,12 @@ app.post('/api/telegram/send', async (req, res) => {
 
     res.json({ ok: true, result: data.result });
   } catch (err: any) {
-    console.error('Telegram Server Relay Error:', err);
-    res.status(500).json({ ok: false, error: err?.message || 'Failed to relay telegram alert' });
+    console.error('Telegram Server Relay Error:', err?.name || 'Error');
+    const isTimeout = err?.name === 'AbortError';
+    res.status(isTimeout ? 504 : 500).json({
+      ok: false,
+      error: isTimeout ? 'Telegram API request timed out.' : 'Failed to relay telegram alert',
+    });
   }
 });
 

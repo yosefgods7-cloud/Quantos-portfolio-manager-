@@ -29,7 +29,25 @@ export const FirebaseService = {
     try {
       const savedConfig = localStorage.getItem('quantedge_firebase_config');
       if (savedConfig) {
-        finalConfig = JSON.parse(savedConfig);
+        const parsed = JSON.parse(savedConfig);
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          !Array.isArray(parsed) &&
+          typeof parsed.apiKey === 'string' &&
+          parsed.apiKey.trim().length > 0 &&
+          typeof parsed.projectId === 'string' &&
+          parsed.projectId.trim().length > 0
+        ) {
+          finalConfig = {
+            apiKey: parsed.apiKey.trim(),
+            authDomain: typeof parsed.authDomain === 'string' ? parsed.authDomain.trim() : '',
+            projectId: parsed.projectId.trim(),
+            storageBucket: typeof parsed.storageBucket === 'string' ? parsed.storageBucket.trim() : '',
+            messagingSenderId: typeof parsed.messagingSenderId === 'string' ? parsed.messagingSenderId.trim() : '',
+            appId: typeof parsed.appId === 'string' ? parsed.appId.trim() : '',
+          };
+        }
       }
     } catch(e) {
       console.warn("Failed to parse saved firebase config.");

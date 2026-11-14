@@ -556,10 +556,24 @@ export const SyncEngine = {
   async uploadScreenshot(file, onProgress) {
     const auth = FirebaseService.getAuth();
     if (!auth.currentUser) throw new Error("Not authenticated");
-    
+    if (!file || typeof file.name !== 'string') throw new Error("Invalid file");
+
+    const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+    const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+    const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'gif']);
+
+    if (typeof file.size === 'number' && file.size > MAX_UPLOAD_BYTES) {
+      throw new Error("Screenshot exceeds 10MB size limit.");
+    }
+    if (file.type && !ALLOWED_MIME_TYPES.has(file.type.toLowerCase())) {
+      throw new Error("Unsupported screenshot file type. Use PNG, JPEG, WEBP, or GIF.");
+    }
+
+    const rawExt = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const ext = ALLOWED_EXTENSIONS.has(rawExt) ? rawExt : 'png';
+
     const storage = FirebaseService.getStorage();
     const uid = auth.currentUser.uid;
-    const ext = file.name.split('.').pop();
     const filename = `screenshot_${Date.now()}.${ext}`;
     const storageRef = ref(storage, `users/${uid}/screenshots/${filename}`);
     
