@@ -341,7 +341,10 @@ class NotificationEngine {
 
         // 1. Primary: Use our robust server relay on server.ts (bypasses browser CORS & gives full error detail)
         try {
-            const serverRes = await fetch('/api/telegram/send', {
+            const telegramRelayUrl = typeof window.resolveApiUrl === 'function'
+                ? window.resolveApiUrl('/api/telegram/send')
+                : '/api/telegram/send';
+            const serverRes = await fetch(telegramRelayUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

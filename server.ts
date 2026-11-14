@@ -14,6 +14,30 @@ const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
+// CORS middleware for /api/* so static PWAs (e.g., GitHub Pages *.github.io) can call this backend
+const configuredCorsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+app.use('/api', (req, res, next) => {
+  const rawOrigin = typeof req.headers.origin === 'string' ? req.headers.origin.replace(/\/+$/, '') : '';
+  if (configuredCorsOrigins.length === 0 || configuredCorsOrigins.includes('*')) {
+    res.setHeader('Access-Control-Allow-Origin', rawOrigin || '*');
+  } else if (rawOrigin && configuredCorsOrigins.includes(rawOrigin)) {
+    res.setHeader('Access-Control-Allow-Origin', rawOrigin);
+  }
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, Pragma');
+  res.setHeader('Access-Control-Max-Age', '86400');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Shared server Gemini client utility (server-side only via process.env.GEMINI_API_KEY)
 let cachedAiClient: GoogleGenAI | null = null;
 let cachedAiKey = '';
@@ -193,6 +217,7 @@ app.post('/api/gemini/generate-stream', async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
 
     const selectedModel = resolveGeminiModel(model);
     const config: Record<string, any> = {};

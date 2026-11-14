@@ -28,6 +28,11 @@
     <script type="module" src="./core/sync.js"></script>
     <script type="module" src="./core/gdrive.js"></script>
     <script type="module" src="theme-manager.js"></script>
+    <script type="module">
+      window.__QE_BUILD_API_BASE_URL__ = (
+        (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL) || ""
+      ).trim().replace(/\/+$/, "");
+    </script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
@@ -8438,6 +8443,31 @@
                 automatically excluded.</span
               >
             </div>
+            <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+              <label for="setting-backend-url">Backend Server URL (For GitHub Pages / Static PWA)</label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <div class="input-wrapper" style="flex: 1; min-width: 220px;">
+                  <i data-lucide="server"></i>
+                  <input
+                    type="url"
+                    id="setting-backend-url"
+                    placeholder="https://your-backend.onrender.com (blank = same origin)"
+                    onchange="saveBackendUrl()"
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="secondary"
+                  onclick="testBackendConnection()"
+                  style="white-space: nowrap;"
+                >
+                  <i data-lucide="activity"></i> Test Backend
+                </button>
+              </div>
+              <span class="helper-text" id="setting-backend-status"
+                >Leave blank when running on the full-stack server. When hosted on GitHub Pages, enter your deployed server.ts URL.</span
+              >
+            </div>
           </div>
           <div class="card col-12" style="margin-top: 24px">
             <div class="stat-label">Google Drive Sync</div>
@@ -11610,6 +11640,37 @@
     </div>
 
     <script>
+      window.normalizeBackendBaseUrl = function (rawUrl) {
+        const cleaned = String(rawUrl || "").trim().replace(/\/+$/, "");
+        if (!cleaned) return "";
+        if (!/^https?:\/\//i.test(cleaned)) {
+          return `https://${cleaned}`;
+        }
+        return cleaned;
+      };
+
+      window.getBackendBaseUrl = function () {
+        const storedSetting = window.Store?.settings?.backendUrl;
+        const storedLegacy = localStorage.getItem("qe_backend_url");
+        const candidate = storedSetting || storedLegacy || window.__QE_BUILD_API_BASE_URL__ || "";
+        return window.normalizeBackendBaseUrl(candidate);
+      };
+
+      window.resolveApiUrl = function (apiPath) {
+        const cleanPath = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
+        const base = window.getBackendBaseUrl();
+        return base ? `${base}${cleanPath}` : cleanPath;
+      };
+
+      window.isStaticHostWithoutBackend = function () {
+        const host = (window.location && window.location.hostname) || "";
+        const isStaticHost =
+          host.endsWith(".github.io") ||
+          host.endsWith(".pages.dev") ||
+          window.location.protocol === "file:";
+        return isStaticHost && !window.getBackendBaseUrl();
+      };
+
       window.getSelectedFreeGeminiModel = function (overrideModel) {
         const allowed = ["gemini-4-hydrogen", "gemini-3.1-flash-lite"];
         if (overrideModel && allowed.includes(overrideModel)) {
@@ -11620,8 +11681,14 @@
       };
 
       window.callServerGemini = async function({ prompt, contents, systemInstruction, model, responseMimeType, responseSchema, thinkingConfig }) {
+        if (window.isStaticHostWithoutBackend()) {
+          throw new Error(
+            "This static PWA cannot run /api/gemini/* directly. Enter your deployed server.ts Backend Server URL in Settings → AI Model Preferences."
+          );
+        }
+
         const selectedModel = window.getSelectedFreeGeminiModel(model);
-        const response = await fetch("/api/gemini/generate", {
+        const response = await fetch(window.resolveApiUrl("/api/gemini/generate"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -11634,6 +11701,12 @@
             thinkingConfig,
           }),
         });
+
+        if (response.status === 405 || response.status === 404) {
+          throw new Error(
+            `Backend endpoint unavailable (HTTP ${response.status}). Check your Backend Server URL in Settings → AI Model Preferences.`
+          );
+        }
 
         const data = await response.json().catch(() => ({}));
         if (!response.ok || data.error) {
@@ -11648,8 +11721,14 @@
       };
 
       window.callServerGeminiStream = async function({ prompt, contents, systemInstruction, model, responseMimeType, thinkingConfig, onChunk }) {
+        if (window.isStaticHostWithoutBackend()) {
+          throw new Error(
+            "This static PWA cannot run /api/gemini/* directly. Enter your deployed server.ts Backend Server URL in Settings → AI Model Preferences."
+          );
+        }
+
         const selectedModel = window.getSelectedFreeGeminiModel(model);
-        const response = await fetch("/api/gemini/generate-stream", {
+        const response = await fetch(window.resolveApiUrl("/api/gemini/generate-stream"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -11663,6 +11742,11 @@
         });
 
         if (!response.ok) {
+          if (response.status === 405 || response.status === 404) {
+            throw new Error(
+              `Backend streaming endpoint unavailable (HTTP ${response.status}). Check your Backend Server URL in Settings → AI Model Preferences.`
+            );
+          }
           const data = await response.json().catch(() => ({}));
           const msg =
             typeof data?.error === "string"
@@ -12921,6 +13005,10 @@ Keep the response cleanly formatted with lists or bold text.`;
         if (geminiModelSelect) {
           geminiModelSelect.value = window.getSelectedFreeGeminiModel();
         }
+        const backendUrlInput = document.getElementById("setting-backend-url");
+        if (backendUrlInput) {
+          backendUrlInput.value = window.getBackendBaseUrl();
+        }
 
         if (Store.settings.webhooks && !Store.settings.notifications) {
           // Migration from old settings
@@ -13108,6 +13196,61 @@ Keep the response cleanly formatted with lists or bold text.`;
         const model = window.getSelectedFreeGeminiModel(select?.value);
         Store.settings.geminiModel = model;
         Store.save();
+      };
+
+      window.saveBackendUrl = function () {
+        const input = document.getElementById("setting-backend-url");
+        const statusEl = document.getElementById("setting-backend-status");
+        const normalized = window.normalizeBackendBaseUrl(input?.value || "");
+        if (input) input.value = normalized;
+        Store.settings.backendUrl = normalized;
+        if (normalized) {
+          localStorage.setItem("qe_backend_url", normalized);
+        } else {
+          localStorage.removeItem("qe_backend_url");
+        }
+        Store.save();
+        if (statusEl) {
+          statusEl.style.color = "var(--muted)";
+          statusEl.textContent = normalized
+            ? `Saved backend URL: ${normalized}. Click "Test Backend" to verify.`
+            : "Using same-origin /api/* endpoints.";
+        }
+      };
+
+      window.testBackendConnection = async function () {
+        window.saveBackendUrl();
+        const statusEl = document.getElementById("setting-backend-status");
+        if (statusEl) {
+          statusEl.style.color = "var(--muted)";
+          statusEl.textContent = "Testing backend connection...";
+        }
+        try {
+          const res = await fetch(window.resolveApiUrl("/api/health"), {
+            cache: "no-store",
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data.status !== "ok") {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          if (statusEl) {
+            if (data.hasGeminiKey) {
+              statusEl.style.color = "var(--success)";
+              statusEl.textContent = `Connected (${window.getBackendBaseUrl() || "same-origin"}) · Gemini AI Ready (${data.defaultModel})`;
+            } else {
+              statusEl.style.color = "var(--warning)";
+              statusEl.textContent = `Connected (${window.getBackendBaseUrl() || "same-origin"}), but GEMINI_API_KEY is missing on the server.`;
+            }
+          }
+          if (typeof syncLiveMarketTicker === "function") {
+            syncLiveMarketTicker();
+          }
+        } catch (err) {
+          if (statusEl) {
+            statusEl.style.color = "var(--danger)";
+            statusEl.textContent = `Connection failed: ${err.message}. Verify the server is running and allows CORS.`;
+          }
+        }
       };
 
       // --- Backup System ---
@@ -22285,19 +22428,22 @@ Keep the response cleanly formatted with lists or bold text.`;
         const feedLabelEl = document.getElementById("dash-macro-feed-type");
         try {
           let data = null;
-          try {
-            const res = await fetch(`/api/market/ticker?t=${Date.now()}`, {
-              cache: "no-store",
-              headers: {
-                "Cache-Control": "no-cache, no-store",
-                Pragma: "no-cache",
-              },
-            });
-            if (res.ok) {
-              data = await res.json();
+          if (!window.isStaticHostWithoutBackend()) {
+            try {
+              const tickerEndpoint = window.resolveApiUrl(`/api/market/ticker?t=${Date.now()}`);
+              const res = await fetch(tickerEndpoint, {
+                cache: "no-store",
+                headers: {
+                  "Cache-Control": "no-cache, no-store",
+                  Pragma: "no-cache",
+                },
+              });
+              if (res.ok) {
+                data = await res.json();
+              }
+            } catch (e) {
+              // Static host / CORS fallback
             }
-          } catch (e) {
-            // Static host fallback
           }
 
           if (data && data.prices) {
@@ -22892,6 +23038,7 @@ Keep the response cleanly formatted with lists or bold text.`;
             "equity",
             "risk",
             "cashflow",
+            "macro-price-index",
             "trading-sessions",
             "equity-chart",
             "dist-chart",
