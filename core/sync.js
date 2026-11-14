@@ -136,6 +136,8 @@ export const SyncEngine = {
           locks: "qe_locks",
           journalConfig: "qe_journal_config",
           debriefs: "qe_debriefs",
+          dailyGoals: "qe_daily_goals",
+          weeklyGoals: "qe_weekly_goals",
           weeklyReviews: "qe_weekly_reviews"
         };
         
@@ -310,6 +312,7 @@ export const SyncEngine = {
           }
           if (data.debriefs) window.Store.debriefs = data.debriefs;
           if (data.dailyGoals) window.Store.dailyGoals = data.dailyGoals;
+          if (data.weeklyGoals) window.Store.weeklyGoals = data.weeklyGoals;
           if (data.weeklyReviews) window.Store.weeklyReviews = data.weeklyReviews;
           
           // Save to local storage without triggering sync loop
@@ -333,6 +336,7 @@ export const SyncEngine = {
           localStorage.setItem("qe_journal_config", JSON.stringify(window.Store.journalConfig));
           localStorage.setItem("qe_debriefs", JSON.stringify(window.Store.debriefs));
           localStorage.setItem("qe_daily_goals", JSON.stringify(window.Store.dailyGoals));
+          localStorage.setItem("qe_weekly_goals", JSON.stringify(window.Store.weeklyGoals));
           localStorage.setItem("qe_weekly_reviews", JSON.stringify(window.Store.weeklyReviews));
           
           if (window.renderAll) window.renderAll();
@@ -491,6 +495,7 @@ export const SyncEngine = {
         journalConfig: store.journalConfig || {},
         debriefs: store.debriefs || [],
         dailyGoals: store.dailyGoals || [],
+        weeklyGoals: store.weeklyGoals || [],
         weeklyReviews: store.weeklyReviews || []
       };
       

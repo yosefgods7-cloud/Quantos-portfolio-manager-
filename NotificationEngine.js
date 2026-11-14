@@ -197,7 +197,23 @@ class NotificationEngine {
                     eqHigh: old.eqHigh !== false, 
                     psychEscalate: old.psychEscalation !== false, 
                     tradeLogged: !!old.tradeLogged 
+                },
+                morningWeeklyGoals: {
+                    enabled: true,
+                    startHour: 5,
+                    endHour: 12,
+                    browser: true,
+                    telegram: false
                 }
+            };
+        }
+        if (!Store.settings.notifications.morningWeeklyGoals) {
+            Store.settings.notifications.morningWeeklyGoals = {
+                enabled: true,
+                startHour: 5,
+                endHour: 12,
+                browser: true,
+                telegram: false
             };
         }
         // Load into UI
@@ -214,11 +230,17 @@ class NotificationEngine {
         setCheck('telegram-monthly-rep', cfg.telegram?.monthly);
 
         setVal('notif-loss-thresh', cfg.thresholds?.lossWarn || 50);
-        setVal('notif-dd-thresh', cfg.thresholds.ddWarn || 70);
-        setVal('notif-streak-thresh', cfg.thresholds.streak || 3);
-        setCheck('notif-eq-high', cfg.thresholds.eqHigh);
-        setCheck('notif-psych-escalation', cfg.thresholds.psychEscalate);
-        setCheck('notif-trade-logged', cfg.thresholds.tradeLogged);
+        setVal('notif-dd-thresh', cfg.thresholds?.ddWarn || 70);
+        setVal('notif-streak-thresh', cfg.thresholds?.streak || 3);
+        setCheck('notif-eq-high', cfg.thresholds?.eqHigh);
+        setCheck('notif-psych-escalation', cfg.thresholds?.psychEscalate);
+        setCheck('notif-trade-logged', cfg.thresholds?.tradeLogged);
+
+        setCheck('notif-morning-enabled', cfg.morningWeeklyGoals.enabled !== false);
+        setVal('notif-morning-start', String(cfg.morningWeeklyGoals.startHour ?? 5));
+        setVal('notif-morning-end', String(cfg.morningWeeklyGoals.endHour ?? 12));
+        setCheck('notif-morning-browser', cfg.morningWeeklyGoals.browser !== false);
+        setCheck('notif-morning-telegram', !!cfg.morningWeeklyGoals.telegram);
 
         // Start background loop
         this.startEngine();
@@ -230,28 +252,51 @@ class NotificationEngine {
     }
 
     saveSettings() {
+        const prevMorning = Store.settings.notifications?.morningWeeklyGoals || {
+            enabled: true,
+            startHour: 5,
+            endHour: 12,
+            browser: true,
+            telegram: false
+        };
         const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-        const getCheck = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
-        const getInt = (id, def) => { const el = document.getElementById(id); return el ? parseInt(el.value) || def : def; };
+        const getCheck = (id, fallback = false) => { const el = document.getElementById(id); return el ? el.checked : fallback; };
+        const getInt = (id, def) => {
+            const el = document.getElementById(id);
+            if (!el) return def;
+            const parsed = parseInt(el.value, 10);
+            return Number.isNaN(parsed) ? def : parsed;
+        };
+
+        const startHour = Math.max(0, Math.min(23, getInt('notif-morning-start', prevMorning.startHour ?? 5)));
+        let endHour = Math.max(1, Math.min(24, getInt('notif-morning-end', prevMorning.endHour ?? 12)));
+        if (endHour <= startHour) endHour = Math.min(24, startHour + 1);
 
         Store.settings.notifications = {
             telegram: {
                 token: getVal('webhook-telegram-token'),
                 chatId: getVal('webhook-telegram-chat'),
-                enabled: getCheck('telegram-enabled'),
-                alerts: getCheck('telegram-rt-alerts'),
-                daily: getCheck('telegram-daily-rep'),
-                weekly: getCheck('telegram-weekly-rep'),
-                monthly: getCheck('telegram-monthly-rep')
+                enabled: getCheck('telegram-enabled', true),
+                alerts: getCheck('telegram-rt-alerts', true),
+                daily: getCheck('telegram-daily-rep', true),
+                weekly: getCheck('telegram-weekly-rep', true),
+                monthly: getCheck('telegram-monthly-rep', false)
             },
             // Schedule removed for manual report generation
             thresholds: {
                 lossWarn: getInt('notif-loss-thresh', 50),
                 ddWarn: getInt('notif-dd-thresh', 70),
                 streak: getInt('notif-streak-thresh', 3),
-                eqHigh: getCheck('notif-eq-high'),
-                psychEscalate: getCheck('notif-psych-escalation'),
-                tradeLogged: getCheck('notif-trade-logged')
+                eqHigh: getCheck('notif-eq-high', true),
+                psychEscalate: getCheck('notif-psych-escalation', true),
+                tradeLogged: getCheck('notif-trade-logged', false)
+            },
+            morningWeeklyGoals: {
+                enabled: getCheck('notif-morning-enabled', prevMorning.enabled !== false),
+                startHour,
+                endHour,
+                browser: getCheck('notif-morning-browser', prevMorning.browser !== false),
+                telegram: getCheck('notif-morning-telegram', !!prevMorning.telegram)
             }
         };
         Store.save();
@@ -1010,6 +1055,54 @@ class NotificationEngine {
         await this.doSend(message, dFlags, forceManual);
     }
 
+    async dispatchMorningWeeklyGoalsReminder(context = {}, forceManual = false) {
+        const cfg = Store.settings.notifications || {};
+        const todayYmd = context.todayYmd || new Date().toISOString().split('T')[0];
+        if (!forceManual && this.isSpam('morning_weekly_goals_' + todayYmd, 720)) return;
+
+        const goals = Array.isArray(context.goals) ? context.goals : [];
+        const completedCount = goals.filter(g => g.completed).length;
+        const weekLabel = context.weekLabel || 'Current Week';
+        const weekNum = context.weekNum ? `Week ${context.weekNum}` : 'Weekly Check-In';
+        const weeklyPlan = context.weeklyPlan || null;
+        const reviewFocus = context.reviewFocus || '';
+
+        const goalLines = goals.length > 0
+            ? goals.slice(0, 8).map(g => `${g.completed ? '✅' : '⬜'} ${escapeHtml(g.text)}`).join('\n')
+            : 'No weekly goals added yet — define your key weekly targets during morning planning.';
+
+        const planDetails = [];
+        if (weeklyPlan?.bias) planDetails.push(`Bias: <code>${escapeHtml(weeklyPlan.bias)}</code>`);
+        if (weeklyPlan?.focusPairs) planDetails.push(`Pairs: <code>${escapeHtml(weeklyPlan.focusPairs)}</code>`);
+        if (weeklyPlan?.ruleNote) planDetails.push(`Rule: ${escapeHtml(weeklyPlan.ruleNote)}`);
+        if (reviewFocus) planDetails.push(`Prior Review Focus: ${escapeHtml(reviewFocus)}`);
+
+        const message = (type) => {
+            if (type === 'discord') {
+                return {
+                    embeds: [{
+                        title: `☀️ MORNING PLANNING CHECK-IN — ${weekNum}`,
+                        color: 3447003,
+                        description: `**Period:** ${weekLabel}\n**Weekly Goals:** ${completedCount}/${goals.length} completed\n\n${goalLines}`,
+                        footer: { text: "QuantEdge Portfolio OS" }
+                    }]
+                };
+            }
+            return `☀️ <b>MORNING DAILY PLANNING CHECK-IN</b>\n` +
+                   `📅 <b>${escapeHtml(weekNum)}</b> (${escapeHtml(weekLabel)})\n` +
+                   `🎯 <b>Weekly Goals Progress:</b> <code>${completedCount} / ${goals.length}</code>\n\n` +
+                   `${goalLines}\n` +
+                   (planDetails.length ? `\n<b>🧭 Weekly Plan Alignment:</b>\n${planDetails.join('\n')}\n` : '') +
+                   `\n<i>Review your weekly goals before setting today's Daily Trading Plan.</i>`;
+        };
+
+        await this.doSend(
+            message,
+            { telegram: !!cfg.morningWeeklyGoals?.telegram },
+            forceManual
+        );
+    }
+
     test(type) {
         this.saveSettings();
         const statusEl = document.getElementById('notif-test-status');
@@ -1068,6 +1161,13 @@ class NotificationEngine {
             } else if (type === 'monthly') {
                 this.sendMonthlyReport(true)
                     .then(() => finish("✓ Test Monthly Audit delivered to Telegram!"))
+                    .catch(err => finish("✕ Telegram Error: " + (err.message || err), true));
+            } else if (type === 'morning') {
+                const ctx = typeof window.getWeeklyPlanningContext === 'function'
+                    ? window.getWeeklyPlanningContext()
+                    : { todayYmd: new Date().toISOString().split('T')[0], goals: Store.weeklyGoals || [] };
+                this.dispatchMorningWeeklyGoalsReminder(ctx, true)
+                    .then(() => finish("✓ Morning Weekly Goals check-in delivered to Telegram!"))
                     .catch(err => finish("✕ Telegram Error: " + (err.message || err), true));
             }
         } catch (e) {
